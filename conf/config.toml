@@ -1,0 +1,21 @@
+# MPC network configuation
+
+# MPC network params
+n = 3
+t = 1
+
+# MPC servers
+[[servers]]
+id = 0
+host = "127.0.0.1"
+http_port = 8080
+
+[[servers]]
+id = 1
+host = "127.0.0.1"
+http_port = 8081
+
+[[servers]]
+id = 2
+host = "127.0.0.1"
+http_port = 8082
