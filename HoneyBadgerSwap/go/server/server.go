@@ -5,11 +5,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/gobingdings/hbswap"
+	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
 	"github.com/syndtr/goleveldb/leveldb"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 )
 
@@ -25,7 +26,6 @@ const (
 var (
 	serverID	string
 	mut 		sync.Mutex
-
 )
 
 func dbPut(key string, value []byte) {
@@ -39,13 +39,25 @@ func dbPut(key string, value []byte) {
 	mut.Unlock()
 }
 
+func dbGet(key string) string {
+	mut.Lock()
+	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
+	data, err := db.Get([]byte(key), nil)
+	if err != nil {
+		fmt.Println("Error getting from database")
+	}
+	db.Close()
+	mut.Unlock()
+	return string(data)
+}
+
 func Watch(conn *ethclient.Client) {
 	hbswapInstance, err := hbswap.NewHbSwap(common.HexToAddress(hbswapAddr), conn)
 
-	inputmaskChannel := make(chan *hbswap.HbSwapInputmask)
-	inputmaskSub, err := hbswapInstance.WatchInputmask(nil, inputmaskChannel)
+	tradePrepChannel := make(chan *hbswap.HbSwapTradePrep)
+	tradePrepSub, err := hbswapInstance.WatchTradePrep(nil, tradePrepChannel)
 	if err != nil {
-		log.Fatal("watch Inputmask err:", err)
+		log.Fatal("watch TradePrep err:", err)
 	}
 
 	tradeChannel := make(chan *hbswap.HbSwapTrade)
@@ -54,15 +66,21 @@ func Watch(conn *ethclient.Client) {
 		log.Fatal("watch Trade err:", err)
 	}
 
+	secretDepositPrepChannel := make(chan *hbswap.HbSwapSecretDeposit)
+	secretDepositPrepSub, err := hbswapInstance.WatchSecretDeposit(nil, secretDepositPrepChannel)
+	if err != nil {
+		log.Fatal("watch LocalDepositPrep err:", err)
+	}
+
 	for {
 		select {
-		case err := <- inputmaskSub.Err():
+		case err := <- tradePrepSub.Err():
 			log.Fatal(err)
-		case oce := <-inputmaskChannel:
-			fmt.Printf("Preparing inputmask with indexes %v and %v\n", oce.IdxETH, oce.IdxTOK)
+		case oce := <-tradePrepChannel:
+			fmt.Printf("Preparing inputmasks with for %v and %v\n", oce.IdxA, oce.IdxB)
 
 			_ = os.Remove(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
-			cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_inputmask")
+			cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade_prep")
 			utils.ExecCmd(cmd)
 
 			f, err := os.Open(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
@@ -79,23 +97,46 @@ func Watch(conn *ethclient.Client) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("Inputmask-%v: %x\n", oce.IdxETH, share1)
-			fmt.Printf("Inputmask-%v: %x\n", oce.IdxTOK, share2)
+			fmt.Printf("Inputmask-%v: %x\n", oce.IdxA, share1)
+			fmt.Printf("Inputmask-%v: %x\n", oce.IdxB, share2)
 
-			dbPut(oce.IdxETH.String(), share1)
-			dbPut(oce.IdxTOK.String(), share2)
+			dbPut(oce.IdxA.String(), share1)
+			dbPut(oce.IdxB.String(), share2)
 
 		case err := <- tradeSub.Err():
 			log.Fatal(err)
 		case oce := <-tradeChannel:
 			fmt.Printf("Starting to trade...\n")
-			cmd := exec.Command("python3", "Scripts/hbswap/python/set_data.py", serverID, oce.IdxETH.String(), oce.IdxTOK.String(), oce.MaskedETH.String(), oce.MaskedTOK.String())
+
+			cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, oce.User.Hex(), oce.TokenA.String(), oce.TokenB.String(), oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
 			utils.ExecCmd(cmd)
 
 			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade")
 			utils.ExecCmd(cmd)
 
-			cmd = exec.Command("python3", "Scripts/hbswap/python/org_data.py", serverID)
+			cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID)
+			stdout := utils.ExecCmd(cmd)
+			changes := strings.Split(stdout[:len(stdout) - 1], " ")
+			fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
+
+			cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenA.String(), oce.User.Hex(), changes[0], "0")
+			utils.ExecCmd(cmd)
+
+			cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenB.String(), oce.User.Hex(), changes[1], "0")
+			utils.ExecCmd(cmd)
+
+			fmt.Printf("Trade finished\n")
+
+		case err := <- secretDepositPrepSub.Err():
+			log.Fatal(err)
+		case oce := <-secretDepositPrepChannel:
+			fmt.Printf("SecretDeposit\n")
+
+			token := oce.Token.Hex()
+			user := oce.User.Hex()
+			amt := oce.Amt.String()
+
+			cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, "1")
 			utils.ExecCmd(cmd)
 		}
 	}
@@ -103,6 +144,7 @@ func Watch(conn *ethclient.Client) {
 
 func main() {
 	serverID = os.Args[1]
+	log.Printf("Starting server %v\n", serverID)
 
 	conn := utils.GetEthClient("ws://127.0.0.1:8546")
 
