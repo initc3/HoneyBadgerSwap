@@ -17,10 +17,12 @@ prepare() {
   rm -rf Persistence
   rm -rf Scripts/hbswap/data
   rm -rf Scripts/hbswap/log
+  rm -rf Scripts/hbswap/db
 
   mkdir Persistence
   mkdir Scripts/hbswap/data
   mkdir Scripts/hbswap/log
+  mkdir Scripts/hbswap/db
 }
 
 compile() {
@@ -42,7 +44,7 @@ org() {
 prepare
 
 compile hbswap_init
-compile hbswap_inputmask
+compile hbswap_trade_prep
 compile hbswap_trade
 
 run hbswap_init

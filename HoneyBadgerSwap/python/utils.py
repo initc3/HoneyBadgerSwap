@@ -1,4 +1,5 @@
 from gmpy import binary, mpz
+from gmpy2 import mpz_from_old_binary
 
 def get_inverse(a):
     ret = 1
@@ -14,6 +15,9 @@ def to_hex(x):
     x = mpz(x)
     x = (x * R) % p
     return binary(int(x))
+
+def from_hex(x):
+    return (mpz_from_old_binary(x) * inverse_R) % p
 
 n = 3
 p = 57896044618658097711785492504343953926634992332820282019728792003956566065153

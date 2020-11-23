@@ -22,7 +22,13 @@ import (
 )
 
 var (
-	GOPATH					= os.Getenv("GOPATH")
+	EthAddr 	= common.HexToAddress("0x0")
+	HbswapAddr 	= common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
+	TokenAddr 	= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
+)
+
+var (
+	GOPATH		= os.Getenv("GOPATH")
 )
 
 func ExecCmd(cmd *exec.Cmd) string {
@@ -39,8 +45,9 @@ func ExecCmd(cmd *exec.Cmd) string {
 	return stdout.String()
 }
 
-func StrToBig(st string) (*big.Int, bool) {
-	return new(big.Int).SetString(st, 10)
+func StrToBig(st string) *big.Int {
+	v, _ := new(big.Int).SetString(st, 10)
+	return v
 }
 
 func GetEthClient(ethInstance string) (*ethclient.Client) {
@@ -89,7 +96,6 @@ func GetAccount(account string) (*bind.TransactOpts, *ecdsa.PrivateKey) {
 
 func WaitMined(ctx context.Context, ec *ethclient.Client,
 	tx *types.Transaction, blockDelay uint64) (*types.Receipt, error) {
-	// an error possibly returned when a transaction is pending
 	const missingFieldErr = "missing required field 'transactionHash' for Log"
 
 	if ec == nil {
@@ -97,18 +103,15 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 	}
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
-	// wait tx to be mined
 	txHashBytes := common.HexToHash(tx.Hash().Hex())
 	for {
 		receipt, rerr := ec.TransactionReceipt(ctx, txHashBytes)
 		if rerr == nil {
-			//log.Infof("Transaction mined. Waiting for %d block confirmations", blockDelay)
 			if blockDelay == 0 {
 				return receipt, rerr
 			}
 			break
 		} else if rerr == ethereum.NotFound || rerr.Error() == missingFieldErr {
-			// Wait for the next round
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
@@ -118,7 +121,6 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 			return receipt, rerr
 		}
 	}
-	// wait for enough block confirmations
 	ddl := big.NewInt(0)
 	latestBlockHeader, err := ec.HeaderByNumber(ctx, nil)
 	if err == nil {
@@ -144,4 +146,3 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 		}
 	}
 }
-
