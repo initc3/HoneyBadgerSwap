@@ -26,7 +26,7 @@ prepare() {
 }
 
 compile() {
-  mpspdz-compile -v -C -F 256 $1
+  ./compile.py -v -C -F 256 $1
 }
 
 run() {
