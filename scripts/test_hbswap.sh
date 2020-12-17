@@ -20,9 +20,9 @@ prepare() {
 }
 
 compile() {
-    mpspdz-compile -v -C -F 256 hbswap_init
-    mpspdz-compile -v -C -F 256 hbswap_inputmask
-    mpspdz-compile -v -C -F 256 hbswap_trade
+    ./compile.py -v -C -F 256 hbswap_init
+    ./compile.py -v -C -F 256 hbswap_inputmask
+    ./compile.py -v -C -F 256 hbswap_trade
 }
 
 run() {
