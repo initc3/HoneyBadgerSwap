@@ -22,6 +22,7 @@ const (
 	players = "4"
 	threshold = "1"
 	mpcPort = "5000"
+	blsPrime = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 	sz = 32
 	nshares = 1000
 )
@@ -106,7 +107,7 @@ func watch() {
 		//	fmt.Printf("Preparing inputmasks with for %v and %v\n", oce.IdxA, oce.IdxB)
 		//
 		//	_ = os.Remove(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
-		//	cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade_prep")
+		//	cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_trade_prep")
 		//	utils.ExecCmd(cmd)
 		//
 		//	f, err := os.Open(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
@@ -137,7 +138,7 @@ func watch() {
 			cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, oce.User.Hex(), oce.TokenA.String(), oce.TokenB.String(), oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
 			utils.ExecCmd(cmd)
 
-			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade")
+			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_trade")
 			utils.ExecCmd(cmd)
 
 			cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID)
