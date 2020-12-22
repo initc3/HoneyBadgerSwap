@@ -20,5 +20,4 @@ for nn in range(t + 1, n + 1):
                 continue
             tot = tot * x[j] * get_inverse(x[j] - x[i]) % p
         inputmask = (inputmask + y[i] * tot) % p
-
     print(inputmask)
