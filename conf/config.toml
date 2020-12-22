@@ -1,7 +1,7 @@
 # MPC network configuation
 
 # MPC network params
-n = 3
+n = 4
 t = 1
 
 # MPC servers
@@ -19,3 +19,8 @@ http_port = 8081
 id = 2
 host = "127.0.0.1"
 http_port = 8082
+
+[[servers]]
+id = 3
+host = "127.0.0.1"
+http_port = 8083

@@ -163,3 +163,15 @@ func GetBalance(conn *ethclient.Client, tokenAddr common.Address, user common.Ad
 
 	return balance
 }
+
+func GetInputmaskCnt(conn *ethclient.Client) *big.Int {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cnt, _ := hbswapInstance.InputmaskCnt(nil)
+	log.Printf("inputmaskCnt: %v\n", cnt)
+
+	return cnt
+}

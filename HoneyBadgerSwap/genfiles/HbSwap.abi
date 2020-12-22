@@ -156,6 +156,7 @@
   {
     "inputs": [],
     "name": "inputmaskCnt",
+    "constant": true,
     "outputs": [
       {
         "internalType": "uint256",
