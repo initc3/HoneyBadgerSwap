@@ -10,22 +10,26 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
 	hbswapAddr = "0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2"
 	prog = "./malicious-shamir-party.x"
-	players = "3"
+	players = "4"
 	threshold = "1"
 	mpcPort = "5000"
 	sz = 32
+	nshares = 1000
 )
 
 var (
 	serverID	string
 	mut 		sync.Mutex
+	conn		*ethclient.Client
 )
 
 func dbPut(key string, value []byte) {
@@ -39,26 +43,48 @@ func dbPut(key string, value []byte) {
 	mut.Unlock()
 }
 
-func dbGet(key string) string {
-	mut.Lock()
-	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
-	data, err := db.Get([]byte(key), nil)
-	if err != nil {
-		fmt.Println("Error getting from database")
+//func dbGet(key string) string {
+//	mut.Lock()
+//	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
+//	data, err := db.Get([]byte(key), nil)
+//	if err != nil {
+//		fmt.Println("Error getting from database")
+//	}
+//	db.Close()
+//	mut.Unlock()
+//	return string(data)
+//}
+
+func genInputmask() {
+	tot := int(utils.GetInputmaskCnt(conn).Int64())
+	for true {
+		cnt := utils.GetInputmaskCnt(conn)
+
+		if int(cnt.Int64()) + 100 > tot {
+			fmt.Printf("Generating new inputmasks...\n")
+
+			cmd := exec.Command("./random-shamir.x", "-N", players, "-i", serverID, "--nshares", strconv.Itoa(nshares))
+			utils.ExecCmd(cmd)
+
+			cmd = exec.Command("python3", "Scripts/hbswap/python/server/proc_inputmask.py", serverID, strconv.Itoa(tot))
+			utils.ExecCmd(cmd)
+
+			tot += nshares
+			fmt.Printf("Total inputmask number: %v\n", tot)
+		}
+
+		time.Sleep(30 * time.Second)
 	}
-	db.Close()
-	mut.Unlock()
-	return string(data)
 }
 
-func Watch(conn *ethclient.Client) {
+func watch() {
 	hbswapInstance, err := hbswap.NewHbSwap(common.HexToAddress(hbswapAddr), conn)
 
-	tradePrepChannel := make(chan *hbswap.HbSwapTradePrep)
-	tradePrepSub, err := hbswapInstance.WatchTradePrep(nil, tradePrepChannel)
-	if err != nil {
-		log.Fatal("watch TradePrep err:", err)
-	}
+	//tradePrepChannel := make(chan *hbswap.HbSwapTradePrep)
+	//tradePrepSub, err := hbswapInstance.WatchTradePrep(nil, tradePrepChannel)
+	//if err != nil {
+	//	log.Fatal("watch TradePrep err:", err)
+	//}
 
 	tradeChannel := make(chan *hbswap.HbSwapTrade)
 	tradeSub, err := hbswapInstance.WatchTrade(nil, tradeChannel)
@@ -74,34 +100,34 @@ func Watch(conn *ethclient.Client) {
 
 	for {
 		select {
-		case err := <- tradePrepSub.Err():
-			log.Fatal(err)
-		case oce := <-tradePrepChannel:
-			fmt.Printf("Preparing inputmasks with for %v and %v\n", oce.IdxA, oce.IdxB)
-
-			_ = os.Remove(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
-			cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade_prep")
-			utils.ExecCmd(cmd)
-
-			f, err := os.Open(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
-			if err != nil {
-				log.Fatal(err)
-			}
-			share1 := make([]byte, sz)
-			_, err = f.Read(share1)
-			if err != nil {
-				log.Fatal(err)
-			}
-			share2 := make([]byte, sz)
-			_, err = f.Read(share2)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Printf("Inputmask-%v: %x\n", oce.IdxA, share1)
-			fmt.Printf("Inputmask-%v: %x\n", oce.IdxB, share2)
-
-			dbPut(oce.IdxA.String(), share1)
-			dbPut(oce.IdxB.String(), share2)
+		//case err := <- tradePrepSub.Err():
+		//	log.Fatal(err)
+		//case oce := <-tradePrepChannel:
+		//	fmt.Printf("Preparing inputmasks with for %v and %v\n", oce.IdxA, oce.IdxB)
+		//
+		//	_ = os.Remove(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
+		//	cmd := exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "hbswap_trade_prep")
+		//	utils.ExecCmd(cmd)
+		//
+		//	f, err := os.Open(fmt.Sprintf("Persistence/Transactions-P%v.data", serverID))
+		//	if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//	share1 := make([]byte, sz)
+		//	_, err = f.Read(share1)
+		//	if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//	share2 := make([]byte, sz)
+		//	_, err = f.Read(share2)
+		//	if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//	fmt.Printf("Inputmask-%v: %x\n", oce.IdxA, share1)
+		//	fmt.Printf("Inputmask-%v: %x\n", oce.IdxB, share2)
+		//
+		//	dbPut(oce.IdxA.String(), share1)
+		//	dbPut(oce.IdxB.String(), share2)
 
 		case err := <- tradeSub.Err():
 			log.Fatal(err)
@@ -146,10 +172,11 @@ func main() {
 	serverID = os.Args[1]
 	log.Printf("Starting server %v\n", serverID)
 
-	conn := utils.GetEthClient("ws://127.0.0.1:8546")
+	conn = utils.GetEthClient("ws://127.0.0.1:8546")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	Watch(conn)
+	go watch()
+	go genInputmask()
 	wg.Wait()
 }
