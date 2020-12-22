@@ -3,7 +3,7 @@ set -e
 
 # bash Scripts/hbswap/scripts/test_hbswap.sh
 
-players=3
+players=4
 threshold=1
 port=5000
 

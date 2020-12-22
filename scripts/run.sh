@@ -42,19 +42,21 @@ bash Scripts/hbswap/scripts/prep.sh
 httpserver 0 &
 httpserver 1 &
 httpserver 2 &
+httpserver 3 &
 
 mpcserver 0 &
 mpcserver 1 &
 mpcserver 2 &
+mpcserver 3 &
 
 secret_deposit 0 10 10
 
 trade 0 1.1 -2.5
-trade 0 -1.1 2
-
-secret_withdraw 0 9 9
-
-withdraw 0 9 9
+#trade 0 -1.1 2
+#
+#secret_withdraw 0 9 9
+#
+#withdraw 0 9 9
 
 
 

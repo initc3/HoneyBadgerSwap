@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-players=3
+players=4
 threshold=1
 port=5000
 
@@ -11,6 +11,7 @@ prepare() {
   Scripts/setup-ssl.sh $players
 
   pkill -f $prog || true
+  pkill -f random-shamir.x || true
   pkill -f start_server.py || true
   pkill -f server.go || true
 
@@ -18,6 +19,7 @@ prepare() {
   rm -rf Scripts/hbswap/data
   rm -rf Scripts/hbswap/log
   rm -rf Scripts/hbswap/db
+  rm -rf Player-Data/4-MSp-255
 
   mkdir Persistence
   mkdir Scripts/hbswap/data
@@ -32,13 +34,15 @@ compile() {
 run() {
     ./$prog -N $players -T $threshold -p 0 -pn $port $1 &
     ./$prog -N $players -T $threshold -p 1 -pn $port $1 &
-    ./$prog -N $players -T $threshold -p 2 -pn $port $1
+    ./$prog -N $players -T $threshold -p 2 -pn $port $1 &
+    ./$prog -N $players -T $threshold -p 3 -pn $port $1
 }
 
 org() {
   mv 'Persistence/Transactions-P0.data' 'Scripts/hbswap/data/Pool-P0.data'
   mv 'Persistence/Transactions-P1.data' 'Scripts/hbswap/data/Pool-P1.data'
   mv 'Persistence/Transactions-P2.data' 'Scripts/hbswap/data/Pool-P2.data'
+  mv 'Persistence/Transactions-P3.data' 'Scripts/hbswap/data/Pool-P3.data'
 }
 
 prepare
