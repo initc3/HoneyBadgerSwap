@@ -63,7 +63,7 @@ func genInputmask() {
 		if int(cnt.Int64()) + 100 > tot {
 			fmt.Printf("Generating new inputmasks...\n")
 
-			cmd := exec.Command("./random-shamir.x", "-N", players, "-i", serverID, "--nshares", strconv.Itoa(nshares))
+			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares))
 			utils.ExecCmd(cmd)
 
 			cmd = exec.Command("python3", "Scripts/hbswap/python/server/proc_inputmask.py", serverID, strconv.Itoa(tot))
