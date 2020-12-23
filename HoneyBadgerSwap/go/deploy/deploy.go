@@ -2,17 +2,28 @@ package main
 
 import (
 	"context"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
-	"log"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
+	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
+	"log"
+)
+
+const (
+	n = 4
+	t = 1
 )
 
 func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
 	log.Println("Deploying HbSwap contract...")
+
+	//var servers []common.Address
+	//for i := 0; i < n; i++ {
+	//	transactOpt, _ := utils.GetAccount(fmt.Sprintf("server_%v", i))
+	//	servers = append(servers, transactOpt.From)
+	//}
 
 	hbswapAddr, tx, _, err := hbswap.DeployHbSwap(auth, conn)
 	if err != nil {
@@ -56,7 +67,7 @@ func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addres
 func main() {
 	conn := utils.GetEthClient("HTTP://127.0.0.1:8545")
 
-	owner, _ := utils.GetAccount("account_0")
+	owner, _ := utils.GetAccount("server_0")
 
 	DeployHbSwap(conn, owner)
 	DeployToken(conn, owner)

@@ -51,8 +51,8 @@ mpcserver 3 &
 
 secret_deposit 0 10 10
 
-trade 0 1.1 -2.5
-trade 0 -1.1 2
+#trade 0 1.1 -2.5
+#trade 0 -1.1 2
 
 secret_withdraw 0 9 9
 

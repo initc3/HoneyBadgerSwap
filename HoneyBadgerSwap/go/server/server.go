@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
@@ -31,6 +32,7 @@ var (
 	serverID	string
 	mut 		sync.Mutex
 	conn		*ethclient.Client
+	server		*bind.TransactOpts
 )
 
 func dbPut(key string, value []byte) {
@@ -99,6 +101,12 @@ func watch() {
 		log.Fatal("watch LocalDepositPrep err:", err)
 	}
 
+	secretWithdrawChannel := make(chan *hbswap.HbSwapSecretWithdraw)
+	secretWithdrawSub, err := hbswapInstance.WatchSecretWithdraw(nil, secretWithdrawChannel)
+	if err != nil {
+		log.Fatal("watch secretWithdraw err:", err)
+	}
+
 	for {
 		select {
 		//case err := <- tradePrepSub.Err():
@@ -165,6 +173,23 @@ func watch() {
 
 			cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, "1")
 			utils.ExecCmd(cmd)
+
+		case err := <- secretWithdrawSub.Err():
+			log.Fatal(err)
+		case oce := <- secretWithdrawChannel:
+			fmt.Printf("SecretWithdraw\n")
+
+			cmd := exec.Command("python3", "Scripts/hbswap/python/server/withdraw_org_data.py", serverID, oce.Token.String(), oce.User.String(), oce.Amt.String())
+			utils.ExecCmd(cmd)
+
+			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_withdraw")
+			stdout := utils.ExecCmd(cmd)
+			agree, _ := strconv.Atoi(strings.Split(stdout[:len(stdout) - 1], " ")[1])
+			fmt.Printf("agree %v\n", agree)
+
+			if agree == 1 {
+				utils.Consent(conn, server, oce.Seq)
+			}
 		}
 	}
 }
@@ -174,6 +199,8 @@ func main() {
 	log.Printf("Starting server %v\n", serverID)
 
 	conn = utils.GetEthClient("ws://127.0.0.1:8546")
+
+	server, _ = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
