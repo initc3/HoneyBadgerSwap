@@ -1,5 +1,5 @@
 dataDir=./Scripts/hbswap/poa/data
-keyStore=./Scripts/hbswap/poa/keystore/account_0
+keyStore=./Scripts/hbswap/poa/keystore/server_0
 
 $GOPATH/src/github.com/ethereum/go-ethereum/build/bin/geth --datadir $dataDir init ./Scripts/hbswap/poa/genesis.json
 

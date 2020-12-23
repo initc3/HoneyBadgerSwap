@@ -14,9 +14,9 @@ func main() {
 	user := os.Args[1]
 	amtA, amtB := os.Args[2], os.Args[3]
 
-	conn := utils.GetEthClient("HTTP://127.0.0.1:8545")
+	conn := utils.GetEthClient(utils.HttpEndpoint)
 
-	owner, _ := utils.GetAccount(fmt.Sprintf("account_%s", user))
+	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
 
 	idxA, idxB := utils.TradePrep(conn, owner)
 
