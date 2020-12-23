@@ -137,6 +137,7 @@
       }
     ],
     "name": "balanceOf",
+    "constant": true,
     "outputs": [
       {
         "internalType": "uint256",

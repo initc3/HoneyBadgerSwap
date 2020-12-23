@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
@@ -18,7 +17,6 @@ import (
 )
 
 const (
-	hbswapAddr = "0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2"
 	prog = "./malicious-shamir-party.x"
 	players = "4"
 	threshold = "1"
@@ -81,7 +79,7 @@ func genInputmask() {
 }
 
 func watch() {
-	hbswapInstance, err := hbswap.NewHbSwap(common.HexToAddress(hbswapAddr), conn)
+	hbswapInstance, err := hbswap.NewHbSwap(utils.HbswapAddr, conn)
 
 	//tradePrepChannel := make(chan *hbswap.HbSwapTradePrep)
 	//tradePrepSub, err := hbswapInstance.WatchTradePrep(nil, tradePrepChannel)
@@ -141,55 +139,67 @@ func watch() {
 		case err := <- tradeSub.Err():
 			log.Fatal(err)
 		case oce := <-tradeChannel:
-			fmt.Printf("Starting to trade...\n")
+			go func() {
+				fmt.Printf("Starting to trade...\n")
 
-			cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, oce.User.Hex(), oce.TokenA.String(), oce.TokenB.String(), oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
-			utils.ExecCmd(cmd)
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, oce.User.Hex(), oce.TokenA.String(), oce.TokenB.String(), oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
+				utils.ExecCmd(cmd)
 
-			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_trade")
-			utils.ExecCmd(cmd)
+				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_trade")
+				utils.ExecCmd(cmd)
 
-			cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID)
-			stdout := utils.ExecCmd(cmd)
-			changes := strings.Split(stdout[:len(stdout) - 1], " ")
-			fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID)
+				stdout := utils.ExecCmd(cmd)
+				changes := strings.Split(stdout[:len(stdout) - 1], " ")
+				fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
 
-			cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenA.String(), oce.User.Hex(), changes[0], "0")
-			utils.ExecCmd(cmd)
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenA.String(), oce.User.Hex(), changes[0], "0")
+				utils.ExecCmd(cmd)
 
-			cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenB.String(), oce.User.Hex(), changes[1], "0")
-			utils.ExecCmd(cmd)
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenB.String(), oce.User.Hex(), changes[1], "0")
+				utils.ExecCmd(cmd)
 
-			fmt.Printf("Trade finished\n")
+				fmt.Printf("Trade finished\n")
+			}()
 
 		case err := <- secretDepositPrepSub.Err():
 			log.Fatal(err)
 		case oce := <-secretDepositPrepChannel:
-			fmt.Printf("SecretDeposit\n")
+			go func() {
+				fmt.Printf("SecretDeposit\n")
 
-			token := oce.Token.Hex()
-			user := oce.User.Hex()
-			amt := oce.Amt.String()
+				token := oce.Token.Hex()
+				user := oce.User.Hex()
+				amt := oce.Amt.String()
 
-			cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, "1")
-			utils.ExecCmd(cmd)
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, "1")
+				utils.ExecCmd(cmd)
+
+			}()
 
 		case err := <- secretWithdrawSub.Err():
 			log.Fatal(err)
 		case oce := <- secretWithdrawChannel:
-			fmt.Printf("SecretWithdraw\n")
+			go func() {
+				fmt.Printf("SecretWithdraw\n")
 
-			cmd := exec.Command("python3", "Scripts/hbswap/python/server/withdraw_org_data.py", serverID, oce.Token.String(), oce.User.String(), oce.Amt.String())
-			utils.ExecCmd(cmd)
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/withdraw_set_data.py", serverID, oce.Token.String(), oce.User.String(), oce.Amt.String())
+				utils.ExecCmd(cmd)
 
-			cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_withdraw")
-			stdout := utils.ExecCmd(cmd)
-			agree, _ := strconv.Atoi(strings.Split(stdout[:len(stdout) - 1], " ")[1])
-			fmt.Printf("agree %v\n", agree)
+				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_withdraw")
+				stdout := utils.ExecCmd(cmd)
 
-			if agree == 1 {
-				utils.Consent(conn, server, oce.Seq)
-			}
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/withdraw_check.py", serverID)
+				stdout = utils.ExecCmd(cmd)
+				agree, _ := strconv.Atoi(stdout[:1])
+				fmt.Printf("agree %v\n", agree)
+
+				if agree == 1 {
+					utils.Consent(conn, server, oce.Seq)
+					//update balance
+				}
+			}()
+
 		}
 	}
 }
@@ -198,9 +208,9 @@ func main() {
 	serverID = os.Args[1]
 	log.Printf("Starting server %v\n", serverID)
 
-	conn = utils.GetEthClient("ws://127.0.0.1:8546")
+	conn = utils.GetEthClient(utils.WsEndpoint)
 
-	server, _ = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
+	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
 
 	var wg sync.WaitGroup
 	wg.Add(1)

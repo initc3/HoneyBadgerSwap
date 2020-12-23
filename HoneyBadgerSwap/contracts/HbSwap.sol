@@ -32,12 +32,11 @@ contract HbSwap {
     mapping (uint => uint) consentCounter;
     mapping (uint => bool) expired;
 
-//    constructor(address[] memory _servers, uint _threshold) public {
-//        for (uint i = 0; i < _servers.length; i++) {
-//            servers[_servers[i]] = true;
-//        }
-    constructor() public {
-//        threshold = _threshold;
+    constructor(address[] memory _servers, uint _threshold) public {
+        for (uint i = 0; i < _servers.length; i++) {
+            servers[_servers[i]] = true;
+        }
+        threshold = _threshold;
     }
 
     function deposit(address _token, uint _amt) payable public {
@@ -88,11 +87,10 @@ contract HbSwap {
 
         require(servers[server], "not a valid server");
         require(!consentRecord[_seq][server], "already consent");
-        require(!expired[_seq], "secretWithdraw completed");
 
         consentRecord[_seq][server] = true;
         consentCounter[_seq] += 1;
-        if (consentCounter[_seq] > threshold) {
+        if (consentCounter[_seq] > threshold && !expired[_seq]) {
             SecretWithdrawIntention memory secretWithdrawIntention = secretWithdrawMap[_seq];
             balances[secretWithdrawIntention.token][secretWithdrawIntention.user] += secretWithdrawIntention.amt;
             expired[_seq] = true;

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -9,6 +10,7 @@ import (
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
 	"log"
+	"math/big"
 )
 
 const (
@@ -19,13 +21,13 @@ const (
 func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
 	log.Println("Deploying HbSwap contract...")
 
-	//var servers []common.Address
-	//for i := 0; i < n; i++ {
-	//	transactOpt, _ := utils.GetAccount(fmt.Sprintf("server_%v", i))
-	//	servers = append(servers, transactOpt.From)
-	//}
+	var servers []common.Address
+	for i := 0; i < n; i++ {
+		transactOpt := utils.GetAccount(fmt.Sprintf("server_%v", i))
+		servers = append(servers, transactOpt.From)
+	}
 
-	hbswapAddr, tx, _, err := hbswap.DeployHbSwap(auth, conn)
+	hbswapAddr, tx, _, err := hbswap.DeployHbSwap(auth, conn, servers, big.NewInt(t))
 	if err != nil {
 		log.Fatalf("Failed to deploy HbSwap: %v", err)
 	}
@@ -65,9 +67,9 @@ func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addres
 }
 
 func main() {
-	conn := utils.GetEthClient("HTTP://127.0.0.1:8545")
+	conn := utils.GetEthClient(utils.HttpEndpoint)
 
-	owner, _ := utils.GetAccount("server_0")
+	owner := utils.GetAccount("server_0")
 
 	DeployHbSwap(conn, owner)
 	DeployToken(conn, owner)
