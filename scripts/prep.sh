@@ -51,6 +51,7 @@ prepare
 compile hbswap_init
 compile hbswap_trade_prep
 compile hbswap_trade
+compile hbswap_withdraw
 
 run hbswap_init
 org
