@@ -1,5 +1,6 @@
 import leveldb
 import sys
+import time
 
 from utils import to_hex, sz
 
@@ -19,7 +20,13 @@ if __name__=='__main__':
         pool_A = f.read(sz)
         pool_B = f.read(sz)
 
-    db = leveldb.LevelDB(f"Scripts/hbswap/db/server{server_id}")
+    while True:
+        try:
+            db = leveldb.LevelDB(f"Scripts/hbswap/db/server{server_id}")
+            break
+        except leveldb.LevelDBError:
+            time.sleep(3)
+
     mask_share_A = bytes(db.Get(idx_A.encode()))
     mask_share_B = bytes(db.Get(idx_B.encode()))
 
