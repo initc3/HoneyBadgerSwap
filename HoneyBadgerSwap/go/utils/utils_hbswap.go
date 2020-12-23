@@ -19,6 +19,7 @@ func Deposit(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.A
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
 	tx, err := hbswapInstance.Deposit(auth, tokenAddr, amt)
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +41,7 @@ func Withdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
 	tx, err := hbswapInstance.Withdraw(auth, tokenAddr, amt)
 	if err != nil {
 		log.Fatal(err)
@@ -56,12 +58,13 @@ func Withdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.
 }
 
 func SecretDeposit(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, amt *big.Int) {
-	fmt.Printf("SecretDeposit %s %v\n", tokenAddr.String(), amt)
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
+	fmt.Printf("SecretDeposit %s %v\n", tokenAddr.String(), amt)
 	tx, err := hbswapInstance.SecretDeposit(auth, tokenAddr, amt)
 	if err != nil {
 		log.Fatal(err)
@@ -78,13 +81,15 @@ func SecretDeposit(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr co
 }
 
 func SecretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, amt *big.Int) {
+	fmt.Printf("secret withdraw %s\n", tokenAddr.Hex())
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	prevBalance := GetBalance(conn, tokenAddr, auth.From)
+	prevBalance := GetBalance(conn, tokenAddr, auth.From).Int64()
 
+	fundGas(conn, auth.From)
 	tx, err := hbswapInstance.SecretWithdraw(auth, tokenAddr, amt)
 	if err != nil {
 		log.Fatal(err)
@@ -99,38 +104,39 @@ func SecretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr c
 		log.Fatalf("Transaction status: %v", receipt.Status)
 	}
 
+	fmt.Printf("current balance %v\n", prevBalance)
 	for true {
-		time.Sleep(5)
-		balance := GetBalance(conn, tokenAddr, auth.From)
+		time.Sleep(10 * time.Second)
+		balance := GetBalance(conn, tokenAddr, auth.From).Int64()
 		fmt.Printf("current balance %v\n", balance)
-		var dif big.Int
-		dif.Sub(balance, prevBalance)
-		if dif.Cmp(amt) == 0 {
+		if prevBalance + amt.Int64() == balance {
 			break
 		}
 	}
 }
 
-//func Consent(conn *ethclient.Client, auth *bind.TransactOpts, seq *big.Int) {
-//	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	tx, err := hbswapInstance.Consent(auth, seq)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	receipt, err := WaitMined(context.Background(), conn, tx, 0)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	if receipt.Status == 0 {
-//		log.Fatalf("Transaction status: %v", receipt.Status)
-//	}
-//}
+func Consent(conn *ethclient.Client, auth *bind.TransactOpts, seq *big.Int) {
+	fmt.Printf("Consent seq %v\n", seq)
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fundGas(conn, auth.From)
+	tx, err := hbswapInstance.Consent(auth, seq)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+}
 
 func TradePrep(conn *ethclient.Client, auth *bind.TransactOpts) (int64, int64) {
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
@@ -138,6 +144,7 @@ func TradePrep(conn *ethclient.Client, auth *bind.TransactOpts) (int64, int64) {
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
 	tx, err := hbswapInstance.TradePrep(auth)
 	if err != nil {
 		log.Fatal(err)
@@ -172,6 +179,7 @@ func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenSell common.Add
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
 	tx, err := hbswapInstance.Trade(auth, tokenSell, tokenBuy, idxSell, idxBuy, maskedSell, maskedBuy)
 	if err != nil {
 		log.Fatal(err)
@@ -187,9 +195,33 @@ func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenSell common.Add
 	}
 }
 
-func GetBalance(conn *ethclient.Client, tokenAddr common.Address, user common.Address) *big.Int {
+func Reset(conn *ethclient.Client, auth *bind.TransactOpts) {
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	fundGas(conn, auth.From)
+	tx, err := hbswapInstance.Reset(auth)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+}
+
+func GetBalance(conn *ethclient.Client, tokenAddr common.Address, user common.Address) *big.Int {
+	fmt.Printf("Getting balance for token %v user %v\n", tokenAddr.Hex(), user.Hex())
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		fmt.Printf("here")
 		log.Fatal(err)
 	}
 

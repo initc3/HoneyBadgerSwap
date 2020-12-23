@@ -3,12 +3,10 @@ package utils
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -22,13 +20,24 @@ import (
 )
 
 var (
-	EthAddr 	= common.HexToAddress("0x0")
-	HbswapAddr 	= common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
-	TokenAddr 	= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
-)
-
-var (
 	GOPATH		= os.Getenv("GOPATH")
+	minBalance	= big.NewInt(200000000000000000)
+
+	//parameter for private net
+	//HttpEndpoint	= "http://127.0.0.1:8545"
+	//WsEndpoint		= "ws://127.0.0.1:8546"
+	//EthAddr 		= common.HexToAddress("0x0")
+	//HbswapAddr 		= common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
+	//TokenAddr 		= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
+	//chainID 		= "123"
+
+	//parameter for kovan test net
+	chainID			= "42"
+	HttpEndpoint	= "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
+	WsEndpoint		= "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
+	EthAddr 		= common.HexToAddress("0x0")
+	HbswapAddr 		= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
+	TokenAddr 		= common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A")
 )
 
 func ExecCmd(cmd *exec.Cmd) string {
@@ -59,7 +68,7 @@ func GetEthClient(ethInstance string) (*ethclient.Client) {
 	return conn
 }
 
-func GetAccount(account string) (*bind.TransactOpts, *ecdsa.PrivateKey) {
+func GetAccount(account string) (*bind.TransactOpts) {
 	dir := GOPATH + "/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/poa/keystore/" + account + "/"
 
 	list, err := ioutil.ReadDir(dir)
@@ -86,12 +95,9 @@ func GetAccount(account string) (*bind.TransactOpts, *ecdsa.PrivateKey) {
 		log.Fatal(err)
 	}
 
-	keys, _ := keystore.DecryptKey(bytes, password)
-	privateKey := keys.PrivateKey
-
 	auth.GasLimit = 8000000
 
-	return auth, privateKey
+	return auth
 }
 
 func WaitMined(ctx context.Context, ec *ethclient.Client,
@@ -145,4 +151,10 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 		case <-queryTicker.C:
 		}
 	}
+}
+
+func stringToBigInt(v string) (*big.Int) {
+	value := big.NewInt(0)
+	value.SetString(v, 10)
+	return value
 }
