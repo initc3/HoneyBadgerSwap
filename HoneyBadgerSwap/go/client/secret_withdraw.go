@@ -23,14 +23,15 @@ func secretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, token commo
 
 func main() {
 	user := os.Args[1]
-	amtETH, amtTOK := os.Args[2], os.Args[3]
+	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
+	amtA, amtB := os.Args[4], os.Args[5]
 
 	conn := utils.GetEthClient(utils.HttpEndpoint)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
 
-	secretWithdraw(conn, owner, utils.EthAddr, amtETH)
-	secretWithdraw(conn, owner, utils.TokenAddr, amtTOK)
+	secretWithdraw(conn, owner, tokenA, amtA)
+	secretWithdraw(conn, owner, tokenB, amtB)
 }
 
 

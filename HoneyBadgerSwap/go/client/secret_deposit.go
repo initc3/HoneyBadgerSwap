@@ -23,14 +23,15 @@ func secretDeposit(conn *ethclient.Client, auth *bind.TransactOpts, token common
 
 func main() {
 	user := os.Args[1]
-	amtETH, amtTOK := os.Args[2], os.Args[3]
+	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
+	amtA, amtB := os.Args[4], os.Args[5]
 
 	conn := utils.GetEthClient(utils.HttpEndpoint)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
 
-	secretDeposit(conn, owner, utils.EthAddr, amtETH)
-	secretDeposit(conn, owner, utils.TokenAddr, amtTOK)
+	secretDeposit(conn, owner, tokenA, amtA)
+	secretDeposit(conn, owner, tokenB, amtB)
 }
 
 

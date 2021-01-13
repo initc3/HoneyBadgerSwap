@@ -21,27 +21,33 @@ import (
 
 var (
 	GOPATH		= os.Getenv("GOPATH")
-	minBalance	= big.NewInt(200000000000000000)
+	minBalance	= big.NewInt(300000000000000000)
 
-	//parameter for private net
-	//HttpEndpoint	= "http://127.0.0.1:8545"
-	//WsEndpoint		= "ws://127.0.0.1:8546"
-	//EthAddr 		= common.HexToAddress("0x0")
-	//HbswapAddr 		= common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
-	//TokenAddr 		= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
-	//chainID 		= "123"
+	// parameter for private net
+	chainID 		= "123"
+	HttpEndpoint	= "http://127.0.0.1:8545"
+	WsEndpoint		= "ws://127.0.0.1:8546"
+	EthAddr 		= common.HexToAddress("0x0000000000000000000000000000000000000000")
+	HbswapAddr 		= common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
+	TokenAddrs 		= []common.Address{
+						common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
+						common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
+					}
 
-	//parameter for kovan test net
-	chainID			= "42"
-	HttpEndpoint	= "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
-	WsEndpoint		= "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
-	EthAddr 		= common.HexToAddress("0x0")
-	HbswapAddr 		= common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385")
-	TokenAddr 		= common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A")
+	//// parameter for kovan test net
+	//chainID			= "42"
+	//HttpEndpoint	= "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
+	//WsEndpoint		= "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
+	//EthAddr 		= common.HexToAddress("0x0000000000000000000000000000000000000000")
+	//HbswapAddr 		= common.HexToAddress("0x7230873b02394AfA05bdDfa303298EF28bb2f0E8")
+	//TokenAddrs 		= []common.Address{
+	//					common.HexToAddress("0x63e7F20503256DdCFEC64872aAdb785d5A290CBb"),
+	//					common.HexToAddress("0x403B0F962566Ffb960d0dE98875dc09603Aa67e9"),
+	//				}
 )
 
 func ExecCmd(cmd *exec.Cmd) string {
-	fmt.Println(cmd)
+	fmt.Printf("Cmd:\n====================\n%v\n====================\n", cmd)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -50,7 +56,7 @@ func ExecCmd(cmd *exec.Cmd) string {
 		fmt.Printf("err:\n%s\n", stderr.String())
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 	}
-	fmt.Printf("out:\n%s\n", stdout.String())
+	fmt.Printf("Output:\n====================\n%s====================\n", stdout.String())
 	return stdout.String()
 }
 
@@ -137,7 +143,7 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 		if err == nil && ddl.Cmp(latestBlockHeader.Number) < 0 {
 			receipt, rerr := ec.TransactionReceipt(ctx, txHashBytes)
 			if rerr == nil {
-				log.Println("tx confirmed!")
+				//fmt.Println("tx confirmed!")
 				return receipt, rerr
 			} else if rerr == ethereum.NotFound || rerr.Error() == missingFieldErr {
 				return nil, errors.New("tx is dropped due to chain re-org")
