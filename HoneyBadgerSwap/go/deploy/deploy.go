@@ -19,7 +19,7 @@ const (
 )
 
 func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
-	log.Println("Deploying HbSwap contract...")
+	fmt.Println("Deploying HbSwap contract...")
 
 	var servers []common.Address
 	for i := 0; i < n; i++ {
@@ -40,13 +40,13 @@ func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addre
 		log.Fatalf("Transaction status: %x", receipt.Status)
 	}
 
-	log.Println("Deployed HbSwap contract at", hbswapAddr.Hex())
+	fmt.Println("Deployed HbSwap contract at", hbswapAddr.Hex())
 
 	return hbswapAddr
 }
 
 func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
-	log.Println("Deploying Token contract...")
+	fmt.Println("Deploying Token contract...")
 
 	tokenAddr, tx, _, err := token.DeployToken(auth, conn)
 	if err != nil {
@@ -61,7 +61,7 @@ func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addres
 		log.Fatalf("Transaction status: %x", receipt.Status)
 	}
 
-	log.Println("Deployed Token contract at", tokenAddr.Hex())
+	fmt.Println("Deployed Token contract at", tokenAddr.Hex())
 
 	return tokenAddr
 }
@@ -72,5 +72,6 @@ func main() {
 	owner := utils.GetAccount("server_0")
 
 	DeployHbSwap(conn, owner)
+	DeployToken(conn, owner)
 	DeployToken(conn, owner)
 }

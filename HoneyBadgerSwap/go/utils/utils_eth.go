@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -16,14 +17,14 @@ func FundETH(conn *ethclient.Client, toAddr common.Address, amount *big.Int) {
 	adminAuth := GetAccount("server_0")
 	transferETH(conn, chainID, adminAuth, toAddr, amount)
 
-	balance := GetBalanceETH(conn, toAddr)
-	log.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
+	//balance := GetBalanceETH(conn, toAddr)
+	//fmt.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
 }
 
 func GetBalanceETH(conn *ethclient.Client, addr common.Address) (*big.Int) {
 	balance, err := conn.BalanceAt(context.Background(), addr, nil)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	return balance
@@ -34,7 +35,7 @@ func fundGas(conn *ethclient.Client, toAddr common.Address) {
 	balance := GetBalanceETH(conn, toAddr)
 	amount := minBalance
 	if balance.Cmp(amount) != -1 {
-		log.Printf("Funded %s to %v ETH on mainchain\n", toAddr.Hex(), balance)
+		//fmt.Printf("Funded %s to %v ETH on mainchain\n", toAddr.Hex(), balance)
 		return
 	}
 	amount.Sub(amount, balance)
@@ -43,7 +44,7 @@ func fundGas(conn *ethclient.Client, toAddr common.Address) {
 	transferETH(conn, chainID, adminAuth, toAddr, amount)
 
 	balance = GetBalanceETH(conn, toAddr)
-	log.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
+	//fmt.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
 }
 
 func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.TransactOpts, toAddr common.Address, amount *big.Int) {
@@ -68,21 +69,21 @@ func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.Transact
 		log.Fatal(err)
 	}
 
-	log.Printf("Sending %v wei from %s to %s\n", amount, fromAddr.Hex(), toAddr.Hex())
+	//fmt.Printf("Sending %v wei from %s to %s\n", amount, fromAddr.Hex(), toAddr.Hex())
 	err = conn.SendTransaction(ctx, signedTx)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		transferETH(conn, chainId, fromAuth, toAddr, amount)
 	}
 
-	log.Printf("Waiting for transaction to be mined...\n")
+	//fmt.Printf("Waiting for transaction to be mined...\n")
 	receipt, err := WaitMined(ctx, conn, signedTx, 0)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		transferETH(conn, chainId, fromAuth, toAddr, amount)
 	}
 	if receipt.Status == 0 {
-		log.Printf("Transaction status: %x", receipt.Status)
+		fmt.Printf("Transaction status: %x", receipt.Status)
 		transferETH(conn, chainId, fromAuth, toAddr, amount)
 	}
 }

@@ -26,7 +26,7 @@ class Server:
                 return value
             except:
                 print(f"Inputmask share {key} not ready. Try again...")
-                time.sleep(1)
+                time.sleep(5)
 
     async def http_server(self):
         routes = web.RouteTableDef()
@@ -37,9 +37,33 @@ class Server:
             mask_idxes = re.split(',', request.match_info.get("mask_idxes"))
             res = ''
             for mask_idx in mask_idxes:
-                res += f"{',' if len(res) > 0 else ''}{self.dbGet(mask_idx.encode())}"
+                res += f"{',' if len(res) > 0 else ''}{self.dbGet(f'inputmask_{mask_idx}'.encode())}"
             data = {
                 "inputmask_shares": res,
+            }
+            print(f"request: {request}")
+            print(f"response: {res}")
+            return web.json_response(data)
+
+        @routes.get("/balance/{token_user}")
+        async def _handler(request):
+            print(f"request: {request}")
+            token_user = request.match_info.get("token_user")
+            res = self.dbGet(f'balance{token_user}'.encode())
+            data = {
+                "balance": f'{res}',
+            }
+            print(f"request: {request}")
+            print(f"response: {res}")
+            return web.json_response(data)
+
+        @routes.get("/price/{trade_seq}")
+        async def _handler(request):
+            print(f"request: {request}")
+            trade_seq = request.match_info.get("trade_seq")
+            res = self.dbGet(f'price_{trade_seq}'.encode())
+            data = {
+                "price": f'{res}',
             }
             print(f"request: {request}")
             print(f"response: {res}")

@@ -13,7 +13,7 @@ import (
 func FundToken(conn *ethclient.Client, tokenAddr common.Address, toAddr common.Address, amount *big.Int) {
 	balance := GetBalanceToken(conn, toAddr, tokenAddr)
 	if balance.Cmp(amount) != -1 {
-		log.Printf("Funded %s to %v token\n", toAddr.Hex(), balance)
+		//fmt.Printf("Funded account %s to %v token\n", toAddr.Hex(), balance)
 		return
 	}
 	amount.Sub(amount, balance)
@@ -22,15 +22,16 @@ func FundToken(conn *ethclient.Client, tokenAddr common.Address, toAddr common.A
 	transferToken(conn, tokenAddr, adminAuth, toAddr, amount)
 
 	balance = GetBalanceToken(conn, toAddr, tokenAddr)
-	log.Printf("Funded %s to %v token\n", toAddr.Hex(), balance)
+	//fmt.Printf("Funded account %s to %v token\n", toAddr.Hex(), balance)
 }
 
-func Approve(conn *ethclient.Client, auth *bind.TransactOpts, receiver common.Address, amt *big.Int) {
-	tokenInstance, err := token.NewToken(TokenAddr, conn)
+func Approve(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, receiver common.Address, amt *big.Int) {
+	tokenInstance, err := token.NewToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fundGas(conn, auth.From)
 	tx, err := tokenInstance.Approve(auth, receiver, amt)
 	if err != nil {
 		log.Fatal(err)
@@ -60,9 +61,7 @@ func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr comm
 }
 
 func transferToken(conn *ethclient.Client, tokenAddr common.Address, fromAuth *bind.TransactOpts, toAddr common.Address, value *big.Int) {
-	fromAddr := fromAuth.From.Hex()
-
-	log.Printf("Trasfering %v token from %s to %s\n", value, fromAddr, toAddr.Hex())
+	//fmt.Printf("Trasfering %v token from %s to %s\n", value, fromAuth.From.Hex(), toAddr.Hex())
 
 	tokenInstance, err := token.NewToken(tokenAddr, conn)
 	if err != nil {

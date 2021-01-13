@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
 	"math/big"
 	"os"
@@ -12,7 +13,8 @@ import (
 
 func main() {
 	user := os.Args[1]
-	amtA, amtB := os.Args[2], os.Args[3]
+	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
+	amtA, amtB := os.Args[4], os.Args[5]
 
 	conn := utils.GetEthClient(utils.HttpEndpoint)
 
@@ -27,8 +29,6 @@ func main() {
 	maskedA := utils.StrToBig(maskedInputs[0])
 	maskedB := utils.StrToBig(maskedInputs[1])
 
-	tokenA := utils.EthAddr
-	tokenB := utils.TokenAddr
 
 	fmt.Printf("maskedInputs: %v\n", maskedInputs)
 	utils.Trade(conn, owner, tokenA, tokenB, big.NewInt(idxA), big.NewInt(idxB), maskedA, maskedB)

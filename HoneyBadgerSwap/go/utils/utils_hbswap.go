@@ -13,7 +13,32 @@ import (
 	"time"
 )
 
+func InitPool(conn *ethclient.Client, auth *bind.TransactOpts, value *big.Int, tokenA common.Address, tokenB common.Address, amtA *big.Int, amtB *big.Int) {
+	fmt.Printf("InitPool tokenA %s tokenB %s amtA %v amtB %v\n", tokenA.Hex(), tokenB.Hex(), amtA, amtB)
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fundGas(conn, auth.From)
+	auth.Value = value
+	tx, err := hbswapInstance.InitPool(auth, tokenA, tokenB, amtA, amtB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+}
+
 func Deposit(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, amt *big.Int) {
+	fmt.Printf("Deposit user %s %v token %s\n", auth.From.Hex(), amt, tokenAddr.Hex())
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		log.Fatal(err)
@@ -104,11 +129,11 @@ func SecretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr c
 		log.Fatalf("Transaction status: %v", receipt.Status)
 	}
 
-	fmt.Printf("current balance %v\n", prevBalance)
+	//fmt.Printf("current balance %v\n", prevBalance)
 	for true {
 		time.Sleep(10 * time.Second)
 		balance := GetBalance(conn, tokenAddr, auth.From).Int64()
-		fmt.Printf("current balance %v\n", balance)
+		//fmt.Printf("current balance %v\n", balance)
 		if prevBalance + amt.Int64() == balance {
 			break
 		}
@@ -136,6 +161,8 @@ func Consent(conn *ethclient.Client, auth *bind.TransactOpts, seq *big.Int) {
 	if receipt.Status == 0 {
 		log.Fatalf("Transaction status: %v", receipt.Status)
 	}
+
+	fmt.Printf("Consent seq %v done\n", seq)
 }
 
 func TradePrep(conn *ethclient.Client, auth *bind.TransactOpts) (int64, int64) {
@@ -169,18 +196,18 @@ func TradePrep(conn *ethclient.Client, auth *bind.TransactOpts) (int64, int64) {
 		log.Fatal(err)
 	}
 
-	log.Printf("idxSell:%v idxBuy:%v\n", idxSell, idxBuy)
+	fmt.Printf("idxSell:%v idxBuy:%v\n", idxSell, idxBuy)
 	return idxSell, idxBuy
 }
 
-func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenSell common.Address, tokenBuy common.Address, idxSell *big.Int, idxBuy *big.Int, maskedSell *big.Int, maskedBuy *big.Int) {
+func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, idxA *big.Int, idxB *big.Int, maskedA *big.Int, maskedB *big.Int) {
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fundGas(conn, auth.From)
-	tx, err := hbswapInstance.Trade(auth, tokenSell, tokenBuy, idxSell, idxBuy, maskedSell, maskedBuy)
+	tx, err := hbswapInstance.Trade(auth, tokenA, tokenB, idxA, idxB, maskedA, maskedB)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -193,9 +220,17 @@ func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenSell common.Add
 	if receipt.Status == 0 {
 		log.Fatalf("Transaction status: %v", receipt.Status)
 	}
+
+	data := receipt.Logs[0].Data
+	tradeSeq, err := strconv.ParseInt(common.Bytes2Hex(data[0 * 32 : 1 * 32]), 16, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("tradeSeq %v txHash %s\n", tradeSeq, tx.Hash().Hex())
 }
 
 func Reset(conn *ethclient.Client, auth *bind.TransactOpts) {
+	fmt.Println("Reset InputmaskCnt")
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		log.Fatal(err)
@@ -217,8 +252,35 @@ func Reset(conn *ethclient.Client, auth *bind.TransactOpts) {
 	}
 }
 
+func UpdatePrice(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, price string) {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	GetPrice(conn, tokenA, tokenB)
+
+	fundGas(conn, auth.From)
+	tx, err := hbswapInstance.UpdatePrice(auth, tokenA, tokenB, price)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+
+	GetPrice(conn, tokenA, tokenB)
+}
+
+/******** read-only ********/
+
 func GetBalance(conn *ethclient.Client, tokenAddr common.Address, user common.Address) *big.Int {
-	fmt.Printf("Getting balance for token %v user %v\n", tokenAddr.Hex(), user.Hex())
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
 		fmt.Printf("here")
@@ -226,7 +288,7 @@ func GetBalance(conn *ethclient.Client, tokenAddr common.Address, user common.Ad
 	}
 
 	balance, _ := hbswapInstance.Balances(nil, tokenAddr, user)
-	log.Printf("%s balance: %v\n", tokenAddr.Hex(), balance)
+	fmt.Printf("On-chain balance user %s token %s: %v\n", user.Hex(), tokenAddr.Hex(), balance)
 
 	return balance
 }
@@ -238,7 +300,31 @@ func GetInputmaskCnt(conn *ethclient.Client) *big.Int {
 	}
 
 	cnt, _ := hbswapInstance.InputmaskCnt(nil)
-	log.Printf("inputmaskCnt: %v\n", cnt)
+	fmt.Printf("Inputmaks shares used: %v\n", cnt)
 
 	return cnt
+}
+
+func GetPrice(conn *ethclient.Client, tokenA common.Address, tokenB common.Address) string {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	price, _ := hbswapInstance.Prices(nil, tokenA, tokenB)
+	fmt.Printf("price: %v\n", price)
+
+	return price
+}
+
+func GetUpdateTime(conn *ethclient.Client, tokenA common.Address, tokenB common.Address) int64 {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	time, _ := hbswapInstance.UpdateTimes(nil, tokenA, tokenB)
+	fmt.Printf("updateTime: %v\n", time)
+
+	return time.Int64()
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
-	"github.com/syndtr/goleveldb/leveldb"
 	"log"
 	"os"
 	"os/exec"
@@ -17,13 +16,14 @@ import (
 )
 
 const (
-	prog = "./malicious-shamir-party.x"
-	players = "4"
-	threshold = "1"
-	mpcPort = "5000"
-	blsPrime = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
-	sz = 32
-	nshares = 1000
+	prog 		= "./malicious-shamir-party.x"
+	players 	= "4"
+	threshold 	= "1"
+	mpcPort 	= "5000"
+	blsPrime 	= "52435875175126190479447740508185965837690552500527637822603658699938581184513"
+	sz 			= 32
+	nshares 	= 1000
+	interval 	= 10
 )
 
 var (
@@ -31,18 +31,19 @@ var (
 	mut 		sync.Mutex
 	conn		*ethclient.Client
 	server		*bind.TransactOpts
+	prevTime	int64
 )
 
-func dbPut(key string, value []byte) {
-	mut.Lock()
-	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
-	err := db.Put([]byte(key), value, nil)
-	if err != nil {
-		fmt.Println("Error writing to database")
-	}
-	db.Close()
-	mut.Unlock()
-}
+//func dbPut(key string, value []byte) {
+//	mut.Lock()
+//	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
+//	err := db.Put([]byte(key), value, nil)
+//	if err != nil {
+//		fmt.Println("Error writing to database")
+//	}
+//	db.Close()
+//	mut.Unlock()
+//}
 
 //func dbGet(key string) string {
 //	mut.Lock()
@@ -87,6 +88,12 @@ func watch() {
 	//	log.Fatal("watch TradePrep err:", err)
 	//}
 
+	initPoolChannel := make(chan *hbswap.HbSwapInitPool)
+	initPoolSub, err := hbswapInstance.WatchInitPool(nil, initPoolChannel)
+	if err != nil {
+		log.Fatal("watch InitPool err:", err)
+	}
+
 	tradeChannel := make(chan *hbswap.HbSwapTrade)
 	tradeSub, err := hbswapInstance.WatchTrade(nil, tradeChannel)
 	if err != nil {
@@ -107,6 +114,16 @@ func watch() {
 
 	for {
 		select {
+		case err := <- initPoolSub.Err():
+			log.Fatal(err)
+		case oce := <- initPoolChannel:
+			go func() {
+				fmt.Printf("****New liquidity pool...\n")
+
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/init_pool.py", serverID, oce.TokenA.String(), oce.TokenB.String(), oce.AmtA.String(), oce.AmtB.String())
+				utils.ExecCmd(cmd)
+			}()
+
 		//case err := <- tradePrepSub.Err():
 		//	log.Fatal(err)
 		//case oce := <-tradePrepChannel:
@@ -138,50 +155,81 @@ func watch() {
 
 		case err := <- tradeSub.Err():
 			log.Fatal(err)
-		case oce := <-tradeChannel:
+		case oce := <- tradeChannel:
 			go func() {
-				fmt.Printf("Starting to trade...\n")
+				fmt.Printf("****Trade\n")
 
-				cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, oce.User.Hex(), oce.TokenA.String(), oce.TokenB.String(), oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
+				if serverID != "0" {
+					time.Sleep(1 * time.Second)
+				}
+
+				user := oce.User.Hex()
+				tokenA := oce.TokenA.String()
+				tokenB := oce.TokenB.String()
+
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, user, tokenA, tokenB, oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
 				utils.ExecCmd(cmd)
 
 				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_trade")
 				utils.ExecCmd(cmd)
 
-				cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID)
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID, tokenA, tokenB, oce.TradeSeq.String())
 				stdout := utils.ExecCmd(cmd)
-				changes := strings.Split(stdout[:len(stdout) - 1], " ")
+				println(strings.Split(stdout, "\n")[0])
+				changes := strings.Split(stdout[:len(strings.Split(stdout, "\n")[0]) - 1], " ")
 				fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
 
-				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenA.String(), oce.User.Hex(), changes[0], "0")
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, tokenA, user, changes[0], "0")
 				utils.ExecCmd(cmd)
 
-				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.TokenB.String(), oce.User.Hex(), changes[1], "0")
+				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, tokenB, user, changes[1], "0")
 				utils.ExecCmd(cmd)
 
-				fmt.Printf("Trade finished\n")
+				if time.Now().Unix() - prevTime > interval {
+					cmd = exec.Command("python3", "Scripts/hbswap/python/server/calc_price_set_data.py", serverID, tokenA, tokenB)
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_calc_price")
+					stdout := utils.ExecCmd(cmd)
+					price := strings.Split(stdout, "\n")[1]
+					fmt.Printf("avg_price %s\n", price)
+
+					if serverID == "0" {
+						utils.UpdatePrice(conn, server, oce.TokenA, oce.TokenB, price)
+					} else {
+						prevTime := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
+						for true {
+							time.Sleep(1 * time.Second)
+							curTime := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
+							if curTime > prevTime {
+								break
+							}
+						}
+					}
+
+					prevTime = time.Now().Unix()
+				}
 			}()
 
 		case err := <- secretDepositPrepSub.Err():
 			log.Fatal(err)
 		case oce := <-secretDepositPrepChannel:
 			go func() {
-				fmt.Printf("SecretDeposit\n")
+				fmt.Printf("****SecretDeposit\n")
 
-				token := oce.Token.Hex()
-				user := oce.User.Hex()
-				amt := oce.Amt.String()
-
-				cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, "1")
+				cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.Token.Hex(), oce.User.Hex(), oce.Amt.String(), "1")
 				utils.ExecCmd(cmd)
-
 			}()
 
 		case err := <- secretWithdrawSub.Err():
 			log.Fatal(err)
 		case oce := <- secretWithdrawChannel:
 			go func() {
-				fmt.Printf("SecretWithdraw\n")
+				fmt.Printf("****SecretWithdraw\n")
+
+				//if serverID != "0" {
+				//	time.Sleep(1 * time.Second)
+				//}
 
 				cmd := exec.Command("python3", "Scripts/hbswap/python/server/withdraw_set_data.py", serverID, oce.Token.String(), oce.User.String(), oce.Amt.String())
 				utils.ExecCmd(cmd)
@@ -196,7 +244,8 @@ func watch() {
 
 				if agree == 1 {
 					utils.Consent(conn, server, oce.Seq)
-					//update balance
+					cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, oce.Token.Hex(), oce.User.Hex(), fmt.Sprintf("-%s", oce.Amt.String()), "1")
+					utils.ExecCmd(cmd)
 				}
 			}()
 
@@ -206,11 +255,13 @@ func watch() {
 
 func main() {
 	serverID = os.Args[1]
-	log.Printf("Starting server %v\n", serverID)
+	fmt.Printf("Starting mpc server %v\n", serverID)
 
 	conn = utils.GetEthClient(utils.WsEndpoint)
 
 	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
+
+	prevTime = 0
 
 	var wg sync.WaitGroup
 	wg.Add(1)

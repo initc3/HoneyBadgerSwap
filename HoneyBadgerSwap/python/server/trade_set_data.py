@@ -14,11 +14,11 @@ if __name__=='__main__':
     masked_amt_A = to_hex(sys.argv[7])
     masked_amt_B = to_hex(sys.argv[8])
 
-    file = f"Scripts/hbswap/data/Pool-P{server_id}.data"
-    pool_A, pool_B = 0, 0
-    with open(file, 'rb') as f:
-        pool_A = f.read(sz)
-        pool_B = f.read(sz)
+    # file = f"Scripts/hbswap/data/Pool-{token_A}-{token_B}-P{server_id}.data"
+    # pool_A, pool_B = 0, 0
+    # with open(file, 'rb') as f:
+    #     pool_A = f.read(sz)
+    #     pool_B = f.read(sz)
 
     while True:
         try:
@@ -27,8 +27,11 @@ if __name__=='__main__':
         except leveldb.LevelDBError:
             time.sleep(3)
 
-    mask_share_A = bytes(db.Get(idx_A.encode()))
-    mask_share_B = bytes(db.Get(idx_B.encode()))
+    pool_A = bytes(db.Get(f'pool-{token_A}-{token_B}:{token_A}'.encode()))
+    pool_B = bytes(db.Get(f'pool-{token_A}-{token_B}:{token_B}'.encode()))
+
+    mask_share_A = bytes(db.Get(f'inputmask_{idx_A}'.encode()))
+    mask_share_B = bytes(db.Get(f'inputmask_{idx_B}'.encode()))
 
     try:
         balance_A = bytes(db.Get(f'balance{token_A}{user}'.encode()))
