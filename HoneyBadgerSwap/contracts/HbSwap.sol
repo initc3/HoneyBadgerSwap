@@ -8,10 +8,16 @@ contract HbSwap {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
+    event InitPool(address tokenA, address tokenB, uint amtA, uint amtB);
     event TradePrep(address user, uint idxA, uint idxB);
-    event Trade(address user, address tokenA, address tokenB, uint idxA, uint idxB, uint maskedA, uint maskedB);
+    event Trade(uint tradeSeq, address user, address tokenA, address tokenB, uint idxA, uint idxB, uint maskedA, uint maskedB);
     event SecretDeposit(address token, address user, uint amt);
     event SecretWithdraw(uint seq, address token, address user, uint amt);
+
+    mapping (address => mapping (address => bool)) public tradingPairs;
+    mapping (address => mapping (address => mapping (address => uint))) public liquidityToken;
+    mapping (address => mapping (address => string)) public prices;
+    mapping (address => mapping (address => uint)) public updateTimes;
 
     uint public threshold;
     uint public inputmaskCnt;
@@ -19,6 +25,8 @@ contract HbSwap {
 
     uint public serverNum;
     mapping (address => bool) public servers;
+
+    uint public tradeCnt;
 
     struct SecretWithdrawIntention {
         address token;
@@ -37,6 +45,27 @@ contract HbSwap {
             servers[_servers[i]] = true;
         }
         threshold = _threshold;
+    }
+
+    function initPool(address _tokenA, address _tokenB, uint _amtA, uint _amtB) payable public {
+        require(_tokenA < _tokenB, "invalid trading pair");
+        require(!tradingPairs[_tokenA][_tokenB], "pool already initiated");
+
+        address user = msg.sender;
+
+        if (_tokenA != address(0x0)) {
+            IERC20 tokenA = IERC20(_tokenA);
+            tokenA.safeTransferFrom(user, address(this), _amtA);
+        }
+        if (_tokenB != address(0x0)) {
+            IERC20 tokenB = IERC20(_tokenB);
+            tokenB.safeTransferFrom(user, address(this), _amtB);
+        }
+
+        tradingPairs[_tokenA][_tokenB] = true;
+        liquidityToken[_tokenA][_tokenB][user] = _sqrt(_amtA * _amtB);
+
+        emit InitPool(_tokenA, _tokenB, _amtA, _amtB);
     }
 
     function deposit(address _token, uint _amt) payable public {
@@ -104,10 +133,33 @@ contract HbSwap {
 
     function trade(address _tokenA, address _tokenB, uint _idxA, uint _idxB, uint _maskedA, uint _maskedB) public {
         require(_tokenA < _tokenB, "invalid trading pair");
-        emit Trade(msg.sender, _tokenA, _tokenB, _idxA, _idxB, _maskedA, _maskedB);
+        require(tradingPairs[_tokenA][_tokenB], "pool not exist");
+        tradeCnt += 1;
+        emit Trade(tradeCnt, msg.sender, _tokenA, _tokenB, _idxA, _idxB, _maskedA, _maskedB);
     }
 
     function reset() public {
         inputmaskCnt = 0;
+    }
+
+    function updatePrice(address _tokenA, address _tokenB, string calldata _price) public {
+        require(_tokenA < _tokenB, "invalid trading pair");
+        require(tradingPairs[_tokenA][_tokenB], "pool not exist");
+        prices[_tokenA][_tokenB] = _price;
+        updateTimes[_tokenA][_tokenB] = block.number;
+    }
+
+    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
+    function _sqrt(uint y) internal pure returns (uint z) {
+        if (y > 3) {
+            z = y;
+            uint x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
     }
 }

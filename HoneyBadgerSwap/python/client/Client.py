@@ -27,11 +27,6 @@ class Client:
                 json_response = await resp.json()
                 return json_response
 
-    async def req_inputmask_shares(self, host, port, inputmask_idxes):
-        url = f"http://{host}:{port}/inputmasks/{inputmask_idxes}"
-        result = await self.send_request(url)
-        return re.split(',', result["inputmask_shares"])
-
     def interpolate(self, shares):
         inputmask = 0
         for i in range(1, self.n + 1):
@@ -44,6 +39,11 @@ class Client:
         return inputmask
     
     # **** call from remote client ****
+    async def req_inputmask_shares(self, host, port, inputmask_idxes):
+        url = f"http://{host}:{port}/inputmasks/{inputmask_idxes}"
+        result = await self.send_request(url)
+        return re.split(',', result["inputmask_shares"])
+
     async def get_inputmasks(self, inputmask_idxes):
         tasks = []
         for server in self.servers:
@@ -67,3 +67,51 @@ class Client:
                 shares.append(int(inputmask_shares[j][i]))
             inputmasks.append(self.interpolate(shares))
         return inputmasks
+
+    async def req_balance_shares(self, host, port, token, user):
+        url = f"http://{host}:{port}/balance/{token}{user}"
+        result = await self.send_request(url)
+        return result["balance"]
+
+    async def get_balance(self, token, user):
+        tasks = []
+        for server in self.servers:
+            host = server["host"]
+            port = server["http_port"]
+
+            task = asyncio.ensure_future(self.req_balance_shares(host, port, token, user))
+            tasks.append(task)
+
+        for task in tasks:
+            await task
+
+        shares = []
+        for task in tasks:
+            shares.append(int(task.result()))
+
+        balance = self.interpolate(shares)
+        return balance
+
+    async def req_price(self, host, port, seq):
+        url = f"http://{host}:{port}/price/{seq}"
+        result = await self.send_request(url)
+        return result["price"]
+
+    async def get_price(self, seq):
+        tasks = []
+        for server in self.servers:
+            host = server["host"]
+            port = server["http_port"]
+
+            task = asyncio.ensure_future(self.req_price(host, port, seq))
+            tasks.append(task)
+
+        for task in tasks:
+            await task
+
+        shares = []
+        for task in tasks:
+            shares.append(int(task.result()))
+
+        price = self.interpolate(shares)
+        return price
