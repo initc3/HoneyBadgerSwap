@@ -1,0 +1,153 @@
+version: '3.8'
+
+volumes:
+  player-data:
+  pool-data:
+
+services:
+
+  eth.chain:
+    image: ethereum/client-go:latest
+    working_dir: /usr/src/
+    volumes:
+      - ./scripts/chain.sh:/usr/src/chain.sh
+      - ./poa:/opt/hbswap/poa
+    entrypoint: ""
+    command: sh chain.sh
+
+  contract.deploy:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: contract.Dockerfile
+      target: deploy
+    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+    volumes:
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    depends_on:
+      - eth.chain
+    entrypoint: ""
+    command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
+
+  contract.deposit:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: contract.Dockerfile
+      target: deposit
+    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+    volumes:
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    depends_on:
+      - contract.deploy
+    entrypoint: ""
+    # TODO wait for contract to be deployed/available
+    command: ["go", "run", "client/deposit.go", "0", "10", "10", "eth.chain"]
+
+  mpc.trusted.setup:
+    image: hbswap-setup
+    build:
+      context: .
+      dockerfile: setup.Dockerfile
+    working_dir: /usr/src
+    volumes:
+      - ../../Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
+      #- ../../Player-Data:/usr/src/Player-Data
+      - player-data:/usr/src/Player-Data
+    command: ["bash", "setup-ssl.sh", "4"]
+
+  # compile MPC programs (hbswap_init, hbswap_trade_prep, hbswap_trade)
+  # see scripts/compile.sh for details
+  mpc.compile:
+    image: python:3.8
+    working_dir: /usr/src
+    volumes:
+      - ../../compile.py:/usr/src/compile.py
+      - ../../Compiler:/usr/src/Compiler
+      - ../../Programs:/usr/src/Programs
+      - ./scripts/compile.sh:/usr/src/compile.sh
+    command: ["bash", "compile.sh"]
+
+  # NOTE Run all (4) nodes in one container. Can be useful for troubleshooting.
+  mpc.init.nodes:
+    image: hbswap-mpc-init
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: mp-spdz
+    working_dir: /usr/src/MP-SPDZ
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc-prep.sh:/usr/src/MP-SPDZ/mpc-prep.sh
+      #- ../../Player-Data:/usr/src/MP-SPDZ/Player-Data
+      - player-data:/usr/src/MP-SPDZ/Player-Data
+      - pool-data:/usr/src/MP-SPDZ/Persistence
+    command: ["bash", "mpc-prep.sh"]
+
+  mpc.nodes:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    working_dir: /usr/src/MP-SPDZ
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      #- ../../Player-Data:/usr/src/MP-SPDZ/Player-Data
+      - player-data:/usr/src/MP-SPDZ/Player-Data
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc.sh:/usr/src/MP-SPDZ/mpc.sh
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - pool-data:/usr/src/MP-SPDZ/Scripts/hbswap/data
+        #- pool-data/Transactions-P0.data:Scripts/hbswap/data/Pool-P0.data
+        #- pool-data/Transactions-P1.data:Scripts/hbswap/data/Pool-P1.data
+        #- pool-data/Transactions-P2.data:Scripts/hbswap/data/Pool-P2.data
+        #- pool-data/Transactions-P3.data:Scripts/hbswap/data/Pool-P3.data
+    command: ["bash", "mpc.sh", "eth.chain"]
+
+    #mpc.node.0:
+    #  image: hbswap-mpc
+    #  build:
+    #    context: ../..
+    #    dockerfile: hbswap.Dockerfile
+    #    target: hbswap
+    #  working_dir: /usr/src/MP-SPDZ
+    #  volumes:
+    #    - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+    #    - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+    #    #- ../../Player-Data:/usr/src/MP-SPDZ/Player-Data
+    #    - player-data:/usr/src/MP-SPDZ/Player-Data
+    #    - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+    #    - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+    #    - ./scripts/mpc.sh:/usr/src/MP-SPDZ/mpc.sh
+    #    - .:/usr/src/MP-SPDZ/Scripts/hbswap
+    #    - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    #    - pool-data:/usr/src/MP-SPDZ/Scripts/hbswap/data
+    #      #- pool-data/Transactions-P0.data:Scripts/hbswap/data/Pool-P0.data
+    #      #- pool-data/Transactions-P1.data:Scripts/hbswap/data/Pool-P1.data
+    #      #- pool-data/Transactions-P2.data:Scripts/hbswap/data/Pool-P2.data
+    #      #- pool-data/Transactions-P3.data:Scripts/hbswap/data/Pool-P3.data
+    #  # NOTE IMPORTANT!
+    #  # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
+    #  command: ["bash", "mpc-node.sh", "0", "eth.chain"]
+
+  client:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    working_dir: /usr/src/MP-SPDZ
+    volumes:
+      - ./scripts/client.sh:/usr/src/MP-SPDZ/client.sh
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    command: ["bash", "client.sh", "eth.chain"]

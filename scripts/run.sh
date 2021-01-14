@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+eth_host=${1:-localhost}
+leader_host=${2:-localhost}
+
 . Scripts/hbswap/scripts/utils.sh
 
 start_local_network() {
@@ -13,7 +16,7 @@ start_local_network() {
 
 deploy_contract() {
   echo 'Deploying contracts...'
-  go run Scripts/hbswap/go/deploy/deploy.go
+  go run Scripts/hbswap/go/deploy/deploy.go $eth_host
   echo 'Finished deploying contracts'
 }
 
@@ -49,21 +52,21 @@ start_servers() {
 }
 
 deposit() {
-  go run Scripts/hbswap/go/client/deposit.go $1 $2 $3 $4 $5
-  go run Scripts/hbswap/go/client/secret_deposit.go $1 $2 $3 $4 $5
+  go run Scripts/hbswap/go/client/deposit.go $1 $2 $3 $4 $5 $eth_host
+  go run Scripts/hbswap/go/client/secret_deposit.go $1 $2 $3 $4 $5 $eth_host
 }
 
 init_pool() {
-  go run Scripts/hbswap/go/client/init_pool.go $1 $2 $3 $4 $5
+  go run Scripts/hbswap/go/client/init_pool.go $1 $2 $3 $4 $5 $eth_host
 }
 
 withdraw() {
-  go run Scripts/hbswap/go/client/secret_withdraw.go $1 $2 $3 $4 $5
-  go run Scripts/hbswap/go/client/withdraw.go $1 $2 $3 $4 $5
+  go run Scripts/hbswap/go/client/secret_withdraw.go $1 $2 $3 $4 $5 $eth_host
+  go run Scripts/hbswap/go/client/withdraw.go $1 $2 $3 $4 $5 $eth_host
 }
 
 trade() {
-  go run Scripts/hbswap/go/client/trade.go $1 $2 $3 $4 $5
+  go run Scripts/hbswap/go/client/trade.go $1 $2 $3 $4 $5 $eth_host
 }
 
 httpserver() {
@@ -71,7 +74,7 @@ httpserver() {
 }
 
 mpcserver() {
-  go run Scripts/hbswap/go/server/server.go $1 > Scripts/hbswap/log/mpc_server_$1.log 2>&1
+  go run Scripts/hbswap/go/server/server.go $1 $eth_host $leader_host > Scripts/hbswap/log/mpc_server_$1.log 2>&1
 }
 
 start_local_network
