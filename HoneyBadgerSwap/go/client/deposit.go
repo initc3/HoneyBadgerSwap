@@ -44,7 +44,9 @@ func main() {
 	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
 	amtA, amtB := os.Args[4], os.Args[5]
 
-	conn := utils.GetEthClient(utils.HttpEndpoint)
+	ethHostname := os.Args[6]
+	ethUrl := utils.GetEthURL(ethHostname)
+	conn := utils.GetEthClient(ethUrl)
 
 	if bytes.Equal(tokenA.Bytes(), utils.EthAddr.Bytes()) {
 		depositETH(conn, user, amtA)

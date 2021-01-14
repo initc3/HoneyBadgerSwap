@@ -35,7 +35,9 @@ func main() {
 	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
 	amtA, amtB := os.Args[4], os.Args[5]
 
-	conn := utils.GetEthClient(utils.HttpEndpoint)
+	ethHostname := os.Args[6]
+	ethUrl := utils.GetEthURL(ethHostname)
+	conn := utils.GetEthClient(ethUrl)
 
 	ethA := bytes.Equal(tokenA.Bytes(), utils.EthAddr.Bytes())
 	ethB := bytes.Equal(tokenB.Bytes(), utils.EthAddr.Bytes())
@@ -57,7 +59,3 @@ func main() {
 
 	utils.InitPool(conn, user, value, tokenA, tokenB, utils.StrToBig(amtA), utils.StrToBig(amtB))
 }
-
-
-
-

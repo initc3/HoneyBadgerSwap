@@ -5,11 +5,11 @@ from Client import Client
 from utils import fp
 
 if __name__ == "__main__":
-    client = Client.from_toml_config("Scripts/hbswap/conf/config.toml")
+    client = Client.from_toml_config("Scripts/hbswap/conf/client.toml")
 
-    inputmask_indexes = ''
+    inputmask_indexes = ""
     for inputmask_index in sys.argv[1::2]:
-        inputmask_indexes += f'{inputmask_index},'
+        inputmask_indexes += f"{inputmask_index},"
     inputmask_indexes = inputmask_indexes[:-1]
 
     inputmasks = asyncio.run(client.get_inputmasks(inputmask_indexes))
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     for (inputmask, value) in zip(inputmasks, values):
         masked_values.append(value + inputmask)
 
-    out = ''
+    out = ""
     for masked_value in masked_values:
-        out += f'{masked_value} '
+        out += f"{masked_value} "
     print(out)

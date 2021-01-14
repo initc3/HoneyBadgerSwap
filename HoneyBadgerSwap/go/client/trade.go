@@ -16,7 +16,9 @@ func main() {
 	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
 	amtA, amtB := os.Args[4], os.Args[5]
 
-	conn := utils.GetEthClient(utils.HttpEndpoint)
+	ethHostname := os.Args[6]
+	ethUrl := utils.GetEthURL(ethHostname)
+	conn := utils.GetEthClient(ethUrl)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
 
@@ -24,16 +26,11 @@ func main() {
 
 	cmd := exec.Command("python3", "Scripts/hbswap/python/client/req_inputmasks.py", strconv.Itoa(int(idxA)), amtA, strconv.Itoa(int(idxB)), amtB)
 	stdout := utils.ExecCmd(cmd)
-	maskedInputs := strings.Split(stdout[:len(stdout) - 1], " ")
+	maskedInputs := strings.Split(stdout[:len(stdout)-1], " ")
 
 	maskedA := utils.StrToBig(maskedInputs[0])
 	maskedB := utils.StrToBig(maskedInputs[1])
 
-
 	fmt.Printf("maskedInputs: %v\n", maskedInputs)
 	utils.Trade(conn, owner, tokenA, tokenB, big.NewInt(idxA), big.NewInt(idxB), maskedA, maskedB)
 }
-
-
-
-

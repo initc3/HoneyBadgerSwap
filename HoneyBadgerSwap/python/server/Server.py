@@ -1,13 +1,16 @@
 import asyncio
-import leveldb
+import os
 import re
 import time
+
+import leveldb
 
 from aiohttp import web
 from utils import from_hex
 
+
 class Server:
-    def __init__(self, n, t, server_id, host, http_port):
+    def __init__(self, n, t, server_id, host, http_port, *, db_path=None):
         self.n = n
         self.t = t
         self.server_id = server_id
@@ -15,12 +18,15 @@ class Server:
         self.host = host
         self.http_port = http_port
 
+        if db_path is None:
+            self.db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
+
         print(f"http server {server_id} is running...")
 
     def dbGet(self, key):
         while True:
             try:
-                db = leveldb.LevelDB(f"Scripts/hbswap/db/server{self.server_id}")
+                db = leveldb.LevelDB(f"{self.db_path}/server{self.server_id}")
                 value = bytes(db.Get(key))
                 value = from_hex(value)
                 return value
@@ -32,10 +38,11 @@ class Server:
         routes = web.RouteTableDef()
 
         @routes.get("/inputmasks/{mask_idxes}")
+        # async def inputmask_handler(request):
         async def _handler(request):
             print(f"request: {request}")
-            mask_idxes = re.split(',', request.match_info.get("mask_idxes"))
-            res = ''
+            mask_idxes = re.split(",", request.match_info.get("mask_idxes"))
+            res = ""
             for mask_idx in mask_idxes:
                 res += f"{',' if len(res) > 0 else ''}{self.dbGet(f'inputmask_{mask_idx}'.encode())}"
             data = {
@@ -46,24 +53,26 @@ class Server:
             return web.json_response(data)
 
         @routes.get("/balance/{token_user}")
+        # async def balance_handler(request):
         async def _handler(request):
             print(f"request: {request}")
             token_user = request.match_info.get("token_user")
-            res = self.dbGet(f'balance{token_user}'.encode())
+            res = self.dbGet(f"balance{token_user}".encode())
             data = {
-                "balance": f'{res}',
+                "balance": f"{res}",
             }
             print(f"request: {request}")
             print(f"response: {res}")
             return web.json_response(data)
 
         @routes.get("/price/{trade_seq}")
+        # async def price_handler(request):
         async def _handler(request):
             print(f"request: {request}")
             trade_seq = request.match_info.get("trade_seq")
-            res = self.dbGet(f'price_{trade_seq}'.encode())
+            res = self.dbGet(f"price_{trade_seq}".encode())
             data = {
-                "price": f'{res}',
+                "price": f"{res}",
             }
             print(f"request: {request}")
             print(f"response: {res}")

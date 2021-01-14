@@ -4,8 +4,8 @@ x = []
 y = []
 
 for i in range(n):
-    file = f"Player-Data/4-MSp-255/Randoms-MSp-P{i}"
-    with open(file, 'r') as f:
+    file = f"PreProcessing-Data/4-MSp-255/Randoms-MSp-P{i}"
+    with open(file, "r") as f:
         x.append(i + 1)
         for line in f.readlines():
             y.append(int(line))
