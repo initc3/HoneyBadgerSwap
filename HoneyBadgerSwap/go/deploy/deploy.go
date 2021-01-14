@@ -11,6 +11,7 @@ import (
 	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
 	"log"
 	"math/big"
+	"os"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 	t = 1
 )
 
-func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
+func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) common.Address {
 	fmt.Println("Deploying HbSwap contract...")
 
 	var servers []common.Address
@@ -45,7 +46,7 @@ func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addre
 	return hbswapAddr
 }
 
-func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Address) {
+func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) common.Address {
 	fmt.Println("Deploying Token contract...")
 
 	tokenAddr, tx, _, err := token.DeployToken(auth, conn)
@@ -67,7 +68,9 @@ func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) (common.Addres
 }
 
 func main() {
-	conn := utils.GetEthClient(utils.HttpEndpoint)
+	ethHostname := os.Args[1]
+	ethUrl := utils.GetEthURL(ethHostname)
+	conn := utils.GetEthClient(ethUrl)
 
 	owner := utils.GetAccount("server_0")
 

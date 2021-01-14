@@ -1,0 +1,188 @@
+version: '3.8'
+
+networks:
+  hbswap:
+
+volumes:
+  public-keys:
+  secrets-p0:
+  secrets-p1:
+  secrets-p2:
+  secrets-p3:
+  inputmaskshares-p0:
+  inputmaskshares-p1:
+  inputmaskshares-p2:
+  inputmaskshares-p3:
+  ppdata-p0:
+  ppdata-p1:
+  ppdata-p2:
+  ppdata-p3:
+  persistence-p0:
+  persistence-p1:
+  persistence-p2:
+  persistence-p3:
+  db-p0:
+  db-p1:
+  db-p2:
+  db-p3:
+
+services:
+
+  # TODO rename to eth.node
+  eth.chain:
+    image: ethereum/client-go:latest
+    networks:
+      - hbswap
+    volumes:
+      - ./scripts/chain.sh:/usr/src/chain.sh
+      - ./poa:/opt/hbswap/poa
+    working_dir: /usr/src/
+    entrypoint: ""
+    command: sh chain.sh
+
+  deploy.contract:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: contract.Dockerfile
+      target: deploy
+    networks:
+      - hbswap
+    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+    volumes:
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    entrypoint: ""
+    command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
+
+  mpc.trusted.setup:
+    image: hbswap-setup
+    build:
+      context: .
+      dockerfile: setup.Dockerfile
+    networks:
+      - hbswap
+    volumes:
+      - ../../Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
+      - ./scripts/generate-keys.sh:/usr/src/generate-keys.sh
+      - public-keys:/usr/src/Player-Data
+      - secrets-p0:/usr/src/Secrets-P0
+      - secrets-p1:/usr/src/Secrets-P1
+      - secrets-p2:/usr/src/Secrets-P2
+      - secrets-p3:/usr/src/Secrets-P3
+    #command: ["bash", "setup-ssl.sh", "4"]
+    working_dir: /usr/src
+    command: ["bash", "generate-keys.sh", "setup-ssl.sh", "4"]
+
+  # compile MPC programs (hbswap_init, hbswap_trade_prep, hbswap_trade)
+  # see scripts/compile.sh for details
+  mpc.compile:
+    image: python:3.8
+    networks:
+      - hbswap
+    volumes:
+      - ../../compile.py:/usr/src/compile.py
+      - ../../Compiler:/usr/src/Compiler
+      - ../../Programs:/usr/src/Programs
+      - ./scripts/compile.sh:/usr/src/compile.sh
+    working_dir: /usr/src
+    command: ["bash", "compile.sh"]
+
+  mpc.node.0:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    networks:
+      - hbswap
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - public-keys:/opt/hbswap/public-keys:ro
+      - secrets-p0:/opt/hbswap/secrets
+        #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
+        #- ppdata-p0:/opt/hbswap/preprocessing-data
+        #- persistence-p0:/usr/src/MP-SPDZ/Persistence
+    working_dir: /usr/src/MP-SPDZ
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
+    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "0", "eth.chain", "mpc.node.0"]
+
+  mpc.node.1:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    networks:
+      - hbswap
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - public-keys:/opt/hbswap/public-keys:ro
+      - secrets-p1:/opt/hbswap/secrets
+    working_dir: /usr/src/MP-SPDZ
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
+    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "1", "eth.chain", "mpc.node.0"]
+
+  mpc.node.2:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    networks:
+      - hbswap
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - public-keys:/opt/hbswap/public-keys:ro
+      - secrets-p2:/opt/hbswap/secrets
+    working_dir: /usr/src/MP-SPDZ
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
+    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "2", "eth.chain", "mpc.node.0"]
+
+  mpc.node.3:
+    image: hbswap-mpc
+    build:
+      context: ../..
+      dockerfile: hbswap.Dockerfile
+      target: hbswap
+    networks:
+      - hbswap
+    volumes:
+      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
+      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
+      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
+      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/usr/src/MP-SPDZ/Scripts/hbswap
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - public-keys:/opt/hbswap/public-keys:ro
+      - secrets-p3:/opt/hbswap/secrets
+    working_dir: /usr/src/MP-SPDZ
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
+    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "3", "eth.chain", "mpc.node.0"]

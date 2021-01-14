@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  init.pool:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: contract.Dockerfile
+      target: client
+    networks:
+      - hbswap
+    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    volumes:
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    entrypoint: ""
+    # TODO wait for contract to be deployed/available
+    command: ["bash", "scripts/init-pool.sh", "eth.chain"]
