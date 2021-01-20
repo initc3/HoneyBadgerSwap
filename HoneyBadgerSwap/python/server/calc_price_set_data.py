@@ -36,5 +36,5 @@ if __name__ == "__main__":
     with open(file, "wb") as f:
         f.write(to_hex(str(total_price)) + to_hex(str(total_cnt)))
 
-    db.Put(key_price, to_hex(0))
-    db.Put(key_cnt, to_hex(0))
+    db.Delete(key_price)
+    db.Delete(key_cnt)
