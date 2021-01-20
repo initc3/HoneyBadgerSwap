@@ -1,7 +1,6 @@
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
 
-
 def get_inverse(a):
     ret = 1
     b = p - 2
@@ -12,17 +11,14 @@ def get_inverse(a):
         a = (a * a) % p
     return ret
 
-
 def to_hex(x):
     x = mpz(x)
     x = (x * R) % p
     ret = binary(int(x))
     return ret + b"0" * (32 - len(ret))
 
-
 def from_hex(x):
     return (mpz_from_old_binary(x) * inverse_R) % p
-
 
 def reconstruct(shares, n):
     inputmask = 0
@@ -35,13 +31,12 @@ def reconstruct(shares, n):
         inputmask = (inputmask + shares[i - 1] * tot) % p
     return inputmask
 
-
 def check_consistency(shares):
     value = reconstruct(shares, t + 1)
+    print(value)
     for i in range(t + 2, n + 1):
         if reconstruct(shares, i) != value:
-            print("inconsistent")
-
+            print('inconsistent')
 
 t = 1
 n = 4

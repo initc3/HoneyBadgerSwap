@@ -178,7 +178,7 @@ func watch(leader_hostname string) {
 				cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID, tokenA, tokenB, oce.TradeSeq.String())
 				stdout := utils.ExecCmd(cmd)
 				println(strings.Split(stdout, "\n")[0])
-				changes := strings.Split(stdout[:len(strings.Split(stdout, "\n")[0])-1], " ")
+				changes := strings.Split(strings.Split(stdout, "\n")[0], " ")
 				fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
 
 				cmd = exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, tokenA, user, changes[0], "0")
