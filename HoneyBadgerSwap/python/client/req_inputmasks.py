@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from Client import Client
-from utils import fp
+from utils import from_float
 
 if __name__ == "__main__":
     client = Client.from_toml_config("Scripts/hbswap/conf/client.toml")
@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     values = []
     for value in sys.argv[2::2]:
-        values.append(int(round(float(value) * (2 ** fp))))
+        values.append(from_float(value))
 
     masked_values = []
     for (inputmask, value) in zip(inputmasks, values):

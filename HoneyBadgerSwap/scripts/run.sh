@@ -57,7 +57,17 @@ deposit() {
 }
 
 init_pool() {
+  deposit $1 $2 $3 $4 $5
   go run Scripts/hbswap/go/client/init_pool.go $1 $2 $3 $4 $5 $eth_host
+}
+
+add_liquidity() {
+  deposit $1 $2 $3 $4 $5
+  go run Scripts/hbswap/go/client/add_liquidity.go $1 $2 $3 $4 $5
+}
+
+remove_liquidity() {
+  go run Scripts/hbswap/go/client/remove_liquidity.go $1 $2 $3 $4
 }
 
 withdraw() {
@@ -77,18 +87,20 @@ mpcserver() {
   go run Scripts/hbswap/go/server/server.go $1 $eth_host $leader_host > Scripts/hbswap/log/mpc_server_$1.log 2>&1
 }
 
+prepare_nodes
+
 start_local_network
 
 deploy_contract
-
-prepare_nodes
 
 shut_down
 
 start_servers
 
 init_pool 0 $eth $token_1 10 20
-init_pool 0 $eth $token_2 10 20
+#add_liquidity 0 $eth $token_1 10 10
+#remove_liquidity 0 $eth $token_1 10
+#init_pool 0 $eth $token_2 10 20
 
 #go run Scripts/hbswap/go/reset/reset.go
 
