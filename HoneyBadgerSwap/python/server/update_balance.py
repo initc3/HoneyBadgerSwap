@@ -4,13 +4,13 @@ import time
 
 import leveldb
 
-from utils import from_hex, to_hex, fp
+from utils import from_hex, to_hex, from_float, zero
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
     token = sys.argv[2]
     user = sys.argv[3]
-    amt = int(sys.argv[4])
+    amt = sys.argv[4]
     flag = bool(int(sys.argv[5]))
 
     db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
@@ -24,12 +24,13 @@ if __name__ == "__main__":
 
     key = f"balance{token}{user}".encode()
     try:
-        balance = bytes(db.Get(key))
-        balance = from_hex(balance)
+        balance = from_hex(bytes(db.Get(key)))
     except KeyError:
         balance = 0
 
+    if balance == zero:
+        balance = 0
     print("old balance", balance)
-    balance += int(round(float(amt) * (2 ** fp))) if flag else amt
+    balance += from_float(amt) if flag else int(amt)
     print("updated balance", balance)
     db.Put(key, to_hex(str(balance)))

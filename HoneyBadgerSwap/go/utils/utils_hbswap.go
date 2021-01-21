@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func InitPool(conn *ethclient.Client, auth *bind.TransactOpts, value *big.Int, tokenA common.Address, tokenB common.Address, amtA *big.Int, amtB *big.Int) {
+func InitPool(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, amtA *big.Int, amtB *big.Int) {
 	fmt.Printf("InitPool tokenA %s tokenB %s amtA %v amtB %v\n", tokenA.Hex(), tokenB.Hex(), amtA, amtB)
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
 	if err != nil {
@@ -21,8 +21,53 @@ func InitPool(conn *ethclient.Client, auth *bind.TransactOpts, value *big.Int, t
 	}
 
 	fundGas(conn, auth.From)
-	auth.Value = value
 	tx, err := hbswapInstance.InitPool(auth, tokenA, tokenB, amtA, amtB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+}
+
+func AddLiquidity(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, amtA *big.Int, amtB *big.Int) {
+	fmt.Printf("AddLiquidity tokenA %s tokenB %s amtA %v amtB %v\n", tokenA.Hex(), tokenB.Hex(), amtA, amtB)
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fundGas(conn, auth.From)
+	tx, err := hbswapInstance.AddLiquidity(auth, tokenA, tokenB, amtA, amtB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	receipt, err := WaitMined(context.Background(), conn, tx, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if receipt.Status == 0 {
+		log.Fatalf("Transaction status: %v", receipt.Status)
+	}
+}
+
+func RemoveLiquidity(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, amt *big.Int) {
+	fmt.Printf("RemoveLiquidity tokenA %s tokenB %s amt %v\n", tokenA.Hex(), tokenB.Hex(), amt)
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr, conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fundGas(conn, auth.From)
+	tx, err := hbswapInstance.RemoveLiquidity(auth, tokenA, tokenB, amt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -323,8 +368,8 @@ func GetUpdateTime(conn *ethclient.Client, tokenA common.Address, tokenB common.
 		log.Fatal(err)
 	}
 
-	time, _ := hbswapInstance.UpdateTimes(nil, tokenA, tokenB)
-	fmt.Printf("updateTime: %v\n", time)
+	t, _ := hbswapInstance.UpdateTimes(nil, tokenA, tokenB)
+	fmt.Printf("updateTime: %v\n", t)
 
-	return time.Int64()
+	return t.Int64()
 }
