@@ -1,10 +1,16 @@
-import os
 import sys
-import time
 
-import leveldb
-
-from utils import to_hex
+sys.path.insert(1, "Scripts/hbswap/python")
+from utils import (
+    key_balance,
+    key_inputmask,
+    key_pool,
+    location_db,
+    location_sharefile,
+    openDB,
+    get_value,
+    to_hex,
+)
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
@@ -16,36 +22,18 @@ if __name__ == "__main__":
     masked_amt_A = to_hex(sys.argv[7])
     masked_amt_B = to_hex(sys.argv[8])
 
-    db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
-    # file = f"Scripts/hbswap/data/Pool-{token_A}-{token_B}-P{server_id}.data"
-    # pool_A, pool_B = 0, 0
-    # with open(file, 'rb') as f:
-    #     pool_A = f.read(sz)
-    #     pool_B = f.read(sz)
+    db = openDB(location_db(server_id))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"{db_path}/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
+    pool_A = bytes(db.Get(key_pool(token_A, token_B, token_A)))
+    pool_B = bytes(db.Get(key_pool(token_A, token_B, token_B)))
 
-    pool_A = bytes(db.Get(f"pool-{token_A}-{token_B}:{token_A}".encode()))
-    pool_B = bytes(db.Get(f"pool-{token_A}-{token_B}:{token_B}".encode()))
+    mask_share_A = bytes(db.Get(key_inputmask(idx_A)))
+    mask_share_B = bytes(db.Get(key_inputmask(idx_B)))
 
-    mask_share_A = bytes(db.Get(f"inputmask_{idx_A}".encode()))
-    mask_share_B = bytes(db.Get(f"inputmask_{idx_B}".encode()))
+    balance_A = get_value(db, key_balance(token_A, user))
+    balance_B = get_value(db, key_balance(token_B, user))
 
-    try:
-        balance_A = bytes(db.Get(f"balance{token_A}{user}".encode()))
-    except KeyError:
-        balance_A = to_hex(str(1))
-    try:
-        balance_B = bytes(db.Get(f"balance{token_B}{user}".encode()))
-    except KeyError:
-        balance_B = to_hex(str(1))
-
-    file = f"Persistence/Transactions-P{server_id}.data"
+    file = location_sharefile(server_id)
     with open(file, "wb") as f:
         f.write(
             pool_A

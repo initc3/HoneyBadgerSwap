@@ -2,6 +2,8 @@ import asyncio
 import sys
 
 from Client import Client
+
+sys.path.insert(1, 'Scripts/hbswap/python')
 from utils import from_float
 
 if __name__ == "__main__":

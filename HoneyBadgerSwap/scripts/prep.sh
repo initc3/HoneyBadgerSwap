@@ -4,11 +4,12 @@ set -e
 . Scripts/hbswap/scripts/utils.sh
 
 prepare() {
-  rm -rf Persistence
-  rm -rf Scripts/hbswap/db
   rm -rf Player-Data
 
+  rm -rf Persistence
   mkdir Persistence
+
+  rm -rf Scripts/hbswap/db
   mkdir Scripts/hbswap/db
 
   Scripts/setup-ssl.sh $players

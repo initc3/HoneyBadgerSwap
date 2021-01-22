@@ -6,6 +6,12 @@ leader_host=${2:-localhost}
 
 . Scripts/hbswap/scripts/utils.sh
 
+prepare_nodes() {
+  echo 'Preparing mpc nodes...'
+  bash Scripts/hbswap/scripts/prep.sh
+  echo 'Finished preparing mpc nodes'
+}
+
 start_local_network() {
   echo 'Staring local network...'
   pkill -f geth | true
@@ -20,20 +26,16 @@ deploy_contract() {
   echo 'Finished deploying contracts'
 }
 
-prepare_nodes() {
-  echo 'Preparing mpc nodes...'
-  bash Scripts/hbswap/scripts/prep.sh
-  echo 'Finished preparing mpc nodes'
-}
-
 shut_down() {
   echo 'Shuting down previous instances...'
   pkill -f random-shamir.x || true
   pkill -f $prog || true
   pkill -f start_server.py || true
   pkill -f server.go || true
+
   rm -rf Scripts/hbswap/log
   mkdir Scripts/hbswap/log
+
   sleep 2
   echo 'Finished shuting down previous instances'
 }
@@ -101,8 +103,6 @@ init_pool 0 $eth $token_1 10 20
 #add_liquidity 0 $eth $token_1 10 10
 #remove_liquidity 0 $eth $token_1 10
 #init_pool 0 $eth $token_2 10 20
-
-#go run Scripts/hbswap/go/reset/reset.go
 
 deposit 0 $eth $token_1 10 10
 #deposit 0 $eth $token_2 10 10

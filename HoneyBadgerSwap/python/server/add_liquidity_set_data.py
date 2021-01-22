@@ -1,8 +1,7 @@
-import leveldb
 import sys
-import time
 
-from utils import to_hex, from_float, from_hex
+sys.path.insert(1, 'Scripts/hbswap/python')
+from utils import key_pool, key_total_supply, location_db, location_sharefile, openDB, from_float, from_hex, to_hex
 
 if __name__=='__main__':
     server_id = sys.argv[1]
@@ -12,20 +11,15 @@ if __name__=='__main__':
     amt_A = to_hex(from_float(sys.argv[5]))
     amt_B = to_hex(from_float(sys.argv[6]))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"Scripts/hbswap/db/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
+    db = openDB(location_db(server_id))
 
-    pool_A = bytes(db.Get(f'pool-{token_A}-{token_B}:{token_A}'.encode()))
-    pool_B = bytes(db.Get(f'pool-{token_A}-{token_B}:{token_B}'.encode()))
+    pool_A = bytes(db.Get(key_pool(token_A, token_B, token_A)))
+    pool_B = bytes(db.Get(key_pool(token_A, token_B, token_B)))
 
-    key = f'total_supply_{token_A}-{token_B}'.encode()
+    key = key_total_supply(token_A, token_B)
     total_supply = bytes(db.Get(key))
     print(from_hex(total_supply))
 
-    file = f"Persistence/Transactions-P{server_id}.data"
+    file = location_sharefile(server_id)
     with open(file, 'wb') as f:
         f.write(pool_A + pool_B + amt_A + amt_B + total_supply)

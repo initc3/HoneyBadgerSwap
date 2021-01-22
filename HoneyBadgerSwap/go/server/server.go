@@ -17,23 +17,21 @@ import (
 )
 
 const (
-	prog      = "./malicious-shamir-party.x"
-	players   = "4"
-	threshold = "1"
-	mpcPort   = "5000"
-	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
-	sz        = 32
-	nshares   = 1000
-	interval  = 10
-	prep_dir  = "/opt/hbswap/preprocessing-data"
+	prog          = "./malicious-shamir-party.x"
+	players       = "4"
+	threshold     = "1"
+	mpcPort       = "5000"
+	blsPrime      = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
+	nshares       = 1000
+	checkInterval = 10
+	prep_dir      = "/opt/hbswap/preprocessing-data"
 )
 
 var (
 	serverID string
-	mut      sync.Mutex
 	conn     *ethclient.Client
 	server   *bind.TransactOpts
-	prevTime int64
+	prevTime = int64(0)
 )
 
 func checkBalance(token string, user string, amt string) int {
@@ -57,17 +55,17 @@ func updateBalance(token string, user string, amt string, flag string) {
 }
 
 func genInputmask(leader_hostname string) {
-	tot := int(utils.GetInputmaskCnt(conn).Int64())
+	tot := utils.GetInputmaskCnt(conn)
 	for true {
 		cnt := utils.GetInputmaskCnt(conn)
 
-		if int(cnt.Int64())+100 > tot {
+		if cnt+100 > tot {
 			fmt.Printf("Generating new inputmasks...\n")
 
 			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leader_hostname)
 			utils.ExecCmd(cmd)
 
-			cmd = exec.Command("python3", "Scripts/hbswap/python/server/proc_inputmask.py", serverID, strconv.Itoa(tot))
+			cmd = exec.Command("python3", "Scripts/hbswap/python/server/proc_inputmask.py", serverID, strconv.Itoa(int(tot)))
 			utils.ExecCmd(cmd)
 
 			tot += nshares
@@ -123,7 +121,7 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-initPoolChannel:
 			go func() {
-				fmt.Printf("****InitPool\n")
+				fmt.Printf("**** InitPool ****\n")
 
 				user := oce.User.String()
 				tokenA := oce.TokenA.String()
@@ -131,16 +129,14 @@ func watch(leader_hostname string) {
 				amtA := oce.AmtA.String()
 				amtB := oce.AmtB.String()
 
-				if checkBalance(tokenA, user, amtA) == 1 &&
-					checkBalance(tokenB, user, amtB) == 1 {
-
-					amt := fmt.Sprintf("%f", math.Sqrt(float64(oce.AmtA.Int64()*oce.AmtB.Int64())))
-					cmd := exec.Command("python3", "Scripts/hbswap/python/server/init_pool.py", serverID, tokenA, tokenB, amtA, amtB, amt)
+				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
+					amtLiquidity := fmt.Sprintf("%f", math.Sqrt(float64(oce.AmtA.Int64()*oce.AmtB.Int64())))
+					cmd := exec.Command("python3", "Scripts/hbswap/python/server/init_pool.py", serverID, tokenA, tokenB, amtA, amtB, amtLiquidity)
 					utils.ExecCmd(cmd)
 
 					updateBalance(tokenA, user, fmt.Sprintf("-%s", amtA), "1")
 					updateBalance(tokenB, user, fmt.Sprintf("-%s", amtB), "1")
-					updateBalance(fmt.Sprintf("%s-%s", tokenA, tokenB), user, amt, "1")
+					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, "1")
 				}
 			}()
 
@@ -148,7 +144,7 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-AddLiquidityChannel:
 			go func() {
-				fmt.Printf("****AddLiquidity\n")
+				fmt.Printf("**** AddLiquidity ****\n")
 
 				user := oce.User.String()
 				tokenA := oce.TokenA.String()
@@ -156,9 +152,7 @@ func watch(leader_hostname string) {
 				amtA := oce.AmtA.String()
 				amtB := oce.AmtB.String()
 
-				if checkBalance(tokenA, user, amtA) == 1 &&
-					checkBalance(tokenB, user, amtB) == 1 {
-
+				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
 					cmd := exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtA, amtB)
 					utils.ExecCmd(cmd)
 
@@ -168,11 +162,14 @@ func watch(leader_hostname string) {
 					cmd = exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_org_data.py", serverID, tokenA, tokenB)
 					stdout := utils.ExecCmd(cmd)
 					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
-					fmt.Printf("amt_A %s amt_B %s amt %s\n", amts[0], amts[1], amts[2])
+					amtA = amts[0]
+					amtB = amts[1]
+					amtLiquidity := amts[2]
+					fmt.Printf("amt_A %s amt_B %s amt %s\n", amtA, amtB, amtLiquidity)
 
-					updateBalance(tokenA, user, fmt.Sprintf("-%s", amts[0]), "0")
-					updateBalance(tokenB, user, fmt.Sprintf("-%s", amts[1]), "0")
-					updateBalance(fmt.Sprintf("%s-%s", tokenA, tokenB), user, amts[2], "0")
+					updateBalance(tokenA, user, fmt.Sprintf("-%s", amtA), "0")
+					updateBalance(tokenB, user, fmt.Sprintf("-%s", amtB), "0")
+					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, "0")
 				}
 			}()
 
@@ -180,29 +177,30 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-RemoveLiquidityChannel:
 			go func() {
-				fmt.Printf("****RemoveLiquidity\n")
+				fmt.Printf("**** RemoveLiquidity ****\n")
 
 				user := oce.User.String()
 				tokenA := oce.TokenA.String()
 				tokenB := oce.TokenB.String()
-				amt := oce.Amt.String()
+				amtLiquidity := oce.Amt.String()
 
-				if checkBalance(fmt.Sprintf("%s-%s", tokenA, tokenB), user, amt) == 1 {
-
-					cmd := exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_set_data.py", serverID, user, tokenA, tokenB, amt)
+				if checkBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity) == 1 {
+					cmd := exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtLiquidity)
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_remove_liquidity")
 					utils.ExecCmd(cmd)
 
-					cmd = exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_org_data.py", serverID, tokenA, tokenB, amt)
+					cmd = exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_org_data.py", serverID, tokenA, tokenB, amtLiquidity)
 					stdout := utils.ExecCmd(cmd)
 					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
-					fmt.Printf("amt_A %s amt_B %s\n", amts[0], amts[1])
+					amtA := amts[0]
+					amtB := amts[1]
+					fmt.Printf("amt_A %s amt_B %s\n", amtA, amtB)
 
-					updateBalance(tokenA, user, amts[0], "0")
-					updateBalance(tokenB, user, amts[1], "0")
-					updateBalance(fmt.Sprintf("%s-%s", tokenA, tokenB), user, fmt.Sprintf("-%s", amt), "1")
+					updateBalance(tokenA, user, amtA, "0")
+					updateBalance(tokenB, user, amtB, "0")
+					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, fmt.Sprintf("-%s", amtLiquidity), "1")
 				}
 			}()
 
@@ -210,11 +208,11 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-tradeChannel:
 			go func() {
-				fmt.Printf("****Trade\n")
+				fmt.Printf("**** Trade ****\n")
 
-				if serverID != "0" {
-					time.Sleep(1 * time.Second)
-				}
+				//if serverID != "0" {
+				//	time.Sleep(1 * time.Second)
+				//}
 
 				user := oce.User.Hex()
 				tokenA := oce.TokenA.String()
@@ -229,14 +227,15 @@ func watch(leader_hostname string) {
 
 				cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID, tokenA, tokenB, oce.TradeSeq.String())
 				stdout := utils.ExecCmd(cmd)
-				println(strings.Split(stdout, "\n")[0])
 				changes := strings.Split(strings.Split(stdout, "\n")[0], " ")
-				fmt.Printf("change_A %s change_B %s\n", changes[0], changes[1])
+				changeA := changes[0]
+				changeB := changes[1]
+				fmt.Printf("changeA %s changeB %s\n", changeA, changeB)
 
-				updateBalance(tokenA, user, changes[0], "0")
-				updateBalance(tokenB, user, changes[1], "0")
+				updateBalance(tokenA, user, changeA, "0")
+				updateBalance(tokenB, user, changeB, "0")
 
-				if time.Now().Unix()-prevTime > interval {
+				if time.Now().Unix()-prevTime > checkInterval {
 					cmd = exec.Command("python3", "Scripts/hbswap/python/server/calc_price_set_data.py", serverID, tokenA, tokenB)
 					utils.ExecCmd(cmd)
 
@@ -250,11 +249,11 @@ func watch(leader_hostname string) {
 					if serverID == "0" {
 						utils.UpdatePrice(conn, server, oce.TokenA, oce.TokenB, price)
 					} else {
-						prevTime := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
+						prevBlockNum := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
 						for true {
-							time.Sleep(1 * time.Second)
-							curTime := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
-							if curTime > prevTime {
+							time.Sleep(time.Second)
+							curBlockNum := utils.GetUpdateTime(conn, oce.TokenA, oce.TokenB)
+							if curBlockNum > prevBlockNum {
 								break
 							}
 						}
@@ -268,7 +267,7 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-secretDepositPrepChannel:
 			go func() {
-				fmt.Printf("****SecretDeposit\n")
+				fmt.Printf("**** SecretDeposit ****\n")
 
 				updateBalance(oce.Token.Hex(), oce.User.Hex(), oce.Amt.String(), "1")
 			}()
@@ -277,7 +276,7 @@ func watch(leader_hostname string) {
 			log.Fatal(err)
 		case oce := <-secretWithdrawChannel:
 			go func() {
-				fmt.Printf("****SecretWithdraw\n")
+				fmt.Printf("**** SecretWithdraw ****\n")
 
 				if checkBalance(oce.Token.String(), oce.User.String(), oce.Amt.String()) == 1 {
 					utils.Consent(conn, server, oce.Seq)
@@ -301,11 +300,9 @@ func main() {
 
 	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
 
-	prevTime = 0
-
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go watch(leader_hostname)
 	go genInputmask(leader_hostname)
+	go watch(leader_hostname)
 	wg.Wait()
 }

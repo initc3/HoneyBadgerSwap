@@ -1,8 +1,7 @@
-import leveldb
 import sys
-import time
 
-from utils import from_hex, sz, from_float, to_hex
+sys.path.insert(1, 'Scripts/hbswap/python')
+from utils import key_pool, key_total_supply, location_db, location_sharefile, openDB, from_float, from_hex, to_hex, sz
 
 input_parameter_num = 4
 
@@ -10,35 +9,24 @@ if __name__=='__main__':
     server_id = sys.argv[1]
     token_A = sys.argv[2]
     token_B = sys.argv[3]
-    amt = sys.argv[4]
+    amt_liquidity = from_float(sys.argv[4])
 
-    file = f"Persistence/Transactions-P{server_id}.data"
-    pool_A, pool_B = 0, 0
+    file = location_sharefile(server_id)
     with open(file, 'rb') as f:
         f.seek(input_parameter_num * sz)
         pool_A = f.read(sz)
         pool_B = f.read(sz)
+        amt_A = from_hex(f.read(sz))
+        amt_B = from_hex(f.read(sz))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"Scripts/hbswap/db/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
+    db = openDB(location_db(server_id))
 
-    db.Put(f'pool-{token_A}-{token_B}:{token_A}'.encode(), pool_A)
-    db.Put(f'pool-{token_A}-{token_B}:{token_B}'.encode(), pool_B)
+    db.Put(key_pool(token_A, token_B, token_A), pool_A)
+    db.Put(key_pool(token_A, token_B, token_B), pool_B)
 
-    key = f'total_supply_{token_A}-{token_B}'.encode()
+    key = key_total_supply(token_A, token_B)
     total_supply = from_hex(bytes(db.Get(key)))
-    total_supply -= from_float(amt)
-    db.Put(key, to_hex(str(total_supply)))
+    total_supply -= amt_liquidity
+    db.Put(key, to_hex(total_supply))
 
-    file = f"Player-Data/Private-Output-{server_id}"
-    with open(file, 'rb') as f:
-        amt_A = f.read(sz)
-        amt_B = f.read(sz)
-    print(from_hex(amt_A), from_hex(amt_B))
-
-    import os
-    print('filesize:', os.path.getsize(file))
+    print(amt_A, amt_B)
