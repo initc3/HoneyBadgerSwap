@@ -1,10 +1,15 @@
 import os
 import sys
-import time
 
-import leveldb
-
-from utils import from_hex, to_hex
+sys.path.insert(1, "Scripts/hbswap/python")
+from utils import (
+    key_total_price,
+    key_trade_cnt,
+    location_db,
+    location_sharefile,
+    openDB,
+    get_value,
+)
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
@@ -12,29 +17,17 @@ if __name__ == "__main__":
     token_B = sys.argv[3]
 
     db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
+    db = openDB(location_db(server_id, db_path=db_path))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"{db_path}/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
+    k_total_price = key_total_price(token_A, token_B)
+    total_price = get_value(db, k_total_price)
 
-    key_price = f"trade_price_{token_A}-{token_B}".encode()
-    try:
-        total_price = from_hex(bytes(db.Get(key_price)))
-    except KeyError:
-        total_price = 0
+    k_trade_cnt = key_trade_cnt(token_A, token_B)
+    trade_cnt = get_value(db, k_trade_cnt)
 
-    key_cnt = f"trade_cnt_{token_A}-{token_B}".encode()
-    try:
-        total_cnt = from_hex(bytes(db.Get(key_cnt)))
-    except KeyError:
-        total_cnt = 0
-
-    file = f"Persistence/Transactions-P{server_id}.data"
+    file = location_sharefile(server_id)
     with open(file, "wb") as f:
-        f.write(to_hex(str(total_price)) + to_hex(str(total_cnt)))
+        f.write(total_price + trade_cnt)
 
-    db.Delete(key_price)
-    db.Delete(key_cnt)
+    db.Delete(k_total_price)
+    db.Delete(k_trade_cnt)

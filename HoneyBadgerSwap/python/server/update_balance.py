@@ -1,10 +1,15 @@
-import os
 import sys
-import time
 
-import leveldb
-
-from utils import from_hex, to_hex, from_float, zero
+sys.path.insert(1, "Scripts/hbswap/python")
+from utils import (
+    key_balance,
+    location_db,
+    openDB,
+    get_value,
+    from_float,
+    from_hex,
+    to_hex,
+)
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
@@ -13,24 +18,12 @@ if __name__ == "__main__":
     amt = sys.argv[4]
     flag = bool(int(sys.argv[5]))
 
-    db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
+    db = openDB(location_db(server_id))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"{db_path}/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
+    key = key_balance(token, user)
+    balance = from_hex(get_value(db, key))
 
-    key = f"balance{token}{user}".encode()
-    try:
-        balance = from_hex(bytes(db.Get(key)))
-    except KeyError:
-        balance = 0
-
-    if balance == zero:
-        balance = 0
-    print("old balance", balance)
+    print("old balance:", balance)
     balance += from_float(amt) if flag else int(amt)
-    print("updated balance", balance)
-    db.Put(key, to_hex(str(balance)))
+    print("updated balance:", balance)
+    db.Put(key, to_hex(balance))

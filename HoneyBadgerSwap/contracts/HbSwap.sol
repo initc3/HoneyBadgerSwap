@@ -129,10 +129,6 @@ contract HbSwap {
         emit Trade(tradeCnt, msg.sender, _tokenA, _tokenB, _idxA, _idxB, _maskedA, _maskedB);
     }
 
-    function reset() public {
-        inputmaskCnt = 0;
-    }
-
     function updatePrice(address _tokenA, address _tokenB, string calldata _price) public {
         require(_tokenA < _tokenB, "invalid trading pair");
         prices[_tokenA][_tokenB] = _price;
