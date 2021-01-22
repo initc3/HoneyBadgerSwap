@@ -1,31 +1,25 @@
-import os
 import sys
-import time
 
-import leveldb
-
-from utils import to_hex, fp
+sys.path.insert(1, "Scripts/hbswap/python")
+from utils import (
+    key_balance,
+    location_db,
+    location_sharefile,
+    openDB,
+    get_value,
+    from_float,
+    to_hex,
+)
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
     token = sys.argv[2]
     user = sys.argv[3]
-    amt = to_hex(str(round(float(sys.argv[4]) * (2 ** fp))))
+    amt = to_hex(from_float(sys.argv[4]))
 
-    db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
+    db = openDB(location_db(server_id))
+    balance = get_value(db, key_balance(token, user))
 
-    while True:
-        try:
-            db = leveldb.LevelDB(f"{db_path}/server{server_id}")
-            break
-        except leveldb.LevelDBError:
-            time.sleep(3)
-
-    try:
-        balance = bytes(db.Get(f"balance{token}{user}".encode()))
-    except KeyError:
-        balance = to_hex(str(1))
-
-    file = f"Persistence/Transactions-P{server_id}.data"
+    file = location_sharefile(server_id)
     with open(file, "wb") as f:
         f.write(balance + amt)

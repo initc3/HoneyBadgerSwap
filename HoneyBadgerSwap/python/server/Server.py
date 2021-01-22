@@ -1,16 +1,16 @@
 import asyncio
-import os
 import re
+import sys
 import time
 
-import leveldb
-
 from aiohttp import web
-from utils import from_hex
+
+sys.path.insert(1, "Scripts/hbswap/python")
+from utils import location_db, openDB, from_hex
 
 
 class Server:
-    def __init__(self, n, t, server_id, host, http_port, *, db_path=None):
+    def __init__(self, n, t, server_id, host, http_port):
         self.n = n
         self.t = t
         self.server_id = server_id
@@ -18,18 +18,13 @@ class Server:
         self.host = host
         self.http_port = http_port
 
-        if db_path is None:
-            self.db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
-
         print(f"http server {server_id} is running...")
 
     def dbGet(self, key):
         while True:
             try:
-                db = leveldb.LevelDB(f"{self.db_path}/server{self.server_id}")
-                value = bytes(db.Get(key))
-                value = from_hex(value)
-                return value
+                db = openDB(location_db(self.server_id))
+                return from_hex(bytes(db.Get(key)))
             except:
                 print(f"Inputmask share {key} not ready. Try again...")
                 time.sleep(5)

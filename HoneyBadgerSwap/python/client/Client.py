@@ -1,8 +1,11 @@
 import asyncio
 import re
+import sys
 import toml
 
 from aiohttp import ClientSession
+
+sys.path.insert(1, 'Scripts/hbswap/python')
 from utils import get_inverse, p
 
 class Client:
