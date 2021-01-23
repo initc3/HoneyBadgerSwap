@@ -58,8 +58,8 @@ simulation: down mpc-keys mpc-compile
 		mpc.node.1 \
 		mpc.node.2 \
 		mpc.node.3
-	docker-compose -f docker-compose.yml -f trader.yml up public.deposit
 	docker-compose -f docker-compose.yml -f liquidity-provider.yml up init.pool
+	docker-compose -f docker-compose.yml -f trader.yml up public.deposit
 	docker-compose -f docker-compose.yml -f trader.yml up secret.deposit
 	docker-compose -f docker-compose.yml -f trader.yml up trade-1
 	docker-compose -f docker-compose.yml -f trader.yml up trade-2

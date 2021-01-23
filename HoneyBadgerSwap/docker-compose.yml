@@ -31,14 +31,18 @@ services:
   # TODO rename to eth.node
   eth.chain:
     image: ethereum/client-go:latest
+    environment:
+      POADIR: /opt/poa
+      DATADIR: /opt/poa/data
+      KEYSTORE: /opt/poa/keystore/server_0
     networks:
       - hbswap
     volumes:
-      - ./scripts/chain.sh:/usr/src/chain.sh
-      - ./poa:/opt/hbswap/poa
+      - ./scripts/chain-latest.sh:/usr/src/chain-latest.sh
+      - ./poa:/opt/poa
     working_dir: /usr/src/
     entrypoint: ""
-    command: sh chain.sh
+    command: sh chain-latest.sh
 
   deploy.contract:
     image: hbswap-go
@@ -101,6 +105,7 @@ services:
       - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap
@@ -128,6 +133,7 @@ services:
       - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap
@@ -152,6 +158,7 @@ services:
       - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap
@@ -176,6 +183,7 @@ services:
       - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap

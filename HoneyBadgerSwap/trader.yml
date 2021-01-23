@@ -42,6 +42,7 @@ services:
     networks:
       - hbswap
     volumes:
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts/trade-1.sh:/usr/src/MP-SPDZ/trade-1.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap
@@ -60,6 +61,7 @@ services:
     networks:
       - hbswap
     volumes:
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts/trade-2.sh:/usr/src/MP-SPDZ/trade-2.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - .:/usr/src/MP-SPDZ/Scripts/hbswap

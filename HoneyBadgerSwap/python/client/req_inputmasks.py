@@ -1,13 +1,15 @@
 import asyncio
+import os
 import sys
 
 from Client import Client
 
-sys.path.insert(1, 'Scripts/hbswap/python')
+sys.path.insert(1, "Scripts/hbswap/python")
 from utils import from_float
 
 if __name__ == "__main__":
-    client = Client.from_toml_config("Scripts/hbswap/conf/client.toml")
+    config = os.getenv("HBSWAP_CLIENT_CONFIG", "/opt/hbswap/conf/client.toml")
+    client = Client.from_toml_config(config)
 
     inputmask_indexes = ""
     for inputmask_index in sys.argv[1::2]:
