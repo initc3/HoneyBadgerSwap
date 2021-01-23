@@ -51,7 +51,7 @@ def location_db(server_id):
 
 def location_inputmask(server_id):
     inputmask_shares_dir = os.getenv(
-        "inputmask_shares", "/opt/hbswap/inputmask-shares",
+        "INPUTMASK_SHARES", "/opt/hbswap/inputmask-shares",
     )
     return f"{inputmask_shares_dir}/4-MSp-255/Randoms-MSp-P{server_id}"
 

@@ -8,19 +8,23 @@ t = 1
 [[servers]]
 id = 0
 host = "127.0.0.1"
+http_host = "127.0.0.1"
 http_port = 8080
 
 [[servers]]
 id = 1
 host = "127.0.0.1"
+http_host = "127.0.0.1"
 http_port = 8081
 
 [[servers]]
 id = 2
 host = "127.0.0.1"
+http_host = "127.0.0.1"
 http_port = 8082
 
 [[servers]]
 id = 3
 host = "127.0.0.1"
+http_host = "127.0.0.1"
 http_port = 8083

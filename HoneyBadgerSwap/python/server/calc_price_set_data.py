@@ -1,4 +1,3 @@
-import os
 import sys
 
 sys.path.insert(1, "Scripts/hbswap/python")
@@ -16,8 +15,7 @@ if __name__ == "__main__":
     token_A = sys.argv[2]
     token_B = sys.argv[3]
 
-    db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
-    db = openDB(location_db(server_id, db_path=db_path))
+    db = openDB(location_db(server_id))
 
     k_total_price = key_total_price(token_A, token_B)
     total_price = get_value(db, k_total_price)

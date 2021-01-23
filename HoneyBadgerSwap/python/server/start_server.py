@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 import toml
 
@@ -26,5 +27,5 @@ async def main(node_id, config_file):
 # TODO Use argparse to accept config file to use.
 if __name__ == "__main__":
     server_id = int(sys.argv[1])
-    config_file = "Scripts/hbswap/conf/server.toml"
+    config_file = os.getenv("HBSWAP_SERVER_CONFIG", "/opt/hbswap/conf/server.toml")
     asyncio.run(main(server_id, config_file))
