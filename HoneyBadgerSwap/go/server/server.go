@@ -34,11 +34,11 @@ var (
 	prevTime = int64(0)
 )
 
-func checkBalance(token string, user string, amt string) int {
+func checkBalance(token string, user string, amt string, leader_hostname string) int {
 	cmd := exec.Command("python3", "Scripts/hbswap/python/server/check_balance_set_data.py", serverID, token, user, amt)
 	utils.ExecCmd(cmd)
 
-	cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_check_balance")
+	cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_check_balance")
 	stdout := utils.ExecCmd(cmd)
 
 	cmd = exec.Command("python3", "Scripts/hbswap/python/server/check_balance_org_data.py", serverID)
@@ -129,7 +129,7 @@ func watch(leader_hostname string) {
 				amtA := oce.AmtA.String()
 				amtB := oce.AmtB.String()
 
-				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
+				if checkBalance(tokenA, user, amtA, leader_hostname) == 1 && checkBalance(tokenB, user, amtB, leader_hostname) == 1 {
 					amtLiquidity := fmt.Sprintf("%f", math.Sqrt(float64(oce.AmtA.Int64()*oce.AmtB.Int64())))
 					cmd := exec.Command("python3", "Scripts/hbswap/python/server/init_pool.py", serverID, tokenA, tokenB, amtA, amtB, amtLiquidity)
 					utils.ExecCmd(cmd)
@@ -152,11 +152,11 @@ func watch(leader_hostname string) {
 				amtA := oce.AmtA.String()
 				amtB := oce.AmtB.String()
 
-				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
+				if checkBalance(tokenA, user, amtA, leader_hostname) == 1 && checkBalance(tokenB, user, amtB, leader_hostname) == 1 {
 					cmd := exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtA, amtB)
 					utils.ExecCmd(cmd)
 
-					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_add_liquidity")
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_add_liquidity")
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_org_data.py", serverID, tokenA, tokenB)
@@ -184,11 +184,11 @@ func watch(leader_hostname string) {
 				tokenB := oce.TokenB.String()
 				amtLiquidity := oce.Amt.String()
 
-				if checkBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity) == 1 {
+				if checkBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, leader_hostname) == 1 {
 					cmd := exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtLiquidity)
 					utils.ExecCmd(cmd)
 
-					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "hbswap_remove_liquidity")
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_remove_liquidity")
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_org_data.py", serverID, tokenA, tokenB, amtLiquidity)
@@ -278,7 +278,7 @@ func watch(leader_hostname string) {
 			go func() {
 				fmt.Printf("**** SecretWithdraw ****\n")
 
-				if checkBalance(oce.Token.String(), oce.User.String(), oce.Amt.String()) == 1 {
+				if checkBalance(oce.Token.String(), oce.User.String(), oce.Amt.String(), leader_hostname) == 1 {
 					utils.Consent(conn, server, oce.Seq)
 					updateBalance(oce.Token.Hex(), oce.User.Hex(), fmt.Sprintf("-%s", oce.Amt.String()), "1")
 				}

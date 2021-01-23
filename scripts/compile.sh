@@ -7,6 +7,8 @@ compile() {
 
 rm -rf Programs/Bytecode Programs/Public-Input Programs/Schedules
 
-compile hbswap_trade
-compile hbswap_withdraw
+compile hbswap_add_liquidity
 compile hbswap_calc_price
+compile hbswap_check_balance
+compile hbswap_remove_liquidity
+compile hbswap_trade
