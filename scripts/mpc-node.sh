@@ -19,7 +19,7 @@ setup_data() {
 
 
 httpserver() {
-  python3 Scripts/hbswap/python/server/start_server.py $1
+  python -m honeybadgerswap.server.start_server $1
 }
 
 mpcserver() {

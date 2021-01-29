@@ -24,7 +24,7 @@ func main() {
 
 	idxA, idxB := utils.TradePrep(conn, owner)
 
-	cmd := exec.Command("python3", "Scripts/hbswap/python/client/req_inputmasks.py", strconv.Itoa(int(idxA)), amtA, strconv.Itoa(int(idxB)), amtB)
+	cmd := exec.Command("python3", "-m", "honeybadgerswap.client.req_inputmasks", strconv.Itoa(int(idxA)), amtA, strconv.Itoa(int(idxB)), amtB)
 	stdout := utils.ExecCmd(cmd)
 	maskedInputs := strings.Split(stdout[:len(stdout)-1], " ")
 

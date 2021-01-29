@@ -1,12 +1,10 @@
 import asyncio
 import re
-import sys
 import time
 
 from aiohttp import web
 
-sys.path.insert(1, "Scripts/hbswap/python")
-from utils import location_db, openDB, from_hex
+from ..utils import location_db, openDB, from_hex
 
 
 class Server:
