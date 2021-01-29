@@ -1,4 +1,4 @@
-from utils import get_inverse, n, t, p, to_hex
+from ..utils import get_inverse, n, t, p
 
 x = []
 y = []

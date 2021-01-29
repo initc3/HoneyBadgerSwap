@@ -1,7 +1,6 @@
 import sys
 
-sys.path.insert(1, "Scripts/hbswap/python")
-from utils import key_inputmask, location_db, location_inputmask, openDB, to_hex, p
+from ..utils import key_inputmask, location_db, location_inputmask, openDB, to_hex, p
 
 if __name__ == "__main__":
     server_id = sys.argv[1]

@@ -2,10 +2,9 @@ import asyncio
 import os
 import sys
 
-from Client import Client
+from .Client import Client
 
-sys.path.insert(1, "Scripts/hbswap/python")
-from utils import from_float
+from ..utils import from_float
 
 if __name__ == "__main__":
     config = os.getenv("HBSWAP_CLIENT_CONFIG", "/opt/hbswap/conf/client.toml")

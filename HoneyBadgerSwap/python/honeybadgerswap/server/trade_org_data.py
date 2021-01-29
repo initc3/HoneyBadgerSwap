@@ -1,7 +1,6 @@
 import sys
 
-sys.path.insert(1, "Scripts/hbswap/python")
-from utils import (
+from ..utils import (
     key_pool,
     key_price,
     key_total_price,
