@@ -3,7 +3,7 @@ import os
 import sys
 import toml
 
-from Server import Server
+from .Server import Server
 
 
 async def main(node_id, config_file):

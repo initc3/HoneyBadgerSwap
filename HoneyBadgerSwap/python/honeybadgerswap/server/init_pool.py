@@ -1,7 +1,6 @@
 import sys
 
-sys.path.insert(1, "Scripts/hbswap/python")
-from utils import key_pool, key_total_supply, location_db, openDB, from_float, to_hex
+from ..utils import key_pool, key_total_supply, location_db, openDB, from_float, to_hex
 
 if __name__ == "__main__":
     server_id = sys.argv[1]
