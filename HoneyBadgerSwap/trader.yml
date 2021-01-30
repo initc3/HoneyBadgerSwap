@@ -2,69 +2,91 @@ version: '3.8'
 
 services:
   public.deposit:
-    image: hbswap-go
+    image: hbswap-go-x
     build:
       context: .
       dockerfile: contract.Dockerfile
       target: client
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    #working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    working_dir: /usr/src/scripts
     volumes:
+      - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./scripts:/usr/src/scripts
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "scripts/client-public-deposit.sh", "eth.chain"]
+    command: ["bash", "client-public-deposit.sh", "eth.chain"]
 
   secret.deposit:
-    image: hbswap-go
+    image: hbswap-go-x
     build:
       context: .
       dockerfile: contract.Dockerfile
       target: client
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    #working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    working_dir: /usr/src/scripts
     volumes:
+      - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./scripts:/usr/src/scripts
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "scripts/client-secret-deposit.sh", "eth.chain"]
+    command: ["bash", "client-secret-deposit.sh", "eth.chain"]
 
   trade-1:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
       dockerfile: hbswap.Dockerfile
       target: hbswap
+    # FIXME is the poa stuff needed?
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
+    # FIXME is the poa stuff needed?
     volumes:
+      - ./poa:/opt/poa
       - ./conf/client.toml:/opt/hbswap/conf/client.toml
-      - ./scripts/trade-1.sh:/usr/src/MP-SPDZ/trade-1.sh
+      - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
-    working_dir: /usr/src/MP-SPDZ
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    working_dir: /usr/src/scripts
     command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-1.sh", "eth.chain"]
     #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "-1.1", "2"]
 
   trade-2:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
       dockerfile: hbswap.Dockerfile
       target: hbswap
+    # FIXME is the poa stuff needed?
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
+    # FIXME is the poa stuff needed?
     volumes:
+      - ./poa:/opt/poa
       - ./conf/client.toml:/opt/hbswap/conf/client.toml
-      - ./scripts/trade-2.sh:/usr/src/MP-SPDZ/trade-2.sh
+      - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
-    working_dir: /usr/src/MP-SPDZ
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    working_dir: /usr/src/scripts
     command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-2.sh", "eth.chain"]

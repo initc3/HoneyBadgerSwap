@@ -5,11 +5,12 @@ set -e
 node_id=$1
 eth_hostname=$2
 leader_hostname=$3
+go_code_path=/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
 
 # Place the data where MP-SPDZ expects it
 setup_data() {
-    rm -rf Scripts/hbswap/log Scripts/hbswap/data/* Scripts/hbswap/poa/data /opt/hbswap/db
-    mkdir -p Persistence Player-Data Scripts/hbswap/log
+    rm -rf /opt/hbswap/db
+    mkdir -p Persistence Player-Data
     mkdir -p /opt/hbswap/db /opt/hbswap/inputmask-shares /opt/hbswap/preprocessing-data
     # Copy the private key, where MP-SPDZ expects it to be (under Player-Data/).
     cp /opt/hbswap/secrets/P$node_id.key Player-Data/
@@ -23,9 +24,7 @@ httpserver() {
 }
 
 mpcserver() {
-  go run Scripts/hbswap/go/server/server.go $1 $eth_hostname $leader_hostname
-  #go run Scripts/hbswap/go/server/server.go -serverid=$1 -ethhost=$eth_hostname -leaderhost=$leader_hostname
-  #go run Scripts/hbswap/go/server/server.go $1 $eth_hostname $leader_hostname > Scripts/hbswap/log/mpc_server_$1.log 2>&1
+  go run $go_code_path/server/server.go $1 $eth_hostname $leader_hostname
 }
 
 setup_data

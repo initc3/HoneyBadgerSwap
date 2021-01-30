@@ -2,15 +2,16 @@
 set -e
 
 eth_host=${1:-localhost}
+go_code_path=/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
 #user=$2
 #amt_A=$3
 #amt_B=$4
 
 
-. Scripts/hbswap/scripts/utils.sh
+. utils.sh
 
 trade() {
-    go run Scripts/hbswap/go/client/trade.go $1 $2 $3 $4 $5 $eth_host
+    go run $go_code_path/client/trade.go $1 $2 $3 $4 $5 $eth_host
 }
 
 #trade 0 $eth $token_1 1.1 -2.5
