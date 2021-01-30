@@ -17,12 +17,14 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 var (
 	GOPATH     = os.Getenv("GOPATH")
+	KEYSTORE   = os.Getenv("POA_KEYSTORE")
 	minBalance = big.NewInt(300000000000000000)
 
 	// parameter for private net
@@ -79,10 +81,12 @@ func GetEthClient(ethInstance string) *ethclient.Client {
 }
 
 func GetAccount(account string) *bind.TransactOpts {
-	dir := GOPATH + "/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/poa/keystore/" + account + "/"
+	dir := filepath.Join(KEYSTORE, account)
+	//dir := GOPATH + "/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/poa/keystore/" + account + "/"
 
 	list, err := ioutil.ReadDir(dir)
 	if err != nil {
+		log.Printf("Error reading directory %s", dir)
 		log.Fatal(err)
 	}
 
@@ -94,7 +98,8 @@ func GetAccount(account string) *bind.TransactOpts {
 		}
 	}
 
-	bytes, err := ioutil.ReadFile(dir + name)
+	//bytes, err := ioutil.ReadFile(dir + name)
+	bytes, err := ioutil.ReadFile(filepath.Join(dir, name))
 	if err != nil {
 		log.Fatal(err)
 	}

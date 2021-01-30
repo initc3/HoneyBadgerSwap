@@ -45,22 +45,26 @@ services:
     command: sh chain-latest.sh
 
   deploy.contract:
-    image: hbswap-go
+    image: hbswap-go-x
     build:
       context: .
       dockerfile: contract.Dockerfile
       target: deploy
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
     working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
     volumes:
+      - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
     entrypoint: ""
     command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
 
   mpc.trusted.setup:
-    image: hbswap-setup
+    image: hbswap-setup-x
     build:
       context: .
       dockerfile: setup.Dockerfile
@@ -93,25 +97,26 @@ services:
     command: ["bash", "compile.sh"]
 
   mpc.node.0:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
-      dockerfile: hbswap.Dockerfile
+      dockerfile: Scripts/hbswap/hbswap.Dockerfile
       target: hbswap
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
     volumes:
-      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
-      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p0:/opt/hbswap/secrets
+      - ./poa:/opt/poa
         #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
         #- ppdata-p0:/opt/hbswap/preprocessing-data
         #- persistence-p0:/usr/src/MP-SPDZ/Persistence
@@ -121,75 +126,78 @@ services:
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "0", "eth.chain", "mpc.node.0"]
 
   mpc.node.1:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
-      dockerfile: hbswap.Dockerfile
+      dockerfile: Scripts/hbswap/hbswap.Dockerfile
       target: hbswap
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
     volumes:
-      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
-      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p1:/opt/hbswap/secrets
+      - ./poa:/opt/poa
     working_dir: /usr/src/MP-SPDZ
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "1", "eth.chain", "mpc.node.0"]
 
   mpc.node.2:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
-      dockerfile: hbswap.Dockerfile
+      dockerfile: Scripts/hbswap/hbswap.Dockerfile
       target: hbswap
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
     volumes:
-      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
-      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p2:/opt/hbswap/secrets
+      - ./poa:/opt/poa
     working_dir: /usr/src/MP-SPDZ
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "2", "eth.chain", "mpc.node.0"]
 
   mpc.node.3:
-    image: hbswap-mpc
+    image: hbswap-mpc-x
     build:
       context: ../..
-      dockerfile: hbswap.Dockerfile
+      dockerfile: Scripts/hbswap/hbswap.Dockerfile
       target: hbswap
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
     volumes:
-      - ../../CONFIG:/usr/src/MP-SPDZ/CONFIG
-      - ../../Makefile:/usr/src/MP-SPDZ/Makefile
       - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
       - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - .:/usr/src/MP-SPDZ/Scripts/hbswap
-      - .:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p3:/opt/hbswap/secrets
+      - ./poa:/opt/poa
     working_dir: /usr/src/MP-SPDZ
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
