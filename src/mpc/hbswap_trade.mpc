@@ -1,0 +1,67 @@
+def read_sint(idx):
+    start = regint(idx * 32)
+    end = regint()
+    masked_value = sint()
+    readsharesfromfile(start, end, masked_value)
+    return masked_value
+
+def sint_to_sfix(x):
+    return sfix._new(x)
+
+def sfix_to_sint(x):
+    return x.v
+
+def main():
+    pool_A = sint_to_sfix(read_sint(0))
+    pool_B = sint_to_sfix(read_sint(1))
+    print_ln('pool_A %s', pool_A.reveal())
+    print_ln('pool_B %s', pool_B.reveal())
+
+    balance_A = sint_to_sfix(read_sint(2))
+    balance_B = sint_to_sfix(read_sint(3))
+    print_ln('balance_A %s', balance_A.reveal())
+    print_ln('balance_B %s', balance_B.reveal())
+
+
+    amt_A = sint_to_sfix(read_sint(6) - read_sint(4))
+    amt_B = sint_to_sfix(read_sint(7) - read_sint(5))
+    print_ln('amt_A %s', amt_A.reveal())
+    print_ln('amt_B %s', amt_B.reveal())
+
+    buy_A = amt_A > 0
+    enough_B = -amt_B <= balance_B
+    calc_A = pool_A - pool_B * pool_A / (pool_B - amt_B)
+    accept_A = calc_A >= amt_A
+    flag_buy_A = buy_A * enough_B * accept_A
+    print_ln('buy_A %s\nenough_B %s\ncalc_A %s\naccept_A %s\nflag_buy_A %s', buy_A.reveal(), enough_B.reveal(), calc_A.reveal(), accept_A.reveal(), flag_buy_A.reveal())
+    pool_A -= flag_buy_A * calc_A
+    pool_B -= flag_buy_A * amt_B
+    print_ln('pool_A %s', pool_A.reveal())
+    print_ln('pool_B %s', pool_B.reveal())
+
+    buy_B = 1 - buy_A
+    enough_A = -amt_A <= balance_A
+    calc_B = pool_B - pool_A * pool_B / (pool_A - amt_A)
+    accept_B = calc_B >= amt_B
+    flag_buy_B = buy_B * enough_A * accept_B
+    print_ln('buy_B %s\nenough_A %s\ncalc_B %s\naccept_B %s\nflag_buy_B %s', buy_B.reveal(), enough_A.reveal(), calc_B.reveal(), accept_B.reveal(), flag_buy_B.reveal())
+    pool_A -= flag_buy_B * amt_A
+    pool_B -= flag_buy_B * calc_B
+    print_ln('pool_A %s', pool_A.reveal())
+    print_ln('pool_B %s', pool_B.reveal())
+
+    change_A = flag_buy_A * calc_A + flag_buy_B * amt_A
+    change_B = flag_buy_A * amt_B + flag_buy_B * calc_B
+    print_ln('change_A %s', change_A.reveal())
+    print_ln('change_B %s', change_B.reveal())
+
+    trade_price = -1 * change_B / change_A
+    print_ln('marketPrice %s', trade_price.reveal())
+
+    writesharestofile(sfix_to_sint(pool_A))
+    writesharestofile(sfix_to_sint(pool_B))
+    writesharestofile(sfix_to_sint(change_A))
+    writesharestofile(sfix_to_sint(change_B))
+    writesharestofile(sfix_to_sint(trade_price))
+
+main()

@@ -1,0 +1,30 @@
+# MPC network configuation
+
+# MPC network params
+n = 4
+t = 1
+
+# MPC servers
+[[servers]]
+id = 0
+host = "mpc.node.0"
+http_port = 8080
+http_host = "0.0.0.0"
+
+[[servers]]
+id = 1
+host = "mpc.node.1"
+http_port = 8080
+http_host = "0.0.0.0"
+
+[[servers]]
+id = 2
+host = "mpc.node.2"
+http_port = 8080
+http_host = "0.0.0.0"
+
+[[servers]]
+id = 3
+host = "mpc.node.3"
+http_port = 8080
+http_host = "0.0.0.0"
