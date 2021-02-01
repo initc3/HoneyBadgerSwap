@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   init.pool:
-    image: hbswap-go-x
+    image: hbswap-go-z
     build:
       context: .
       dockerfile: contract.Dockerfile

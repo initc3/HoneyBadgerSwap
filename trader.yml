@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   public.deposit:
-    image: hbswap-go-x
+    image: hbswap-go-z
     build:
       context: .
       dockerfile: contract.Dockerfile
@@ -24,7 +24,7 @@ services:
     command: ["bash", "client-public-deposit.sh", "eth.chain"]
 
   secret.deposit:
-    image: hbswap-go-x
+    image: hbswap-go-z
     build:
       context: .
       dockerfile: contract.Dockerfile
@@ -46,9 +46,9 @@ services:
     command: ["bash", "client-secret-deposit.sh", "eth.chain"]
 
   trade-1:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
+      context: .
       dockerfile: hbswap.Dockerfile
       target: hbswap
     # FIXME is the poa stuff needed?
@@ -70,9 +70,9 @@ services:
     #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "-1.1", "2"]
 
   trade-2:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
+      context: .
       dockerfile: hbswap.Dockerfile
       target: hbswap
     # FIXME is the poa stuff needed?
