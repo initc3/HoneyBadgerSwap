@@ -1,0 +1,48 @@
+def read_sint(idx):
+    start = regint(idx * 32)
+    end = regint()
+    masked_value = sint()
+    readsharesfromfile(start, end, masked_value)
+    return masked_value
+
+def sint_to_sfix(x):
+    return sfix._new(x)
+
+def sfix_to_sint(x):
+    return x.v
+
+def main():
+    pool_A = sint_to_sfix(read_sint(0))
+    pool_B = sint_to_sfix(read_sint(1))
+    print_ln('pool_A %s', pool_A.reveal())
+    print_ln('pool_B %s', pool_B.reveal())
+
+    amt_A = sint_to_sfix(read_sint(2))
+    amt_B = sint_to_sfix(read_sint(3))
+    print_ln('amt_A %s', amt_A.reveal())
+    print_ln('amt_B %s', amt_B.reveal())
+
+    total_supply = sint_to_sfix(read_sint(4))
+    print_ln('total_supply %s', total_supply.reveal())
+
+    flag = amt_A * pool_B > amt_B * pool_A
+    not_flag = 1 - flag
+    amt_A = flag * (amt_B * pool_A / pool_B) + not_flag * amt_A
+    amt_B = flag * amt_B + not_flag * (amt_A * pool_B / pool_A)
+    print_ln('actual amtA %s amtB %s', amt_A.reveal(), amt_B.reveal())
+
+    amt_liquidity = amt_A * total_supply / pool_A
+    print_ln('amt_liquidity %s', amt_liquidity.reveal())
+
+    pool_A = pool_A + amt_A
+    pool_B = pool_B + amt_B
+    print_ln('pool_A %s', pool_A.reveal())
+    print_ln('pool_B %s', pool_B.reveal())
+
+    writesharestofile(sfix_to_sint(pool_A))
+    writesharestofile(sfix_to_sint(pool_B))
+    writesharestofile(sfix_to_sint(amt_A))
+    writesharestofile(sfix_to_sint(amt_B))
+    writesharestofile(sfix_to_sint(amt_liquidity))
+
+main()
