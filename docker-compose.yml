@@ -4,6 +4,8 @@ networks:
   hbswap:
 
 volumes:
+  mpc-bytecodes:
+  mpc-schedules:
   public-keys:
   secrets-p0:
   secrets-p1:
@@ -91,8 +93,10 @@ services:
     volumes:
       - ../../compile.py:/usr/src/compile.py
       - ../../Compiler:/usr/src/Compiler
-      - ../../Programs:/usr/src/Programs
+      - ./src/mpc:/usr/src/Programs/Source
       - ./scripts/compile.sh:/usr/src/compile.sh
+      - mpc-bytecodes:/usr/src/Programs/Bytecode
+      - mpc-schedules:/usr/src/Programs/Schedules
     working_dir: /usr/src
     command: ["bash", "compile.sh"]
 
@@ -108,8 +112,8 @@ services:
     networks:
       - hbswap
     volumes:
-      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
-      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - mpc-bytecodes:/usr/src/MP-SPDZ/Programs/Bytecode
+      - mpc-schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
@@ -137,8 +141,8 @@ services:
     networks:
       - hbswap
     volumes:
-      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
-      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - mpc-bytecodes:/usr/src/MP-SPDZ/Programs/Bytecode
+      - mpc-schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
@@ -163,8 +167,8 @@ services:
     networks:
       - hbswap
     volumes:
-      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
-      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - mpc-bytecodes:/usr/src/MP-SPDZ/Programs/Bytecode
+      - mpc-schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
@@ -189,8 +193,8 @@ services:
     networks:
       - hbswap
     volumes:
-      - ../../Programs/Bytecode:/usr/src/MP-SPDZ/Programs/Bytecode
-      - ../../Programs/Schedules:/usr/src/MP-SPDZ/Programs/Schedules
+      - mpc-bytecodes:/usr/src/MP-SPDZ/Programs/Bytecode
+      - mpc-schedules:/usr/src/MP-SPDZ/Programs/Schedules
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
