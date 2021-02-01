@@ -47,7 +47,7 @@ services:
     command: sh chain-latest.sh
 
   deploy.contract:
-    image: hbswap-go-x
+    image: hbswap-go-z
     build:
       context: .
       dockerfile: contract.Dockerfile
@@ -66,14 +66,14 @@ services:
     command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
 
   mpc.trusted.setup:
-    image: hbswap-setup-x
+    image: hbswap-setup-z
     build:
       context: .
       dockerfile: setup.Dockerfile
     networks:
       - hbswap
     volumes:
-      - ../../Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
+      - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
       - ./scripts/generate-keys.sh:/usr/src/generate-keys.sh
       - public-keys:/usr/src/Player-Data
       - secrets-p0:/usr/src/Secrets-P0
@@ -91,8 +91,8 @@ services:
     networks:
       - hbswap
     volumes:
-      - ../../compile.py:/usr/src/compile.py
-      - ../../Compiler:/usr/src/Compiler
+      - ./MP-SPDZ/compile.py:/usr/src/compile.py
+      - ./MP-SPDZ/Compiler:/usr/src/Compiler
       - ./src/mpc:/usr/src/Programs/Source
       - ./scripts/compile.sh:/usr/src/compile.sh
       - mpc-bytecodes:/usr/src/Programs/Bytecode
@@ -101,10 +101,10 @@ services:
     command: ["bash", "compile.sh"]
 
   mpc.node.0:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
-      dockerfile: Scripts/hbswap/hbswap.Dockerfile
+      context: .
+      dockerfile: hbswap.Dockerfile
       target: hbswap
     environment:
       POADIR: /opt/poa
@@ -130,10 +130,10 @@ services:
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "0", "eth.chain", "mpc.node.0"]
 
   mpc.node.1:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
-      dockerfile: Scripts/hbswap/hbswap.Dockerfile
+      context: .
+      dockerfile: hbswap.Dockerfile
       target: hbswap
     environment:
       POADIR: /opt/poa
@@ -156,10 +156,10 @@ services:
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "1", "eth.chain", "mpc.node.0"]
 
   mpc.node.2:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
-      dockerfile: Scripts/hbswap/hbswap.Dockerfile
+      context: .
+      dockerfile: hbswap.Dockerfile
       target: hbswap
     environment:
       POADIR: /opt/poa
@@ -182,10 +182,10 @@ services:
     command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "2", "eth.chain", "mpc.node.0"]
 
   mpc.node.3:
-    image: hbswap-mpc-x
+    image: hbswap-mpc-z
     build:
-      context: ../..
-      dockerfile: Scripts/hbswap/hbswap.Dockerfile
+      context: .
+      dockerfile: hbswap.Dockerfile
       target: hbswap
     environment:
       POADIR: /opt/poa

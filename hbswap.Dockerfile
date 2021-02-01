@@ -35,25 +35,20 @@ RUN set -ex \
     && ln -s libmpirxx.so.8.4.3 libmpirxx.so \
     && ln -s libmpirxx.so.8.4.3 libmpirxx.so.8
 
-COPY Makefile .
-COPY CONFIG .
-COPY BMR BMR
-#COPY ECDSA ECDSA
-COPY Exceptions Exceptions
-#COPY ExternalIO ExternalIO
-#COPY FHE FHE
-#COPY FHEOffline FHEOffline
-COPY GC GC
-COPY Machines Machines
-COPY Math Math
-COPY Networking Networking
-COPY OT OT
-COPY Processor Processor
-COPY Protocols Protocols
-COPY SimpleOT SimpleOT
-COPY Tools Tools
-COPY Utils Utils
-#COPY Yao Yao
+COPY MP-SPDZ/Makefile .
+COPY MP-SPDZ/CONFIG .
+COPY MP-SPDZ/BMR BMR
+COPY MP-SPDZ/Exceptions Exceptions
+COPY MP-SPDZ/GC GC
+COPY MP-SPDZ/Machines Machines
+COPY MP-SPDZ/Math Math
+COPY MP-SPDZ/Networking Networking
+COPY MP-SPDZ/OT OT
+COPY MP-SPDZ/Processor Processor
+COPY MP-SPDZ/Protocols Protocols
+COPY MP-SPDZ/SimpleOT SimpleOT
+COPY MP-SPDZ/Tools Tools
+COPY MP-SPDZ/Utils Utils
 
 RUN make clean
 
@@ -98,13 +93,13 @@ RUN go get -d -v github.com/ethereum/go-ethereum
 WORKDIR $GOPATH/src/github.com/ethereum/go-ethereum
 RUN git checkout cfbb969da
 
-COPY Scripts/hbswap/src /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+COPY src /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
 
 WORKDIR /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
 
 RUN go get -d -v ./...
 
-COPY Scripts /usr/src/MP-SPDZ/Scripts
+COPY MP-SPDZ/Scripts /usr/src/MP-SPDZ/Scripts
 
 # MP-SPDZ
 WORKDIR $MP_SPDZ_HOME
@@ -124,5 +119,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 libmpc-dev \
         && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/src/MP-SPDZ/Scripts/hbswap/src/python
+COPY src/python /usr/src/honeybadgerswap-python
+WORKDIR /usr/src/honeybadgerswap-python
 RUN pip install --editable .
