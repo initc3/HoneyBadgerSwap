@@ -15,6 +15,7 @@ contract HbSwap {
     event TradePrep(address user, uint idxA, uint idxB);
     event Trade(uint tradeSeq, address user, address tokenA, address tokenB, uint idxA, uint idxB, uint maskedA, uint maskedB);
     event SecretWithdraw(uint seq, address token, address user, uint amt);
+    event UpdatePrice(address tokenA, address tokenB, string price, uint time);
 
     struct SecretWithdrawIntention {
         address token;
@@ -133,6 +134,7 @@ contract HbSwap {
         require(_tokenA < _tokenB, "invalid trading pair");
         prices[_tokenA][_tokenB] = _price;
         updateTimes[_tokenA][_tokenB] = block.number;
+        emit UpdatePrice(_tokenA, _tokenB, prices[_tokenA][_tokenB], updateTimes[_tokenA][_tokenB]);
     }
 
 }

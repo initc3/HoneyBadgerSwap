@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-db_dir=${DB_PATH:-/opt/hbswap/db}
-
 . Scripts/hbswap/scripts/utils.sh
 
 prepare() {
@@ -11,10 +9,8 @@ prepare() {
   rm -rf Persistence
   mkdir Persistence
 
-  rm -rf $db_dir
-  mkdir $db_dir
-
-  Scripts/setup-ssl.sh $players
+  rm -rf Scripts/hbswap/db
+  mkdir Scripts/hbswap/db
 }
 
 compile() {
