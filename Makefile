@@ -51,28 +51,30 @@ init-eth:
 	docker-compose up client.deposit
 
 simulation: down mpc-keys mpc-compile
-	docker-compose up -d ethnode
+	docker-compose up --detach ethnode
 	docker-compose up deploy.contract
-	docker-compose up -d \
+	# MPC Network -- could be deployed to a cloud provider
+	docker-compose up --detach \
 		mpcnode0 \
 		mpcnode1 \
 		mpcnode2 \
 		mpcnode3
-	docker-compose -f docker-compose.yml -f liquidity-provider.yml up init.pool
-	docker-compose -f docker-compose.yml -f trader.yml up public.deposit
-	docker-compose -f docker-compose.yml -f trader.yml up secret.deposit
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
-	docker-compose -f docker-compose.yml -f trader.yml up trade-1
-	docker-compose -f docker-compose.yml -f trader.yml up trade-2
+	# client operations -- could be done by UI
+	docker-compose --file docker-compose.yml --file liquidity-provider.yml up init.pool
+	docker-compose --file docker-compose.yml --file trader.yml up public.deposit
+	docker-compose --file docker-compose.yml --file trader.yml up secret.deposit
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
+	docker-compose --file docker-compose.yml --file trader.yml up trade-1
+	docker-compose --file docker-compose.yml --file trader.yml up trade-2
 
 start-hbswap:
 	docker-compose up -d ethnode
