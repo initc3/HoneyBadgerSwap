@@ -22,7 +22,6 @@ def main():
     print_ln('balance_A %s', balance_A.reveal())
     print_ln('balance_B %s', balance_B.reveal())
 
-
     amt_A = sint_to_sfix(read_sint(6) - read_sint(4))
     amt_B = sint_to_sfix(read_sint(7) - read_sint(5))
     print_ln('amt_A %s', amt_A.reveal())
@@ -58,10 +57,14 @@ def main():
     trade_price = -1 * change_B / change_A
     print_ln('marketPrice %s', trade_price.reveal())
 
+    trade_cnt = flag_buy_A + flag_buy_B
+    print_ln('trade_cnt %s', trade_cnt.reveal())
+
     writesharestofile(sfix_to_sint(pool_A))
     writesharestofile(sfix_to_sint(pool_B))
     writesharestofile(sfix_to_sint(change_A))
     writesharestofile(sfix_to_sint(change_B))
     writesharestofile(sfix_to_sint(trade_price))
+    writesharestofile(trade_cnt)
 
 main()

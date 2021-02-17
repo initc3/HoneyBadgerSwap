@@ -7,24 +7,20 @@ t = 1
 # MPC servers
 [[servers]]
 id = 0
-host = "127.0.0.1"
-http_host = "127.0.0.1"
+host = "0.0.0.0"
 http_port = 8080
 
 [[servers]]
 id = 1
-host = "127.0.0.1"
-http_host = "127.0.0.1"
+host = "0.0.0.0"
 http_port = 8081
 
 [[servers]]
 id = 2
-host = "127.0.0.1"
-http_host = "127.0.0.1"
+host = "0.0.0.0"
 http_port = 8082
 
 [[servers]]
 id = 3
-host = "127.0.0.1"
-http_host = "127.0.0.1"
+host = "0.0.0.0"
 http_port = 8083

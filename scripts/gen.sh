@@ -27,3 +27,5 @@ cd Scripts/hbswap
 #truffle_complie
 sync_go_binding HbSwap hbswap
 #sync_go_binding Token token
+
+#truffle-flattener contracts/HbSwap.sol --output contracts/FlattenedHbSwap.sol

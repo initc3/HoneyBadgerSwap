@@ -101,7 +101,7 @@ start_servers
 
 init_pool 0 $eth $token_1 10 20
 #add_liquidity 0 $eth $token_1 10 10
-#remove_liquidity 0 $eth $token_1 10
+#remove_liquidity 0 $eth $token_1 7
 #init_pool 0 $eth $token_2 10 20
 
 deposit 0 $eth $token_1 10 10
