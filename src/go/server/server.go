@@ -478,7 +478,7 @@ func main() {
 	serverID = os.Args[1]
 	fmt.Printf("Starting mpc server %v\n", serverID)
 
-	conn = utils.GetEthClient(utils.WsEndpoint)
+	//conn = utils.GetEthClient(utils.WsEndpoint)
 
 	ethHostname := os.Args[2]
 	wsUrl := utils.GetEthWsURL(ethHostname)
