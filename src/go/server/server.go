@@ -30,14 +30,14 @@ const (
 )
 
 var (
-	serverID		string
-	conn			*ethclient.Client
-	server			*bind.TransactOpts
-	prevTime 		= int64(0)
-	pq     			utils.PriorityQueue
-	mutexPQ			= &sync.Mutex{}
-	eventSet		map[utils.EventID]bool
-	leaderHostname 	string
+	serverID       string
+	conn           *ethclient.Client
+	server         *bind.TransactOpts
+	prevTime       = int64(0)
+	pq             utils.PriorityQueue
+	mutexPQ        = &sync.Mutex{}
+	eventSet       map[utils.EventID]bool
+	leaderHostname string
 )
 
 func checkBalance(token string, user string, amt string) int {
@@ -65,7 +65,7 @@ func genInputmask() {
 	for true {
 		cnt := utils.GetInputmaskCnt(conn)
 
-		if cnt + 100 > tot {
+		if cnt+100 > tot {
 			fmt.Printf("Generating new inputmasks...\n")
 
 			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
@@ -478,7 +478,7 @@ func main() {
 	serverID = os.Args[1]
 	fmt.Printf("Starting mpc server %v\n", serverID)
 
-	conn = utils.GetEthClient(utils.WsEndpoint)
+	//conn = utils.GetEthClient(utils.WsEndpoint)
 
 	ethHostname := os.Args[2]
 	wsUrl := utils.GetEthWsURL(ethHostname)
