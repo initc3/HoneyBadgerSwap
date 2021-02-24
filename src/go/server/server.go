@@ -6,8 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
+	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
 	"math"
 	"os"
@@ -480,10 +480,12 @@ func main() {
 
 	//conn = utils.GetEthClient(utils.WsEndpoint)
 
-	ethHostname := os.Args[2]
-	wsUrl := utils.GetEthWsURL(ethHostname)
+	//ethHostname := os.Args[2]
+	//wsUrl := utils.GetEthWsURL(ethHostname)
+	wsUrl := utils.WsEndpoint
 	conn = utils.GetEthClient(wsUrl)
-	leaderHostname = os.Args[3]
+	//leaderHostname = os.Args[3]
+	leaderHostname = os.Args[2]
 
 	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
 	eventSet = map[utils.EventID]bool{}

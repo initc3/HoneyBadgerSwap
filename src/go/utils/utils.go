@@ -14,7 +14,6 @@ import (
 	"log"
 	"math/big"
 	"net"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,29 +26,29 @@ var (
 	KEYSTORE   = os.Getenv("POA_KEYSTORE")
 	minBalance = big.NewInt(300000000000000000)
 
-	//// parameter for private net
-	chainID = "123"
-	//HttpEndpoint = "http://127.0.0.1:8545"
-	EthPort = 8545
-	//WsEndpoint   = "ws://127.0.0.1:8546"
-	EthWsPort  = 8546
-	EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
-	HbswapAddr = common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
-	TokenAddrs = []common.Address{
-		common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
-		common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
-	}
+	////// parameter for private net
+	//chainID = "123"
+	////HttpEndpoint = "http://127.0.0.1:8545"
+	//EthPort = 8545
+	////WsEndpoint   = "ws://127.0.0.1:8546"
+	//EthWsPort  = 8546
+	//EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
+	//HbswapAddr = common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2")
+	//TokenAddrs = []common.Address{
+	//	common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
+	//	common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
+	//}
 
 	// parameter for kovan test net
-	//chainID			= "42"
-	//HttpEndpoint	= "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
-	//WsEndpoint		= "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
-	//EthAddr 		= common.HexToAddress("0x0000000000000000000000000000000000000000")
-	//HbswapAddr 		= common.HexToAddress("0x77527db365ec8de2296d33464224e045bd7882c8")
-	//TokenAddrs 		= []common.Address{
-	//	common.HexToAddress("0x63e7f20503256ddcfec64872aadb785d5a290cbb"),
-	//	common.HexToAddress("0x403b0f962566ffb960d0de98875dc09603aa67e9"),
-	//}
+	chainID			= "42"
+	HttpEndpoint	= "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
+	WsEndpoint		= "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
+	EthAddr 		= common.HexToAddress("0x0000000000000000000000000000000000000000")
+	HbswapAddr 		= common.HexToAddress("0x77527db365ec8de2296d33464224e045bd7882c8")
+	TokenAddrs 		= []common.Address{
+		common.HexToAddress("0x63e7f20503256ddcfec64872aadb785d5a290cbb"),
+		common.HexToAddress("0x403b0f962566ffb960d0de98875dc09603aa67e9"),
+	}
 )
 
 func ExecCmd(cmd *exec.Cmd) string {
@@ -183,23 +182,23 @@ func GetIPAddr(hostname string) net.IP {
 	return addrs[0]
 }
 
-func GetURL(hostname string, port int, scheme string) string {
-	addr := GetIPAddr(hostname)
-	host := fmt.Sprintf("%s:%d", addr, port)
-	u := &url.URL{
-		Scheme: scheme,
-		Host:   host,
-	}
-	return u.String()
-}
-
-func GetEthURL(hostname string) string {
-	return GetURL(hostname, EthPort, "http")
-}
-
-func GetEthWsURL(hostname string) string {
-	return GetURL(hostname, EthWsPort, "ws")
-}
+//func GetURL(hostname string, port int, scheme string) string {
+//	addr := GetIPAddr(hostname)
+//	host := fmt.Sprintf("%s:%d", addr, port)
+//	u := &url.URL{
+//		Scheme: scheme,
+//		Host:   host,
+//	}
+//	return u.String()
+//}
+//
+//func GetEthURL(hostname string) string {
+//	return GetURL(hostname, EthPort, "http")
+//}
+//
+//func GetEthWsURL(hostname string) string {
+//	return GetURL(hostname, EthWsPort, "ws")
+//}
 
 //func dbPut(key string, value []byte) {
 //	mut.Lock()

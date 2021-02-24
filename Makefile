@@ -154,3 +154,11 @@ up-init: down-init rm-init
 	docker-compose -f hbswap-init.yml up mpc.trusted.setup mpc.compile
 	docker-compose -f hbswap-init.yml up mpc.node.0 mpc.node.1 mpc.node.2 mpc.node.3
 	#docker-compose -f hbswap-init.yml up mpc.allnodes
+
+testnet: down mpc-keys mpc-compile
+	docker-compose up --detach \
+        testnet.mpc.node.0 \
+        testnet.mpc.node.1 \
+        testnet.mpc.node.2 \
+        testnet.mpc.node.3
+# docker-compose logs -f testnet.mpc.node.0 testnet.mpc.node.1 testnet.mpc.node.2 testnet.mpc.node.3
