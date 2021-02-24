@@ -34,6 +34,9 @@ down:
 stop:
 	docker-compose stop eth.chain mpc.nodes
 
+build:
+	docker-compose -f docker-compose.yml -f liquidity-provider.yml -f trader.yml build
+
 rm: clean
 	#docker-compose rm --stop --force eth.chain contract.deploy contract.deposit
 	docker-compose rm --stop --force -v
