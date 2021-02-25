@@ -31,7 +31,7 @@ volumes:
 services:
 
   # TODO rename to eth.node
-  eth.chain:
+  ethnode:
     image: ethereum/client-go:latest
     environment:
       POADIR: /opt/poa
@@ -47,11 +47,11 @@ services:
     command: sh chain-latest.sh
 
   deploy.contract:
-    image: hbswap-go-z
+    image: hbswap-go
     build:
       context: .
-      dockerfile: contract.Dockerfile
-      target: deploy
+      dockerfile: Dockerfile
+      target: go-deps
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
@@ -63,13 +63,10 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
-    command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
+    command: ["wait-for-it", "ethnode:8545", "--", "go", "run", "deploy/deploy.go", "ethnode"]
 
   mpc.trusted.setup:
-    image: hbswap-setup-z
-    build:
-      context: .
-      dockerfile: setup.Dockerfile
+    image: sbellem/openssl:bullseye-slim
     networks:
       - hbswap
     volumes:
@@ -100,12 +97,11 @@ services:
     working_dir: /usr/src
     command: ["bash", "compile.sh"]
 
-  mpc.node.0:
-    image: hbswap-mpc-z
+  mpcnode0:
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
@@ -129,15 +125,14 @@ services:
         #- persistence-p0:/usr/src/hbswap/Persistence
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
-    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "0", "eth.chain", "mpc.node.0"]
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
 
-  mpc.node.1:
-    image: hbswap-mpc-z
+  mpcnode1:
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
@@ -158,15 +153,14 @@ services:
       - ./poa:/opt/poa
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
-    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "1", "eth.chain", "mpc.node.0"]
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
 
-  mpc.node.2:
-    image: hbswap-mpc-z
+  mpcnode2:
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
@@ -187,15 +181,14 @@ services:
       - ./poa:/opt/poa
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
-    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "2", "eth.chain", "mpc.node.0"]
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
 
-  mpc.node.3:
-    image: hbswap-mpc-z
+  mpcnode3:
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
@@ -216,5 +209,5 @@ services:
       - ./poa:/opt/poa
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpc.node.0"
-    command: ["wait-for-it", "eth.chain:8545", "--", "bash", "mpc-node.sh", "3", "eth.chain", "mpc.node.0"]
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3", "ethnode", "mpcnode0"]

@@ -18,7 +18,7 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-mpc-progs
-	docker-compose run --rm eth.chain rm -rf /opt/hbswap/poa/data
+	docker-compose run --rm ethnode rm -rf /opt/hbswap/poa/data
 	#docker-compose run --rm mpc.nodes rm -rf Scripts/hbswap/log/*
 
 clean-mpc-progs:
@@ -32,10 +32,10 @@ down:
 	docker-compose -f docker-compose.yml -f liquidity-provider.yml -f trader.yml down --remove-orphans
 
 stop:
-	docker-compose stop eth.chain mpc.nodes
+	docker-compose stop ethnode mpc.nodes
 
 rm: clean
-	#docker-compose rm --stop --force eth.chain contract.deploy contract.deposit
+	#docker-compose rm --stop --force ethnode contract.deploy contract.deposit
 	docker-compose rm --stop --force -v
 	docker volume rm \
 		hbswap_public-keys \
@@ -45,19 +45,19 @@ rm: clean
 		hbswap_secrets-p3
 
 init-eth:
-	docker-compose up -d eth.chain
+	docker-compose up -d ethnode
 	docker-compose up contract.deploy
 	docker-compose up pool.init
 	docker-compose up client.deposit
 
 simulation: down mpc-keys mpc-compile
-	docker-compose up -d eth.chain
+	docker-compose up -d ethnode
 	docker-compose up deploy.contract
 	docker-compose up -d \
-		mpc.node.0 \
-		mpc.node.1 \
-		mpc.node.2 \
-		mpc.node.3
+		mpcnode0 \
+		mpcnode1 \
+		mpcnode2 \
+		mpcnode3
 	docker-compose -f docker-compose.yml -f liquidity-provider.yml up init.pool
 	docker-compose -f docker-compose.yml -f trader.yml up public.deposit
 	docker-compose -f docker-compose.yml -f trader.yml up secret.deposit
@@ -75,13 +75,13 @@ simulation: down mpc-keys mpc-compile
 	docker-compose -f docker-compose.yml -f trader.yml up trade-2
 
 start-hbswap:
-	docker-compose up -d eth.chain
+	docker-compose up -d ethnode
 	docker-compose up deploy.contract
 	docker-compose up -d \
-		mpc.node.0 \
-		mpc.node.1 \
-		mpc.node.2 \
-		mpc.node.3
+		mpcnode0 \
+		mpcnode1 \
+		mpcnode2 \
+		mpcnode3
 	#sh scripts/follow-sim-logs-with-tmux.sh
 
 public-deposit:
@@ -98,7 +98,7 @@ trade-2:
 	docker-compose -f docker-compose.yml -f trader.yml up trade-2
 
 up-eth:
-	docker-compose up -d eth.chain
+	docker-compose up -d ethnode
 
 deploy-contract: up-eth
 	docker-compose -f docker-compose.yml -f eth.yml up contract.deploy
@@ -124,20 +124,20 @@ mpc-init-pool: mpc-keys mpc-compile
 
 mpc:
 	docker-compose up -d \
-		mpc.node.0 \
-		mpc.node.1 \
-		mpc.node.2 \
-		mpc.node.3
+		mpcnode0 \
+		mpcnode1 \
+		mpcnode2 \
+		mpcnode3
 
 run-client:
 	docker-compose up client
 
 #up: ## run the example
 up: down rm mpc-keys mpc-compile mpc-init-pool ## run the example
-	docker-compose up -d eth.chain
+	docker-compose up -d ethnode
 	docker-compose up contract.deploy
 	docker-compose up contract.deposit
-	docker-compose up -d mpc.node.0 mpc.node.1 mpc.node.2 mpc.node.3
+	docker-compose up -d mpcnode0 mpcnode1 mpcnode2 mpcnode3
 	docker-compose up -d client
 	sh scripts/follow-sim-logs-with-tmux.sh
 
@@ -145,10 +145,10 @@ down-init:
 	docker-compose -f hbswap-init.yml down --remove-orphans
 
 rm-init: clean
-	docker-compose -f hbswap-init.yml rm --stop --force mpc.trusted.setup mpc.compile mpc.node.0 mpc.node.1 mpc.node.2 mpc.node.3
+	docker-compose -f hbswap-init.yml rm --stop --force mpc.trusted.setup mpc.compile mpcnode0 mpcnode1 mpcnode2 mpcnode3
 	#docker-compose -f hbswap-init.yml rm --stop --force mpc.trusted.setup mpc.compile mpc.allnodes
 
 up-init: down-init rm-init
 	docker-compose -f hbswap-init.yml up mpc.trusted.setup mpc.compile
-	docker-compose -f hbswap-init.yml up mpc.node.0 mpc.node.1 mpc.node.2 mpc.node.3
+	docker-compose -f hbswap-init.yml up mpcnode0 mpcnode1 mpcnode2 mpcnode3
 	#docker-compose -f hbswap-init.yml up mpc.allnodes
