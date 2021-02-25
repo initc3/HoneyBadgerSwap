@@ -12,13 +12,13 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    #working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    #working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./scripts:/usr/src/scripts
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
     command: ["bash", "client-public-deposit.sh", "eth.chain"]
@@ -34,13 +34,13 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    #working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+    #working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./scripts:/usr/src/scripts
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
     command: ["bash", "client-secret-deposit.sh", "eth.chain"]
@@ -63,7 +63,7 @@ services:
       - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-1.sh", "eth.chain"]
     #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "1.1", "-2.5"]
@@ -87,6 +87,6 @@ services:
       - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-2.sh", "eth.chain"]

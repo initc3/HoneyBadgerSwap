@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/token"
 	"log"
 	"math/big"
 )

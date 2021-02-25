@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
+	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"math/big"
 )
 
