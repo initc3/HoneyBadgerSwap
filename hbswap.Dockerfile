@@ -93,9 +93,9 @@ RUN go get -d -v github.com/ethereum/go-ethereum
 WORKDIR $GOPATH/src/github.com/ethereum/go-ethereum
 RUN git checkout cfbb969da
 
-COPY src /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+COPY src /go/src/github.com/initc3/HoneyBadgerSwap/src
 
-WORKDIR /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+WORKDIR /go/src/github.com/initc3/HoneyBadgerSwap/src
 
 RUN go get -d -v ./...
 

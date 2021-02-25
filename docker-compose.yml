@@ -57,11 +57,11 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+    working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src/go
     volumes:
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
 
@@ -117,7 +117,7 @@ services:
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p0:/opt/hbswap/secrets
       - ./poa:/opt/poa
@@ -146,7 +146,7 @@ services:
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p1:/opt/hbswap/secrets
       - ./poa:/opt/poa
@@ -172,7 +172,7 @@ services:
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p2:/opt/hbswap/secrets
       - ./poa:/opt/poa
@@ -198,7 +198,7 @@ services:
       - ./conf/server.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node.sh:/usr/src/MP-SPDZ/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
       - public-keys:/opt/hbswap/public-keys:ro
       - secrets-p3:/opt/hbswap/secrets
       - ./poa:/opt/poa
