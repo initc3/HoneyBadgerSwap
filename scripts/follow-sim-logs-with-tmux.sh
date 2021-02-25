@@ -9,10 +9,10 @@ else
 fi
 
 tmux $TMUX_CMD "docker-compose logs -f eth.chain; sh" \; \
-    splitw -v -p 60 "docker-compose logs -f mpc.node.0; sh" \; \
-    splitw -v -p 60 "docker-compose logs -f mpc.node.1; sh" \; \
-    splitw -v -p 60 "docker-compose logs -f mpc.node.2; sh" \; \
-    splitw -v -p 60 "docker-compose logs -f mpc.node.3; sh" \; \
+    splitw -v -p 60 "docker-compose logs -f mpcnode0; sh" \; \
+    splitw -v -p 60 "docker-compose logs -f mpcnode1; sh" \; \
+    splitw -v -p 60 "docker-compose logs -f mpcnode2; sh" \; \
+    splitw -v -p 60 "docker-compose logs -f mpcnode3; sh" \; \
     selectp -t 0 \; \
     splitw -h -p 60 "docker-compose logs -f contract.deploy; sh" \; \
     splitw -h -p 60 "docker-compose logs -f contract.deposit; sh"
