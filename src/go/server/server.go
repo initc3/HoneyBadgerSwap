@@ -244,7 +244,7 @@ func watch(leader_hostname string) {
 					os.Mkdir(fmt.Sprintf(prep_dir), 0777)
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_calc_price")
 					stdout := utils.ExecCmd(cmd)
-					price := strings.Split(stdout, "\n")[1]
+					price := strings.Split(stdout, "\n")[0]
 					fmt.Printf("avg_price %s\n", price)
 
 					if serverID == "0" {
