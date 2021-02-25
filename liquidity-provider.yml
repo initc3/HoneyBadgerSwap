@@ -2,17 +2,16 @@ version: '3.8'
 
 services:
   init.pool:
-    image: hbswap-go-z
+    image: hbswap-go
     build:
       context: .
-      dockerfile: contract.Dockerfile
-      target: client
+      dockerfile: Dockerfile
+      target: go-deps
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    #working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -21,4 +20,4 @@ services:
       - ./scripts:/usr/src/scripts
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "init-pool.sh", "eth.chain"]
+    command: ["bash", "init-pool.sh", "ethnode"]

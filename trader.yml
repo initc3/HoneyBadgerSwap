@@ -2,17 +2,16 @@ version: '3.8'
 
 services:
   public.deposit:
-    image: hbswap-go-z
+    image: hbswap-go
     build:
       context: .
-      dockerfile: contract.Dockerfile
-      target: client
+      dockerfile: Dockerfile
+      target: go-deps
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    #working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -21,20 +20,19 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "client-public-deposit.sh", "eth.chain"]
+    command: ["bash", "client-public-deposit.sh", "ethnode"]
 
   secret.deposit:
-    image: hbswap-go-z
+    image: hbswap-go
     build:
       context: .
-      dockerfile: contract.Dockerfile
-      target: client
+      dockerfile: Dockerfile
+      target: go-deps
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
     networks:
       - hbswap
-    #working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -43,14 +41,13 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "client-secret-deposit.sh", "eth.chain"]
+    command: ["bash", "client-secret-deposit.sh", "ethnode"]
 
   trade-1:
-    image: hbswap-mpc-z
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     # FIXME is the poa stuff needed?
     environment:
       POADIR: /opt/poa
@@ -65,16 +62,15 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-1.sh", "eth.chain"]
-    #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "1.1", "-2.5"]
-    #command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade.sh", "eth.chain", "0", "-1.1", "2"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
 
   trade-2:
-    image: hbswap-mpc-z
+    image: hbswap
     build:
       context: .
-      dockerfile: hbswap.Dockerfile
-      target: hbswap
+      dockerfile: Dockerfile
     # FIXME is the poa stuff needed?
     environment:
       POADIR: /opt/poa
@@ -89,4 +85,4 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpc.node.3:8080", "--", "bash", "trade-2.sh", "eth.chain"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
