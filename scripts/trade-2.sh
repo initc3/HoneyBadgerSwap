@@ -2,7 +2,7 @@
 set -e
 
 eth_host=${1:-localhost}
-go_code_path=/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 #user=$2
 #amt_A=$3
 #amt_B=$4

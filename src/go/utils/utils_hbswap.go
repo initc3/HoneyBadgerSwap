@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
 	"math/big"
 	"strconv"
@@ -179,7 +179,7 @@ func SecretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr c
 		time.Sleep(10 * time.Second)
 		balance := GetBalance(conn, tokenAddr, auth.From).Int64()
 		//fmt.Printf("current balance %v\n", balance)
-		if prevBalance + amt.Int64() == balance {
+		if prevBalance+amt.Int64() == balance {
 			break
 		}
 	}
@@ -232,11 +232,11 @@ func TradePrep(conn *ethclient.Client, auth *bind.TransactOpts) (int64, int64) {
 	}
 
 	data := receipt.Logs[0].Data
-	idxSell, err := strconv.ParseInt(common.Bytes2Hex(data[1 * 32 : 2 * 32]), 16, 64)
+	idxSell, err := strconv.ParseInt(common.Bytes2Hex(data[1*32:2*32]), 16, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
-	idxBuy, err := strconv.ParseInt(common.Bytes2Hex(data[2 * 32 : 3 * 32]), 16, 64)
+	idxBuy, err := strconv.ParseInt(common.Bytes2Hex(data[2*32:3*32]), 16, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -267,7 +267,7 @@ func Trade(conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Addres
 	}
 
 	data := receipt.Logs[0].Data
-	tradeSeq, err := strconv.ParseInt(common.Bytes2Hex(data[0 * 32 : 1 * 32]), 16, 64)
+	tradeSeq, err := strconv.ParseInt(common.Bytes2Hex(data[0*32:1*32]), 16, 64)
 	if err != nil {
 		log.Fatal(err)
 	}

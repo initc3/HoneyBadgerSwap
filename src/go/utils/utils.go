@@ -82,7 +82,6 @@ func GetEthClient(ethInstance string) *ethclient.Client {
 
 func GetAccount(account string) *bind.TransactOpts {
 	dir := filepath.Join(KEYSTORE, account)
-	//dir := GOPATH + "/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/poa/keystore/" + account + "/"
 
 	list, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -200,26 +199,3 @@ func GetEthURL(hostname string) string {
 func GetEthWsURL(hostname string) string {
 	return GetURL(hostname, EthWsPort, "ws")
 }
-
-//func dbPut(key string, value []byte) {
-//	mut.Lock()
-//	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
-//	err := db.Put([]byte(key), value, nil)
-//	if err != nil {
-//		fmt.Println("Error writing to database")
-//	}
-//	db.Close()
-//	mut.Unlock()
-//}
-
-//func dbGet(key string) string {
-//	mut.Lock()
-//	db, _ := leveldb.OpenFile(fmt.Sprintf("Scripts/hbswap/db/server%s", serverID), nil)
-//	data, err := db.Get([]byte(key), nil)
-//	if err != nil {
-//		fmt.Println("Error getting from database")
-//	}
-//	db.Close()
-//	mut.Unlock()
-//	return string(data)
-//}

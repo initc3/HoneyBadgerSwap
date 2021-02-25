@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/token"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/token"
 	"log"
 	"math/big"
 )
@@ -47,7 +47,7 @@ func Approve(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.A
 	}
 }
 
-func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr common.Address) (*big.Int) {
+func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr common.Address) *big.Int {
 	tokenInstance, err := token.NewToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)

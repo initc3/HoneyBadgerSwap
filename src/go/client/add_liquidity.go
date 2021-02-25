@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
+	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"os"
 )
 
@@ -16,7 +16,3 @@ func main() {
 
 	utils.AddLiquidity(conn, user, tokenA, tokenB, utils.StrToBig(amtA), utils.StrToBig(amtB))
 }
-
-
-
-

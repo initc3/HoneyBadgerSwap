@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go/utils"
-	"github.com/initc3/MP-SPDZ/Scripts/hbswap/go_bindings/hbswap"
+	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
 	"math"
 	"os"
@@ -35,14 +35,12 @@ var (
 )
 
 func checkBalance(token string, user string, amt string, leader_hostname string) int {
-	//cmd := exec.Command("python3", "Scripts/hbswap/python/server/check_balance_set_data.py", serverID, token, user, amt)
 	cmd := exec.Command("python3", "-m", "honeybadgerswap.server.check_balance_set_data", serverID, token, user, amt)
 	utils.ExecCmd(cmd)
 
 	cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_check_balance")
 	stdout := utils.ExecCmd(cmd)
 
-	//cmd = exec.Command("python3", "Scripts/hbswap/python/server/check_balance_org_data.py", serverID)
 	cmd = exec.Command("python3", "-m", "honeybadgerswap.server.check_balance_org_data", serverID)
 	stdout = utils.ExecCmd(cmd)
 	enoughBalance, _ := strconv.Atoi(stdout[:1])
@@ -52,7 +50,6 @@ func checkBalance(token string, user string, amt string, leader_hostname string)
 }
 
 func updateBalance(token string, user string, amt string, flag string) {
-	//cmd := exec.Command("python3", "Scripts/hbswap/python/server/update_balance.py", serverID, token, user, amt, flag)
 	cmd := exec.Command("python3", "-m", "honeybadgerswap.server.update_balance", serverID, token, user, amt, flag)
 	utils.ExecCmd(cmd)
 }
@@ -68,7 +65,6 @@ func genInputmask(leader_hostname string) {
 			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leader_hostname)
 			utils.ExecCmd(cmd)
 
-			//cmd = exec.Command("python3", "Scripts/hbswap/python/server/proc_inputmask.py", serverID, strconv.Itoa(int(tot)))
 			cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
 			utils.ExecCmd(cmd)
 
@@ -135,7 +131,6 @@ func watch(leader_hostname string) {
 
 				if checkBalance(tokenA, user, amtA, leader_hostname) == 1 && checkBalance(tokenB, user, amtB, leader_hostname) == 1 {
 					amtLiquidity := fmt.Sprintf("%f", math.Sqrt(float64(oce.AmtA.Int64()*oce.AmtB.Int64())))
-					//cmd := exec.Command("python3", "Scripts/hbswap/python/server/init_pool.py", serverID, tokenA, tokenB, amtA, amtB, amtLiquidity)
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.init_pool", serverID, tokenA, tokenB, amtA, amtB, amtLiquidity)
 					utils.ExecCmd(cmd)
 
@@ -158,14 +153,12 @@ func watch(leader_hostname string) {
 				amtB := oce.AmtB.String()
 
 				if checkBalance(tokenA, user, amtA, leader_hostname) == 1 && checkBalance(tokenB, user, amtB, leader_hostname) == 1 {
-					//cmd := exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtA, amtB)
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_set_data", serverID, user, tokenA, tokenB, amtA, amtB)
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_add_liquidity")
 					utils.ExecCmd(cmd)
 
-					//cmd = exec.Command("python3", "Scripts/hbswap/python/server/add_liquidity_org_data.py", serverID, tokenA, tokenB)
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_org_data", serverID, tokenA, tokenB)
 					stdout := utils.ExecCmd(cmd)
 					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
@@ -192,7 +185,6 @@ func watch(leader_hostname string) {
 				amtLiquidity := oce.Amt.String()
 
 				if checkBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, leader_hostname) == 1 {
-					//cmd := exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_set_data.py", serverID, user, tokenA, tokenB, amtLiquidity)
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_set_data", serverID, user, tokenA, tokenB, amtLiquidity)
 					utils.ExecCmd(cmd)
 
@@ -200,7 +192,6 @@ func watch(leader_hostname string) {
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_remove_liquidity")
 					utils.ExecCmd(cmd)
 
-					//cmd = exec.Command("python3", "Scripts/hbswap/python/server/remove_liquidity_org_data.py", serverID, tokenA, tokenB, amtLiquidity)
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_org_data", serverID, tokenA, tokenB, amtLiquidity)
 					stdout := utils.ExecCmd(cmd)
 					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
@@ -228,7 +219,6 @@ func watch(leader_hostname string) {
 				tokenA := oce.TokenA.String()
 				tokenB := oce.TokenB.String()
 
-				//cmd := exec.Command("python3", "Scripts/hbswap/python/server/trade_set_data.py", serverID, user, tokenA, tokenB, oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
 				cmd := exec.Command("python3", "-m", "honeybadgerswap.server.trade_set_data", serverID, user, tokenA, tokenB, oce.IdxA.String(), oce.IdxB.String(), oce.MaskedA.String(), oce.MaskedB.String())
 				utils.ExecCmd(cmd)
 				os.RemoveAll(fmt.Sprintf(prep_dir))
@@ -236,7 +226,6 @@ func watch(leader_hostname string) {
 				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leader_hostname, "hbswap_trade")
 				utils.ExecCmd(cmd)
 
-				//cmd = exec.Command("python3", "Scripts/hbswap/python/server/trade_org_data.py", serverID, tokenA, tokenB, oce.TradeSeq.String())
 				cmd = exec.Command("python3", "-m", "honeybadgerswap.server.trade_org_data", serverID, tokenA, tokenB, oce.TradeSeq.String())
 				stdout := utils.ExecCmd(cmd)
 				changes := strings.Split(strings.Split(stdout, "\n")[0], " ")
@@ -248,7 +237,6 @@ func watch(leader_hostname string) {
 				updateBalance(tokenB, user, changeB, "0")
 
 				if time.Now().Unix()-prevTime > checkInterval {
-					//cmd = exec.Command("python3", "Scripts/hbswap/python/server/calc_price_set_data.py", serverID, tokenA, tokenB)
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_set_data", serverID, tokenA, tokenB)
 					utils.ExecCmd(cmd)
 

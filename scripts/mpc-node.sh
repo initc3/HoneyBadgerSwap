@@ -5,7 +5,7 @@ set -e
 node_id=$1
 eth_hostname=$2
 leader_hostname=$3
-go_code_path=/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
 setup_data() {
