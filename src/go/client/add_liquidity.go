@@ -16,7 +16,3 @@ func main() {
 
 	utils.AddLiquidity(conn, user, tokenA, tokenB, utils.StrToBig(amtA), utils.StrToBig(amtB))
 }
-
-
-
-
