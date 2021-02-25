@@ -47,7 +47,7 @@ func Approve(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.A
 	}
 }
 
-func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr common.Address) (*big.Int) {
+func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr common.Address) *big.Int {
 	tokenInstance, err := token.NewToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)

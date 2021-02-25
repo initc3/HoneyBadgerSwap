@@ -16,7 +16,3 @@ func main() {
 
 	utils.RemoveLiquidity(conn, user, tokenA, tokenB, utils.StrToBig(amt))
 }
-
-
-
-
