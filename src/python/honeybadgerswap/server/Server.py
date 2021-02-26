@@ -5,7 +5,7 @@ import time
 
 from aiohttp import web
 
-from ..utils import key_balance, key_inputmask, key_trade_price, key_trade_time, location_db, openDB, get_value, from_hex
+from ..utils import key_balance, key_inputmask, key_trade_price, key_trade_time, location_db, openDB, get_value, from_hex, http_request_timeout
 
 class Server:
     def __init__(self, n, t, server_id, host, http_port):
@@ -18,18 +18,28 @@ class Server:
 
         print(f"http server {server_id} is running...")
 
-    async def db_get(self, key):
+    async def db_get_balance(self, key):
         db = openDB(location_db(self.server_id))
         return from_hex(get_value(db, key))
 
+    async def db_get(self, key):
+        db = openDB(location_db(self.server_id))
+        return db.get(key)
+
     async def db_get_non_balance(self, key):
+        start_time = int(time.time())
         while True:
             v = await self.db_get(key)
             if v == 0:
                 print(f"{key} not ready. Try again...")
-                time.sleep(10)
+                await time.sleep(10)
+                print("sleep over")
             else:
                 return v
+            cur_time = int(time.time())
+            print(cur_time, start_time)
+            if cur_time - start_time > http_request_timeout:
+                return 'NULL'
 
     async def http_server(self):
         async def handler_inputmask(request):
@@ -65,7 +75,7 @@ class Server:
             token_user = re.split(',', request.match_info.get("token_user"))
             token = token_user[0]
             user = token_user[1]
-            res = await self.db_get(key_balance(token, user))
+            res = await self.db_get_balance(key_balance(token, user))
             data = {
                 "balance": f'{res}',
             }
