@@ -1,4 +1,15 @@
-FROM python:3.8 as mpspdz-base
+FROM python:3.8 as compiler
+
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /usr/src
+COPY MP-SPDZ/compile.py .
+COPY MP-SPDZ/Compiler Compiler
+
+RUN mkdir -p Programs/Source
+###############################################################################
+
+FROM python:3.8 as machines
 
 ENV PYTHONUNBUFFERED 1
 
@@ -63,14 +74,14 @@ ENV N_PARTIES 4
 ENV THRESHOLD 1
 
 # Compile random-shamir
-FROM mpspdz-base as random-shamir-prep
+FROM machines as random-shamir-prep
 ENV INPUTMASK_SHARES "/opt/hbswap/inputmask-shares"
 RUN mkdir -p $INPUTMASK_SHARES \
         && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/inputmask-shares/\"'" >> CONFIG.mine
 RUN make random-shamir.x
 
 # Compile malicious-shamir-party
-FROM mpspdz-base as malicious-shamir-party
+FROM machines as malicious-shamir-party
 ENV PREP_DIR "/opt/hbswap/preprocessing-data"
 RUN mkdir -p $PREP_DIR \
         && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/preprocessing-data/\"'" >> CONFIG.mine

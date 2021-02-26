@@ -50,7 +50,8 @@ init-eth:
 	docker-compose up pool.init
 	docker-compose up client.deposit
 
-simulation: down mpc-keys mpc-compile
+#simulation: down mpc-keys mpc-compile
+simulation: down mpc-compile
 	docker-compose up -d ethnode
 	docker-compose up deploy.contract
 	docker-compose up -d \

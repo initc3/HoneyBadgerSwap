@@ -54,6 +54,7 @@ COPY --from=sbellem/mpspdz:2cf97686-randomshamirprep\
 COPY --from=sbellem/mpspdz:2cf97686-maliciousshamirparty \
                 /usr/src/MP-SPDZ/malicious-shamir-party.x /usr/src/hbswap/
 RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
+COPY testkeys/public /opt/hbswap/public-keys
 #############################################################################
 
 # GO (server) dependencies
