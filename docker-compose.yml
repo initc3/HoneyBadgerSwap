@@ -6,11 +6,6 @@ networks:
 volumes:
   mpc-bytecodes:
   mpc-schedules:
-  public-keys:
-  secrets-p0:
-  secrets-p1:
-  secrets-p2:
-  secrets-p3:
   inputmaskshares-p0:
   inputmaskshares-p1:
   inputmaskshares-p2:
@@ -30,7 +25,6 @@ volumes:
 
 services:
 
-  # TODO rename to eth.node
   ethnode:
     image: ethereum/client-go:latest
     environment:
@@ -65,37 +59,20 @@ services:
     entrypoint: ""
     command: ["wait-for-it", "ethnode:8545", "--", "go", "run", "deploy/deploy.go", "ethnode"]
 
-  mpc.trusted.setup:
-    image: sbellem/openssl:bullseye-slim
-    networks:
-      - hbswap
-    volumes:
-      - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
-      - ./scripts/generate-keys.sh:/usr/src/generate-keys.sh
-      - public-keys:/usr/src/Player-Data
-      - secrets-p0:/usr/src/Secrets-P0
-      - secrets-p1:/usr/src/Secrets-P1
-      - secrets-p2:/usr/src/Secrets-P2
-      - secrets-p3:/usr/src/Secrets-P3
-    #command: ["bash", "setup-ssl.sh", "4"]
-    working_dir: /usr/src
-    command: ["bash", "generate-keys.sh", "setup-ssl.sh", "4"]
-
   # compile MPC programs (hbswap_init, hbswap_trade_prep, hbswap_trade)
   # see scripts/compile.sh for details
   mpc.compile:
-    image: python:3.8
+    #image: sbellem/mpspdz:compiler
+    image: sbellem/hbswapmpcbytecodes
     networks:
       - hbswap
     volumes:
-      - ./MP-SPDZ/compile.py:/usr/src/compile.py
-      - ./MP-SPDZ/Compiler:/usr/src/Compiler
-      - ./src/mpc:/usr/src/Programs/Source
-      - ./scripts/compile.sh:/usr/src/compile.sh
+      #- ./src/mpc:/usr/src/Programs/Source
+      #- ./scripts/compile.sh:/usr/src/compile.sh
       - mpc-bytecodes:/usr/src/Programs/Bytecode
       - mpc-schedules:/usr/src/Programs/Schedules
-    working_dir: /usr/src
-    command: ["bash", "compile.sh"]
+    #working_dir: /usr/src
+    #command: ["bash", "compile.sh"]
 
   mpcnode0:
     image: hbswap
@@ -117,12 +94,12 @@ services:
       - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p0:/opt/hbswap/secrets
       - ./poa:/opt/poa
         #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
         #- ppdata-p0:/opt/hbswap/preprocessing-data
         #- persistence-p0:/usr/src/hbswap/Persistence
+    secrets:
+      - P0.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
@@ -148,9 +125,9 @@ services:
       - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p1:/opt/hbswap/secrets
       - ./poa:/opt/poa
+    secrets:
+      - P1.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
@@ -176,9 +153,9 @@ services:
       - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p2:/opt/hbswap/secrets
       - ./poa:/opt/poa
+    secrets:
+      - P2.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
@@ -204,10 +181,20 @@ services:
       - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p3:/opt/hbswap/secrets
       - ./poa:/opt/poa
+    secrets:
+      - P3.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3", "ethnode", "mpcnode0"]
+
+secrets:
+   P0.key:
+     file: testkeys/secret/P0.key
+   P1.key:
+     file: testkeys/secret/P1.key
+   P2.key:
+     file: testkeys/secret/P2.key
+   P3.key:
+     file: testkeys/secret/P3.key
