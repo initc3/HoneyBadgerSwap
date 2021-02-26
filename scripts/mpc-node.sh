@@ -12,10 +12,11 @@ setup_data() {
     rm -rf /opt/hbswap/db
     mkdir -p Persistence Player-Data
     mkdir -p /opt/hbswap/db /opt/hbswap/inputmask-shares /opt/hbswap/preprocessing-data
-    # Copy the private key, where MP-SPDZ expects it to be (under Player-Data/).
-    cp /opt/hbswap/secrets/P$node_id.key Player-Data/
     # Copy the public keys of all players
     cp /opt/hbswap/public-keys/* Player-Data/
+    # Symlink to the private key, to where MP-SPDZ expects it to be (under Player-Data/).
+    #cp /opt/hbswap/secrets/P$node_id.key Player-Data/
+    ln -s /run/secrets/P$node_id.key Player-Data/P$node_id.key
 }
 
 
