@@ -40,24 +40,24 @@ services:
     entrypoint: ""
     command: sh chain-latest.sh
 
-  deploy.contract:
-    image: hbswap-go
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: go-deps
-    environment:
-      POADIR: /opt/poa
-      POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
-    working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src/go
-    volumes:
-      - ./poa:/opt/poa
-      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-    entrypoint: ""
-    command: ["wait-for-it", "ethnode:8545", "--", "go", "run", "deploy/deploy.go", "ethnode"]
+    #deploy.contract:
+    #  image: hbswap-go
+    #  build:
+    #    context: .
+    #    dockerfile: Dockerfile
+    #    target: go-deps
+    #  environment:
+    #    POADIR: /opt/poa
+    #    POA_KEYSTORE: /opt/poa/keystore
+    #  networks:
+    #    - hbswap
+    #  working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src/go
+    #  volumes:
+    #    - ./poa:/opt/poa
+    #    - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+    #    - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+    #  entrypoint: ""
+    #  command: ["wait-for-it", "ethnode:8545", "--", "go", "run", "deploy/deploy.go", "ethnode"]
 
   # compile MPC programs (hbswap_init, hbswap_trade_prep, hbswap_trade)
   # see scripts/compile.sh for details
