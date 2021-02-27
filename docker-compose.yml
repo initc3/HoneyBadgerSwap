@@ -75,14 +75,13 @@ services:
     #command: ["bash", "compile.sh"]
 
   mpcnode0:
-    image: hbswap
+    #image: hbswap
+    image: sbellem/hbswap
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58080:8080
     networks:
@@ -90,11 +89,11 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
-      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
-      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - ./poa:/opt/poa
+        #- ./conf/server.toml:/opt/hbswap/conf/server.toml
+        #- ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+        #- ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+        #- ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+        #- ./poa/keystore:/opt/poa/keystore
         #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
         #- ppdata-p0:/opt/hbswap/preprocessing-data
         #- persistence-p0:/usr/src/hbswap/Persistence
@@ -106,14 +105,13 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
 
   mpcnode1:
-    image: hbswap
+    #image: hbswap
+    image: sbellem/hbswap
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58081:8080
     networks:
@@ -121,11 +119,11 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
-      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
-      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - ./poa:/opt/poa
+        #- ./conf/server.toml:/opt/hbswap/conf/server.toml
+        #- ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+        #- ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+        #- ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+        #- ./poa/keystore:/opt/poa/keystore
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
@@ -134,14 +132,13 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
 
   mpcnode2:
-    image: hbswap
+    #image: hbswap
+    image: sbellem/hbswap
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58082:8080
     networks:
@@ -149,11 +146,11 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
-      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
-      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - ./poa:/opt/poa
+        #- ./conf/server.toml:/opt/hbswap/conf/server.toml
+        #- ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+        #- ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+        #- ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+        #- ./poa/keystore:/opt/poa/keystore
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
@@ -162,14 +159,13 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
 
   mpcnode3:
-    image: hbswap
+    #image: hbswap
+    image: sbellem/hbswap
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58083:8080
     networks:
@@ -177,11 +173,11 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
-      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
-      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
-      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - ./poa:/opt/poa
+        #- ./conf/server.toml:/opt/hbswap/conf/server.toml
+        #- ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+        #- ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+        #- ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+        #- ./poa/keystore:/opt/poa/keystore
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap

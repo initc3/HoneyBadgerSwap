@@ -1,8 +1,146 @@
 version: '3.8'
 
+volumes:
+  mpc-bytecodes:
+  mpc-schedules:
+
 services:
   ethnode:
     image: sbellem/ethdevnode:latest
     ports:
       - "8545:8545"
       - "8546:8546"
+
+  # pre-compiled MPC programs
+  mpc.compile:
+    image: sbellem/hbswapmpcbytecodes
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/Programs/Bytecode
+      - mpc-schedules:/usr/src/Programs/Schedules
+
+  mpcnode0:
+    image: hbswap
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 58080:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa:/opt/poa
+        #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
+        #- ppdata-p0:/opt/hbswap/preprocessing-data
+        #- persistence-p0:/usr/src/hbswap/Persistence
+    secrets:
+      - P0.key
+    working_dir: /usr/src/hbswap
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
+
+  mpcnode1:
+    image: hbswap
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 58081:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa:/opt/poa
+    secrets:
+      - P1.key
+    working_dir: /usr/src/hbswap
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
+
+  mpcnode2:
+    image: hbswap
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 58082:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa:/opt/poa
+    secrets:
+      - P2.key
+    working_dir: /usr/src/hbswap
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
+
+  mpcnode3:
+    image: hbswap
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 58083:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node.sh:/usr/src/hbswap/mpc-node.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa:/opt/poa
+    secrets:
+      - P3.key
+    working_dir: /usr/src/hbswap
+    # NOTE IMPORTANT!
+    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3", "ethnode", "mpcnode0"]
+
+secrets:
+   P0.key:
+     file: testkeys/secret/P0.key
+   P1.key:
+     file: testkeys/secret/P1.key
+   P2.key:
+     file: testkeys/secret/P2.key
+   P3.key:
+     file: testkeys/secret/P3.key
