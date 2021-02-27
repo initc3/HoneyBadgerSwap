@@ -78,3 +78,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY src/python /usr/src/honeybadgerswap-python
 WORKDIR /usr/src/honeybadgerswap-python
 RUN pip install --editable .
+
+### In development contexts, these files can be mounted along with the src code
+COPY conf/server.toml /opt/hbswap/conf/server.toml
+COPY scripts/mpc-node.sh /usr/src/hbswap/mpc-node.sh
+COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
+COPY poa/keystore /opt/poa/keystore
