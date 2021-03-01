@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/heap"
+	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -10,6 +11,7 @@ import (
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
 	"math"
+	"math/big"
 	"os"
 	"os/exec"
 	"strconv"
@@ -19,21 +21,22 @@ import (
 )
 
 const (
-	prog          = "./malicious-shamir-party.x"
-	players       = "4"
-	threshold     = "1"
-	mpcPort       = "5000"
-	blsPrime      = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
-	nshares       = 1000
-	checkInterval = 10
-	prep_dir      = "/opt/hbswap/preprocessing-data"
+	prog      = "./malicious-shamir-party.x"
+	players   = "4"
+	threshold = "1"
+	mpcPort   = "5000"
+	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
+	nshares   = 1000
+	prepDir   = "/opt/hbswap/preprocessing-data"
+	batch	  = 1
+
 )
 
 var (
+	network 	   string
 	serverID       string
 	conn           *ethclient.Client
 	server         *bind.TransactOpts
-	prevTime       = int64(0)
 	pq             utils.PriorityQueue
 	mutexPQ        = &sync.Mutex{}
 	eventSet       map[utils.EventID]bool
@@ -61,9 +64,9 @@ func updateBalance(token string, user string, amt string, flag string) {
 }
 
 func genInputmask() {
-	tot := utils.GetInputmaskCnt(conn)
+	tot := utils.GetInputmaskCnt(network, conn)
 	for true {
-		cnt := utils.GetInputmaskCnt(conn)
+		cnt := utils.GetInputmaskCnt(network, conn)
 
 		if cnt+100 > tot {
 			fmt.Printf("Generating new inputmasks...\n")
@@ -83,7 +86,7 @@ func genInputmask() {
 }
 
 func watch() {
-	hbswapInstance, err := hbswap.NewHbSwap(utils.HbswapAddr, conn)
+	hbswapInstance, err := hbswap.NewHbSwap(utils.HbswapAddr[network], conn)
 
 	initPoolChannel := make(chan *hbswap.HbSwapInitPool)
 	initPoolSub, err := hbswapInstance.WatchInitPool(nil, initPoolChannel)
@@ -313,18 +316,8 @@ func processTasks() {
 					_tokenA := common.HexToAddress(tokenA)
 					_tokenB := common.HexToAddress(tokenB)
 					price := fmt.Sprintf("%f", float64(_amtB)/float64(_amtA))
-					if serverID == "0" {
-						utils.UpdatePrice(conn, server, _tokenA, _tokenB, price)
-					} else {
-						prevBlockNum := utils.GetUpdateTime(conn, _tokenA, _tokenB)
-						for true {
-							time.Sleep(time.Second)
-							curBlockNum := utils.GetUpdateTime(conn, _tokenA, _tokenB)
-							if curBlockNum > prevBlockNum {
-								break
-							}
-						}
-					}
+
+					utils.UpdatePrice(network, conn, server, _tokenA, _tokenB, big.NewInt(0), price)
 				}
 
 			case "AddLiquidity":
@@ -406,8 +399,8 @@ func processTasks() {
 
 				cmd := exec.Command("python3", "-m", "honeybadgerswap.server.trade_set_data", serverID, user, tokenA, tokenB, idxA, idxB, maskedA, maskedB)
 				utils.ExecCmd(cmd)
-				os.RemoveAll(fmt.Sprintf(prep_dir))
-				os.Mkdir(fmt.Sprintf(prep_dir), 0777)
+				os.RemoveAll(fmt.Sprintf(prepDir))
+				os.Mkdir(fmt.Sprintf(prepDir), 0777)
 
 				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_trade")
 				utils.ExecCmd(cmd)
@@ -422,37 +415,23 @@ func processTasks() {
 				updateBalance(tokenA, user, changeA, "0")
 				updateBalance(tokenB, user, changeB, "0")
 
-				if time.Now().Unix()-prevTime > checkInterval {
+				seq, _ := strconv.Atoi(tradeSeq)
+				if seq % batch == 0 {
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_set_data", serverID, tokenA, tokenB)
 					utils.ExecCmd(cmd)
-					os.RemoveAll(fmt.Sprintf(prep_dir))
-					os.Mkdir(fmt.Sprintf(prep_dir), 0777)
+					os.RemoveAll(fmt.Sprintf(prepDir))
+					os.Mkdir(fmt.Sprintf(prepDir), 0777)
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_calc_price")
 					stdout := utils.ExecCmd(cmd)
+
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_org_data", serverID)
+					stdout = utils.ExecCmd(cmd)
 					price := strings.Split(stdout, "\n")[0]
 					fmt.Printf("avg_price %s\n", price)
-
-					if price == "0" || price == "" {
-						continue
-					}
-
 					_tokenA := common.HexToAddress(tokenA)
 					_tokenB := common.HexToAddress(tokenB)
-					if serverID == "0" {
-						utils.UpdatePrice(conn, server, _tokenA, _tokenB, price)
-					} else {
-						prevBlockNum := utils.GetUpdateTime(conn, _tokenA, _tokenB)
-						for true {
-							time.Sleep(time.Second)
-							curBlockNum := utils.GetUpdateTime(conn, _tokenA, _tokenB)
-							if curBlockNum > prevBlockNum {
-								break
-							}
-						}
-					}
-
-					prevTime = time.Now().Unix()
+					utils.UpdatePrice(network, conn, server, _tokenA, _tokenB, big.NewInt(int64(seq)), price)
 				}
 
 			case "SecretWithdraw":
@@ -464,7 +443,7 @@ func processTasks() {
 				amt := task.Parameters[3]
 
 				if checkBalance(token, user, amt) == 1 {
-					utils.Consent(conn, server, utils.StrToBig(seq))
+					utils.Consent(network, conn, server, utils.StrToBig(seq))
 					updateBalance(token, user, fmt.Sprintf("-%s", amt), "1")
 				}
 
@@ -475,18 +454,31 @@ func processTasks() {
 }
 
 func main() {
-	serverID = os.Args[1]
-	fmt.Printf("Starting mpc server %v\n", serverID)
+	_network := flag.String("n", "testnet", "Type 'testnet' or 'privatenet'. Default: testnet")
+	flag.Parse()
+	network = *_network
+	fmt.Println(network)
 
-	//conn = utils.GetEthClient(utils.WsEndpoint)
+	var wsUrl string
+	if (network == "privatenet") {
+		serverID = os.Args[3]
+		fmt.Printf("Starting mpc server %v\n", serverID)
+		server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
+		eventSet = map[utils.EventID]bool{}
+		leaderHostname = os.Args[4]
+		ethHostname := os.Args[5]
+		wsUrl = utils.GetEthWsURL(ethHostname)
 
-	ethHostname := os.Args[2]
-	wsUrl := utils.GetEthWsURL(ethHostname)
+	} else {
+		serverID = os.Args[1]
+		fmt.Printf("Starting mpc server %v\n", serverID)
+		server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
+		eventSet = map[utils.EventID]bool{}
+
+		leaderHostname = os.Args[2]
+		wsUrl = utils.TestnetWsEndpoint
+	}
 	conn = utils.GetEthClient(wsUrl)
-	leaderHostname = os.Args[3]
-
-	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
-	eventSet = map[utils.EventID]bool{}
 
 	var wg sync.WaitGroup
 	wg.Add(1)

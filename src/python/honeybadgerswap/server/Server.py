@@ -75,8 +75,8 @@ class Server:
         async def handler_log(request):
             print(f"s{self.server_id} request: {request}")
             n = int(request.match_info.get("n"))
-            a_file = open(f"Scripts/hbswap/log/mpc_server_{self.server_id}.log", "r")
-            lines = a_file.readlines()
+            log_file = open(f"/usr/src/hbswap/log/mpc_server_{self.server_id}.log", "r")
+            lines = log_file.readlines()
             last_lines = lines[-n:]
             res = ''
             for line in last_lines:

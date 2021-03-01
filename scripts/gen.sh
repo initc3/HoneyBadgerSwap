@@ -23,7 +23,6 @@ sync_go_binding() {
   abigen_files $1 $2
 }
 
-cd Scripts/hbswap
 #truffle_complie
 sync_go_binding HbSwap hbswap
 #sync_go_binding Token token
