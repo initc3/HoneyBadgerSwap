@@ -72,6 +72,8 @@ func main() {
 	ethUrl := utils.GetEthURL(ethHostname)
 	conn := utils.GetEthClient(ethUrl)
 
+	//conn := utils.GetEthClient(utils.TestnetWsEndpoint)
+
 	owner := utils.GetAccount("server_0")
 
 	DeployHbSwap(conn, owner)

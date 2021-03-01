@@ -14,6 +14,8 @@ def main():
     total_cnt = read_sint(1)
 
     avg_price = total_price / total_cnt
-    print_ln('%s', avg_price.reveal())
+    #print_ln('%s', avg_price.reveal())
+    for i in range(4):
+        avg_price.reveal_to(i)
 
 main()

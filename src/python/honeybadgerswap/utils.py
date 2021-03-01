@@ -104,6 +104,9 @@ def get_inverse(a):
 def from_float(x):
     return int(round(float(x) * (2 ** fp)))
 
+def to_float(x):
+    return 1. * x / (2 ** fp)
+
 
 def from_hex(x):
     return int((mpz_from_old_binary(x) * inverse_R) % p)

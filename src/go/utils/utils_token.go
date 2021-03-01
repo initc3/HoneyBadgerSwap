@@ -25,13 +25,13 @@ func FundToken(conn *ethclient.Client, tokenAddr common.Address, toAddr common.A
 	//fmt.Printf("Funded account %s to %v token\n", toAddr.Hex(), balance)
 }
 
-func Approve(conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, receiver common.Address, amt *big.Int) {
+func Approve(network string, conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, receiver common.Address, amt *big.Int) {
 	tokenInstance, err := token.NewToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fundGas(conn, auth.From)
+	fundGas(network, conn, auth.From)
 	tx, err := tokenInstance.Approve(auth, receiver, amt)
 	if err != nil {
 		log.Fatal(err)

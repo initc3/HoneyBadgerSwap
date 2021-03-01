@@ -28,6 +28,7 @@ contract HbSwap {
 
     uint public inputmaskCnt;
     uint public tradeCnt;
+    mapping (uint => address) public inputMaskOwner;
     mapping (address => mapping(address => uint)) public balances;
 
     uint public secretWithdrawCnt;
@@ -37,7 +38,9 @@ contract HbSwap {
     mapping (uint => bool) expired;
 
     mapping (address => mapping (address => string)) public prices;
-    mapping (address => mapping (address => uint)) public updateTimes;
+    mapping (address => mapping (address => uint)) public lastUpdateSeq;
+    mapping (address => mapping (address => mapping (uint => mapping (string => uint)))) proposalCnt;
+    mapping (address => mapping (address => mapping (uint => mapping (address => bool)))) propose;
 
     constructor(address[] memory _servers, uint _threshold) public {
         for (uint i = 0; i < _servers.length; i++) {
@@ -120,21 +123,40 @@ contract HbSwap {
     }
 
     function tradePrep() public {
+        address user = msg.sender;
+        inputMaskOwner[inputmaskCnt] = user;
+        inputMaskOwner[inputmaskCnt + 1] = user;
+
         emit TradePrep(msg.sender, inputmaskCnt, inputmaskCnt + 1);
+
         inputmaskCnt += 2;
     }
 
     function trade(address _tokenA, address _tokenB, uint _idxA, uint _idxB, uint _maskedA, uint _maskedB) public {
         require(_tokenA < _tokenB, "invalid trading pair");
+
+        address user = msg.sender;
+        require(inputMaskOwner[_idxA] == user, "unauthorized inputmask");
+        require(inputMaskOwner[_idxB] == user, "unauthorized inputmask");
+
         tradeCnt += 1;
         emit Trade(tradeCnt, msg.sender, _tokenA, _tokenB, _idxA, _idxB, _maskedA, _maskedB);
     }
 
-    function updatePrice(address _tokenA, address _tokenB, string calldata _price) public {
+    function updatePrice(address _tokenA, address _tokenB, uint _checkpointSeq, string calldata _price) public {
         require(_tokenA < _tokenB, "invalid trading pair");
-        prices[_tokenA][_tokenB] = _price;
-        updateTimes[_tokenA][_tokenB] = block.number;
-        emit UpdatePrice(_tokenA, _tokenB, prices[_tokenA][_tokenB], updateTimes[_tokenA][_tokenB]);
-    }
 
+        address server = msg.sender;
+        require(servers[server], "not a valid server");
+
+        if (!propose[_tokenA][_tokenB][_checkpointSeq][server]) {
+            propose[_tokenA][_tokenB][_checkpointSeq][server] = true;
+            proposalCnt[_tokenA][_tokenB][_checkpointSeq][_price] += 1;
+
+            if (_checkpointSeq == 0 || (proposalCnt[_tokenA][_tokenB][_checkpointSeq][_price] > threshold && _checkpointSeq > lastUpdateSeq[_tokenA][_tokenB])) {
+                prices[_tokenA][_tokenB] = _price;
+                lastUpdateSeq[_tokenA][_tokenB] = _checkpointSeq;
+            }
+        }
+    }
 }

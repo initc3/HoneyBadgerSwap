@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
@@ -27,11 +28,16 @@ import (
 //}
 
 func main() {
-	user := utils.GetAccount(fmt.Sprintf("account_%s", os.Args[1]))
-	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
-	amtA, amtB := os.Args[4], os.Args[5]
+	_network := flag.String("n", "testnet", "Type 'testnet' or 'privatenet'. Default: testnet")
+	flag.Parse()
+	network := *_network
+	fmt.Println(network)
 
-	ethHostname := os.Args[6]
+	user := utils.GetAccount(fmt.Sprintf("account_%s", os.Args[3]))
+	tokenA, tokenB := common.HexToAddress(os.Args[4]), common.HexToAddress(os.Args[5])
+	amtA, amtB := os.Args[6], os.Args[7]
+
+	ethHostname := os.Args[8]
 	ethUrl := utils.GetEthURL(ethHostname)
 	conn := utils.GetEthClient(ethUrl)
 
@@ -53,5 +59,5 @@ func main() {
 	//	value = prepareETH(conn, user, amtB)
 	//}
 
-	utils.InitPool(conn, user, tokenA, tokenB, utils.StrToBig(amtA), utils.StrToBig(amtB))
+	utils.InitPool(network, conn, user, tokenA, tokenB, utils.StrToBig(amtA), utils.StrToBig(amtB))
 }

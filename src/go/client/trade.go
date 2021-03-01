@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
@@ -12,17 +13,22 @@ import (
 )
 
 func main() {
-	user := os.Args[1]
-	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
-	amtA, amtB := os.Args[4], os.Args[5]
+	_network := flag.String("n", "testnet", "Type 'testnet' or 'privatenet'. Default: testnet")
+	flag.Parse()
+	network := *_network
+	fmt.Println(network)
 
-	ethHostname := os.Args[6]
+	user := os.Args[3]
+	tokenA, tokenB := common.HexToAddress(os.Args[4]), common.HexToAddress(os.Args[5])
+	amtA, amtB := os.Args[6], os.Args[7]
+
+	ethHostname := os.Args[8]
 	ethUrl := utils.GetEthURL(ethHostname)
 	conn := utils.GetEthClient(ethUrl)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
 
-	idxA, idxB := utils.TradePrep(conn, owner)
+	idxA, idxB := utils.TradePrep(network, conn, owner)
 
 	cmd := exec.Command("python3", "-m", "honeybadgerswap.client.req_inputmasks", strconv.Itoa(int(idxA)), amtA, strconv.Itoa(int(idxB)), amtB)
 	stdout := utils.ExecCmd(cmd)
@@ -32,5 +38,5 @@ func main() {
 	maskedB := utils.StrToBig(maskedInputs[1])
 
 	fmt.Printf("maskedInputs: %v\n", maskedInputs)
-	utils.Trade(conn, owner, tokenA, tokenB, big.NewInt(idxA), big.NewInt(idxB), maskedA, maskedB)
+	utils.Trade(network, conn, owner, tokenA, tokenB, big.NewInt(idxA), big.NewInt(idxB), maskedA, maskedB)
 }

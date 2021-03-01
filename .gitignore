@@ -1,2 +1,4 @@
 poa/data
 .idea/
+*log/
+*build/
