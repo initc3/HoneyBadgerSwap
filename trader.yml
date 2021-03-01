@@ -21,7 +21,7 @@ services:
     entrypoint: ""
     # TODO wait for contract to be deployed/available
     #command: ["bash", "client-public-deposit.sh", "ethnode"]
-    command: ["bash", "client-public-deposit.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
+    command: ["bash", "client-public-deposit.sh", "$HBSWAP_ETHNODE"]
 
   secret.deposit:
     image: hbswap-go
@@ -43,7 +43,7 @@ services:
     entrypoint: ""
     # TODO wait for contract to be deployed/available
     #command: ["bash", "client-secret-deposit.sh", "ethnode"]
-    command: ["bash", "client-secret-deposit.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
+    command: ["bash", "client-secret-deposit.sh", "$HBSWAP_ETHNODE"]
 
   trade-1:
     image: hbswap
@@ -59,13 +59,13 @@ services:
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
-      - ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
-    command: ["bash", "trade-1.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
+    command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
 
@@ -83,10 +83,10 @@ services:
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
-      - ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
-    command: ["bash", "trade-2.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
+    command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]

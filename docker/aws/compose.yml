@@ -28,7 +28,7 @@ services:
       - mpc-schedules:/usr/src/Programs/Schedules
 
   mpcnode0:
-    image: sbellem/hbswap
+    image: sbellem/hbswap:aws
     environment:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
@@ -47,11 +47,11 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
 
   mpcnode1:
-    image: sbellem/hbswap
+    image: sbellem/hbswap:aws
     environment:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8080:8080
+      - 8081:8081
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -63,11 +63,11 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
 
   mpcnode2:
-    image: sbellem/hbswap
+    image: sbellem/hbswap:aws
     environment:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8080:8080
+      - 8082:8082
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -79,11 +79,11 @@ services:
     command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
 
   mpcnode3:
-    image: sbellem/hbswap
+    image: sbellem/hbswap:aws
     environment:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8080:8080
+      - 8083:8083
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules

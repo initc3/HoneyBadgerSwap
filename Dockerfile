@@ -87,7 +87,8 @@ WORKDIR /usr/src/honeybadgerswap-python
 RUN pip install --editable .
 
 ### In development contexts, these files can be mounted along with the src code
-COPY conf/server.toml /opt/hbswap/conf/server.toml
+ARG http_server_config=conf/server.toml
+COPY $http_server_config /opt/hbswap/conf/server.toml
 COPY scripts/mpc-node.sh /usr/src/hbswap/mpc-node.sh
 COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY poa/keystore /opt/poa/keystore
