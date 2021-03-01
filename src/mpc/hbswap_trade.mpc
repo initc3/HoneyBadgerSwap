@@ -29,22 +29,26 @@ def main():
 
     valid_order = (amt_A * amt_B) < 0
 
+    fee_rate = sfix(0.003)
+
     buy_A = amt_A > 0
-    enough_B = -amt_B <= balance_B
+    total_B = (1 + fee_rate) * amt_B
+    enough_B = -total_B <= balance_B
     calc_A = pool_A - pool_B * pool_A / (pool_B - amt_B)
     accept_A = calc_A >= amt_A
     flag_buy_A = valid_order * buy_A * enough_B * accept_A
     print_ln('buy_A %s\nenough_B %s\ncalc_A %s\naccept_A %s\nflag_buy_A %s', buy_A.reveal(), enough_B.reveal(), calc_A.reveal(), accept_A.reveal(), flag_buy_A.reveal())
 
     buy_B = 1 - buy_A
-    enough_A = -amt_A <= balance_A
+    total_A = (1 + fee_rate) * amt_A
+    enough_A = -total_A <= balance_A
     calc_B = pool_B - pool_A * pool_B / (pool_A - amt_A)
     accept_B = calc_B >= amt_B
     flag_buy_B = valid_order * buy_B * enough_A * accept_B
     print_ln('buy_B %s\nenough_A %s\ncalc_B %s\naccept_B %s\nflag_buy_B %s', buy_B.reveal(), enough_A.reveal(), calc_B.reveal(), accept_B.reveal(), flag_buy_B.reveal())
 
-    change_A = flag_buy_A * calc_A + flag_buy_B * amt_A
-    change_B = flag_buy_A * amt_B + flag_buy_B * calc_B
+    change_A = flag_buy_A * calc_A + flag_buy_B * total_A
+    change_B = flag_buy_A * total_B + flag_buy_B * calc_B
     print_ln('change_A %s', change_A.reveal())
     print_ln('change_B %s', change_B.reveal())
 
