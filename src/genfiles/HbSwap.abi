@@ -337,9 +337,52 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "inputMaskOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "inputmaskCnt",
     "constant": true,
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "lastUpdateSeq",
     "outputs": [
       {
         "internalType": "uint256",
@@ -452,31 +495,6 @@
   {
     "inputs": [],
     "name": "tradeCnt",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "updateTimes",
-    "constant": true,
     "outputs": [
       {
         "internalType": "uint256",
@@ -707,6 +725,11 @@
         "internalType": "address",
         "name": "_tokenB",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_checkpointSeq",
+        "type": "uint256"
       },
       {
         "internalType": "string",

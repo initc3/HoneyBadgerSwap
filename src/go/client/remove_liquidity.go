@@ -12,7 +12,7 @@ func main() {
 	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
 	amt := os.Args[4]
 
-	conn := utils.GetEthClient(utils.HttpEndpoint)
+	conn := utils.GetEthClient(utils.TestnetHttpEndpoint)
 
 	utils.RemoveLiquidity(conn, user, tokenA, tokenB, utils.StrToBig(amt))
 }

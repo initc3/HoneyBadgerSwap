@@ -13,9 +13,9 @@ import (
 
 /********** external functions **********/
 
-func FundETH(conn *ethclient.Client, toAddr common.Address, amount *big.Int) {
+func FundETH(network string, conn *ethclient.Client, toAddr common.Address, amount *big.Int) {
 	adminAuth := GetAccount("server_0")
-	transferETH(conn, chainID, adminAuth, toAddr, amount)
+	transferETH(conn, chainID[network], adminAuth, toAddr, amount)
 
 	//balance := GetBalanceETH(conn, toAddr)
 	//fmt.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
@@ -31,7 +31,7 @@ func GetBalanceETH(conn *ethclient.Client, addr common.Address) (*big.Int) {
 }
 
 /********** internal functions **********/
-func fundGas(conn *ethclient.Client, toAddr common.Address) {
+func fundGas(network string, conn *ethclient.Client, toAddr common.Address) {
 	balance := GetBalanceETH(conn, toAddr)
 	amount := minBalance
 	if balance.Cmp(amount) != -1 {
@@ -41,7 +41,7 @@ func fundGas(conn *ethclient.Client, toAddr common.Address) {
 	amount.Sub(amount, balance)
 
 	adminAuth := GetAccount("server_0")
-	transferETH(conn, chainID, adminAuth, toAddr, amount)
+	transferETH(conn, chainID[network], adminAuth, toAddr, amount)
 
 	balance = GetBalanceETH(conn, toAddr)
 	//fmt.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
