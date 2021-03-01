@@ -35,7 +35,7 @@ stop:
 	docker-compose stop ethnode mpc.nodes
 
 rm: clean
-	#docker-compose rm --stop --force ethnode contract.deploy contract.deposit
+	#docker-compose rm --stop --force ethnode contract.deploycontract.deposit
 	docker-compose rm --stop --force -v
 	docker volume rm \
 		hbswap_public-keys \
@@ -53,7 +53,7 @@ init-eth:
 #simulation: down mpc-keys mpc-compile
 simulation: down mpc-compile
 	docker-compose up -d ethnode
-	docker-compose up deploy.contract
+	docker-compose up deploycontract
 	docker-compose up -d \
 		mpcnode0 \
 		mpcnode1 \
@@ -77,7 +77,7 @@ simulation: down mpc-compile
 
 start-hbswap:
 	docker-compose up -d ethnode
-	docker-compose up deploy.contract
+	docker-compose up deploycontract
 	docker-compose up -d \
 		mpcnode0 \
 		mpcnode1 \
@@ -101,7 +101,7 @@ trade-2:
 up-eth:
 	docker-compose up -d ethnode
 
-deploy-contract: up-eth
+deploycontract: up-eth
 	docker-compose -f docker-compose.yml -f eth.yml up contract.deploy
 
 lp-init-pool:
