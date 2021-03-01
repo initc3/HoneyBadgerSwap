@@ -10,8 +10,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
+      #networks:
+      #  - hbswap
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -20,7 +20,8 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "client-public-deposit.sh", "ethnode"]
+    #command: ["bash", "client-public-deposit.sh", "ethnode"]
+    command: ["bash", "client-public-deposit.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
 
   secret.deposit:
     image: hbswap-go
@@ -31,8 +32,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
+      #networks:
+      #  - hbswap
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -41,7 +42,8 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "client-secret-deposit.sh", "ethnode"]
+    #command: ["bash", "client-secret-deposit.sh", "ethnode"]
+    command: ["bash", "client-secret-deposit.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
 
   trade-1:
     image: hbswap
@@ -52,8 +54,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
+      #networks:
+      #  - hbswap
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
@@ -62,7 +64,8 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    command: ["bash", "trade-1.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
 
@@ -75,8 +78,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
+      #networks:
+      #  - hbswap
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
@@ -85,4 +88,5 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
+    command: ["bash", "trade-2.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]

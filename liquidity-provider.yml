@@ -10,8 +10,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    networks:
-      - hbswap
+      #networks:
+      #  - hbswap
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -20,4 +20,5 @@ services:
       - ./scripts:/usr/src/scripts
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    command: ["bash", "init-pool.sh", "ethnode"]
+    #command: ["bash", "init-pool.sh", "ethnode"]
+    command: ["bash", "init-pool.sh", "aws-LoadBal-1RRRLSMSRJ72-54a6aeb93abec510.elb.eu-west-3.amazonaws.com"]

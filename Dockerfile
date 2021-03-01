@@ -8,8 +8,15 @@ COPY --from=sbellem/go-ethereum:cfbb969da-buster \
                 /go/src/github.com/ethereum /go/src/github.com/ethereum
 
 COPY src /go/src/github.com/initc3/HoneyBadgerSwap/src
+
 WORKDIR /go/src/github.com/initc3/HoneyBadgerSwap/src
 RUN go get -d -v ./...
+
+# needed to deploy contracts
+# TODO: verify whether poa dir is really needed, or what is needed from it, maybe
+# the keystore is sufficient
+COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
+COPY poa/keystore /opt/poa/keystore
 
 
 # main image

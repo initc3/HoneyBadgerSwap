@@ -2,19 +2,22 @@ version: '3.8'
 
 services:
 
-  deploy.contract:
-    image: hbswap-go-z
+  deploycontract:
+    image: hbswap-go
     build:
       context: .
-      dockerfile: contract.Dockerfile
-      target: deploy
+      dockerfile: Dockerfile
+      target: go-deps
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-    working_dir: /go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap/go
+    working_dir: /go/src/github.com/initc3/HoneyBadgerSwap/src/go
     volumes:
       - ./poa:/opt/poa
-      - ./src:/go/src/github.com/initc3/MP-SPDZ/Scripts/hbswap
+      #- ./poa/keystore:/opt/poa/keystore
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
-    #command: ["wait-for-it", "eth.chain:8545", "--", "go", "run", "deploy/deploy.go", "eth.chain"]
-    command: ["go", "run", "deploy/deploy.go", "honey-LoadB-2JZ1BRZY8F3Q-3085a0a161f4eb3d.elb.eu-west-3.amazonaws.com"]
+    command: ["go", "run", "deploy/deploy.go", "$HBSWAP_ETHNODE"]
+    #command: ["go", "run", "deploy/deploy.go", "aws-LoadBal-1I36V77N4SFN4-705c9573e0b2603c.elb.eu-west-3.amazonaws.com"]
+    #command: ["go", "run", "deploy/deploy.go", "hbswa-LoadB-1WFZ8C0UK3GUR-673e08abd4c66d64.elb.eu-west-3.amazonaws.com"]
+
