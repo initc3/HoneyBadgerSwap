@@ -9,7 +9,9 @@ const hbswapAddr = "0xe4d40ec72bf5da61a872af12011c7cadd9c49793"
 const token1 = "0x63e7f20503256ddcfec64872aadb785d5a290cbb"
 const token2 = "0x403b0f962566ffb960d0de98875dc09603aa67e9"
 
-const serverPrefix = "https://testnet.mpc.node."
+const basePort = 58080
+const feeRate = 0.003
+const fixPointDigit = 8
 
 // **** Internal functions ****
 
@@ -91,8 +93,7 @@ function interpolate(n, t, r, p) {
 async function getSecretBalance(token, user, prefix='') {
     let shares = []
     for (let i = 0; i < 4; i++) {
-        url = "http://localhost:" + (58080 + i) + "/balance/" + token + ',' + user
-        // url = `${serverPrefix}i:58080/balance/${token},${user}`
+        url = "http://localhost:" + (basePort + i) + "/balance/" + token + ',' + user
         console.log(url)
         const share = (await (await fetch(url, {mode: 'cors'})).json()).balance
         $("#" + prefix + i).text(share)
@@ -104,8 +105,7 @@ async function getSecretBalance(token, user, prefix='') {
 async function getTradePrice(tradeSeq) {
     let shares = []
     for (let i = 0; i < 4; i++) {
-        url = "http://localhost:" + (58080 + i) + "/price/" + tradeSeq
-        // url = `${serverPrefix}i:8080/price/${tradeSeq}`
+        url = "http://localhost:" + (basePort + i) + "/price/" + tradeSeq
         console.log(url)
         let share = (await (await fetch(url, {mode: 'cors'})).json()).price
         $("#tradePrice" + i).text(share)
@@ -115,16 +115,14 @@ async function getTradePrice(tradeSeq) {
 }
 
 async function getInputmasks(srv, idxes) {
-    url = "http://localhost:" + (58080 + srv) + "/inputmasks/" + idxes
-    // url = `${serverPrefix}i:8080/inputmasks/${idxes}`
+    url = "http://localhost:" + (basePort + srv) + "/inputmasks/" + idxes
     const shares = (await (await fetch(url, {mode: 'cors'})).json()).inputmask_shares.split(',')
     return [BigInt(shares[0]), BigInt(shares[1])]
 }
 
 async function getServerLog(srv, lines) {
     console.log('get log')
-    url = "http://localhost:" + (58080 + srv) + "/log/" + lines
-    // url = `${serverPrefix}i:8080/log/${lines}`
+    url = "http://localhost:" + (basePort + srv) + "/log/" + lines
     const log = (await (await fetch(url, {mode: 'cors'})).json()).log
     $("#log").text(log)
 }
@@ -402,7 +400,8 @@ async function updateTradePair() {
 }
 
 async function updateAmtTradeFrom() {
-    const fromToken = tokenList.get($( "#tradeFromToken option:selected" ).text())
+    const _fromToken = $( "#tradeFromToken option:selected").text()
+    const fromToken = tokenList.get(_fromToken)
     const toToken = tokenList.get($( "#tradeToToken option:selected" ).text())
 
     if (fromToken == toToken) {
@@ -423,13 +422,16 @@ async function updateAmtTradeFrom() {
 
     const amtTradeTo = amtTradeFrom * price
     const minReceived = amtTradeTo * (1 - slippage)
+    const fee = amtTradeFrom * feeRate
 
-    $("#amtTradeTo").val(amtTradeTo)
-    $("#minRecv").text(minReceived)
+    $("#amtTradeTo").val(amtTradeTo.toFixed(fixPointDigit))
+    $("#minRecv").text(minReceived.toFixed(fixPointDigit))
+    $("#fee").text(fee.toFixed(fixPointDigit) + ' ' + _fromToken)
 }
 
 async function updateAmtTradeTo() {
-    const fromToken = tokenList.get($( "#tradeFromToken option:selected" ).text())
+    const _fromToken = $( "#tradeFromToken option:selected").text()
+    const fromToken = tokenList.get(_fromToken)
     const toToken = tokenList.get($( "#tradeToToken option:selected" ).text())
 
     if (fromToken == toToken) {
@@ -450,9 +452,11 @@ async function updateAmtTradeTo() {
 
     const amtTradeFrom = amtTradeTo / price
     const minReceived = amtTradeTo * (1 - slippage)
+    const fee = amtTradeFrom * feeRate
 
-    $("#amtTradeFrom").val(amtTradeFrom)
-    $("#minRecv").text(minReceived)
+    $("#amtTradeFrom").val(amtTradeFrom.toFixed(fixPointDigit))
+    $("#minRecv").text(minReceived.toFixed(fixPointDigit))
+    $("#fee").text(fee.toFixed(fixPointDigit) + ' ' + _fromToken)
 }
 
 async function updatePoolPair() {
