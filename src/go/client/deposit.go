@@ -51,7 +51,10 @@ func main() {
 	amtA, amtB := os.Args[6], os.Args[7]
 
 	ethHostname := os.Args[8]
-	ethUrl := utils.GetEthURL(ethHostname)
+	ethUrl := ethHostname
+	if network == "privatenet" {
+		ethUrl = utils.GetEthURL(ethHostname)
+	}
 	conn := utils.GetEthClient(ethUrl)
 
 	if bytes.Equal(tokenA.Bytes(), utils.EthAddr.Bytes()) {

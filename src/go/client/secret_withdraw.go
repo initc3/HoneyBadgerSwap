@@ -27,7 +27,10 @@ func main() {
 	amtA, amtB := os.Args[4], os.Args[5]
 
 	ethHostname := os.Args[6]
-	ethUrl := utils.GetEthURL(ethHostname)
+	ethUrl := ethHostname
+	if network == "privatenet" {
+		ethUrl = utils.GetEthURL(ethHostname)
+	}
 	conn := utils.GetEthClient(ethUrl)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
