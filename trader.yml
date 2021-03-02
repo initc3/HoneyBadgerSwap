@@ -10,8 +10,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      #networks:
-      #  - hbswap
+    networks:
+      - hbswap
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -20,8 +20,8 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    #command: ["bash", "client-public-deposit.sh", "ethnode"]
-    command: ["bash", "client-public-deposit.sh", "$HBSWAP_ETHNODE"]
+    command: ["bash", "client-public-deposit.sh", "ethnode"]
+    #command: ["bash", "client-public-deposit.sh", "$HBSWAP_ETHNODE"]
 
   secret.deposit:
     image: hbswap-go
@@ -32,8 +32,8 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      #networks:
-      #  - hbswap
+    networks:
+      - hbswap
     working_dir: /usr/src/scripts
     volumes:
       - ./poa:/opt/poa
@@ -42,8 +42,8 @@ services:
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    #command: ["bash", "client-secret-deposit.sh", "ethnode"]
-    command: ["bash", "client-secret-deposit.sh", "$HBSWAP_ETHNODE"]
+    command: ["bash", "client-secret-deposit.sh", "ethnode"]
+    #command: ["bash", "client-secret-deposit.sh", "$HBSWAP_ETHNODE"]
 
   trade-1:
     image: hbswap
@@ -54,18 +54,19 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      #networks:
-      #  - hbswap
+    networks:
+      - hbswap
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
-      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      #- ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
-    command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    #command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
 
@@ -78,15 +79,16 @@ services:
     environment:
       POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      #networks:
-      #  - hbswap
+    networks:
+      - hbswap
     # FIXME is the poa stuff needed?
     volumes:
       - ./poa:/opt/poa
-      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      #- ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
-    command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
+    #command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]

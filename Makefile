@@ -52,7 +52,7 @@ init-eth:
 
 simulation: down mpc-compile
 	docker-compose up --detach ethnode
-	docker-compose up deploy.contract
+	docker-compose up deploycontract
 	# MPC Network -- could be deployed to a cloud provider
 	docker-compose up --detach \
 		mpcnode0 \
@@ -155,7 +155,7 @@ up-init: down-init rm-init
 	docker-compose -f hbswap-init.yml up mpcnode0 mpcnode1 mpcnode2 mpcnode3
 	#docker-compose -f hbswap-init.yml up mpc.allnodes
 
-testnet: down mpc-keys mpc-compile
+testnet: down mpc-compile
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \

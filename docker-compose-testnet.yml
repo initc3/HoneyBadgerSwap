@@ -30,38 +30,6 @@ volumes:
 
 services:
 
-#  mpc.trusted.setup:
-#    image: sbellem/openssl:bullseye-slim
-#    networks:
-#      - hbswap
-#    volumes:
-#      - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/setup-ssl.sh
-#      - ./scripts/generate-keys.sh:/usr/src/generate-keys.sh
-#      - public-keys:/usr/src/Player-Data
-#      - secrets-p0:/usr/src/Secrets-P0
-#      - secrets-p1:/usr/src/Secrets-P1
-#      - secrets-p2:/usr/src/Secrets-P2
-#      - secrets-p3:/usr/src/Secrets-P3
-#    #command: ["bash", "setup-ssl.sh", "4"]
-#    working_dir: /usr/src
-#    command: ["bash", "generate-keys.sh", "setup-ssl.sh", "4"]
-#
-#  # compile MPC programs (hbswap_init, hbswap_trade_prep, hbswap_trade)
-#  # see scripts/compile.sh for details
-#  mpc.compile:
-#    image: python:3.8
-#    networks:
-#      - hbswap
-#    volumes:
-#      - ./MP-SPDZ/compile.py:/usr/src/compile.py
-#      - ./MP-SPDZ/Compiler:/usr/src/Compiler
-#      - ./src/mpc:/usr/src/Programs/Source
-#      - ./scripts/compile.sh:/usr/src/compile.sh
-#      - mpc-bytecodes:/usr/src/Programs/Bytecode
-#      - mpc-schedules:/usr/src/Programs/Schedules
-#    working_dir: /usr/src
-#    command: ["bash", "compile.sh"]
-
   mpcnode0:
     image: hbswap
     build:
