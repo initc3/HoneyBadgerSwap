@@ -31,14 +31,12 @@ volumes:
 services:
 
   mpcnode0:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58080:8080
     networks:
@@ -50,28 +48,26 @@ services:
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p0:/opt/hbswap/secrets
-      - ./poa:/opt/poa
+      - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
         #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
         #- ppdata-p0:/opt/hbswap/preprocessing-data
         #- persistence-p0:/usr/src/hbswap/Persistence
+    secrets:
+      - P0.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     command: ["bash", "mpc-node-testnet.sh", "0", "mpcnode0"]
 
   mpcnode1:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58081:8080
     networks:
@@ -83,25 +79,23 @@ services:
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p1:/opt/hbswap/secrets
-      - ./poa:/opt/poa
+      - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+    secrets:
+      - P1.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     command: ["bash", "mpc-node-testnet.sh", "1", "mpcnode0"]
 
   mpcnode2:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58082:8080
     networks:
@@ -113,25 +107,23 @@ services:
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p2:/opt/hbswap/secrets
-      - ./poa:/opt/poa
+      - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+    secrets:
+      - P2.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     command: ["bash", "mpc-node-testnet.sh", "2", "mpcnode0"]
 
   mpcnode3:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      POADIR: /opt/poa
       POA_KEYSTORE: /opt/poa/keystore
-      PYTHONUNBUFFERED: 1
     ports:
       - 58083:8080
     networks:
@@ -143,12 +135,22 @@ services:
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
-      - public-keys:/opt/hbswap/public-keys:ro
-      - secrets-p3:/opt/hbswap/secrets
-      - ./poa:/opt/poa
+      - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+    secrets:
+      - P3.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     command: ["bash", "mpc-node-testnet.sh", "3", "mpcnode0"]
+
+secrets:
+   P0.key:
+     file: testkeys/secret/P0.key
+   P1.key:
+     file: testkeys/secret/P1.key
+   P2.key:
+     file: testkeys/secret/P2.key
+   P3.key:
+     file: testkeys/secret/P3.key
