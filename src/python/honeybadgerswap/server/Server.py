@@ -5,7 +5,17 @@ import time
 
 from aiohttp import web
 
-from ..utils import key_balance, key_inputmask, key_trade_price, key_trade_time, location_db, openDB, get_value, from_hex
+from ..utils import (
+    key_balance,
+    key_inputmask,
+    key_trade_price,
+    key_trade_time,
+    location_db,
+    openDB,
+    get_value,
+    from_hex,
+)
+
 
 class Server:
     def __init__(self, n, t, server_id, host, http_port):
@@ -34,10 +44,13 @@ class Server:
     async def http_server(self):
         async def handler_inputmask(request):
             print(f"s{self.server_id} request: {request}")
-            mask_idxes = re.split(',', request.match_info.get("mask_idxes"))
-            res = ''
+            mask_idxes = re.split(",", request.match_info.get("mask_idxes"))
+            res = ""
             for mask_idx in mask_idxes:
-                res += f"{',' if len(res) > 0 else ''}{await self.db_get_non_balance(key_inputmask(mask_idx))}"
+                res += (
+                    f"{',' if len(res) > 0 else ''}"
+                    f"{await self.db_get_non_balance(key_inputmask(mask_idx))}"
+                )
             data = {
                 "inputmask_shares": res,
             }
@@ -55,19 +68,19 @@ class Server:
 
             res = await self.db_get_non_balance(key_trade_price(trade_seq))
             data = {
-                "price": f'{res}',
+                "price": f"{res}",
             }
             print(f"s{self.server_id} response: {res}")
             return web.json_response(data)
 
         async def handler_balance(request):
             print(f"s{self.server_id} request: {request}")
-            token_user = re.split(',', request.match_info.get("token_user"))
+            token_user = re.split(",", request.match_info.get("token_user"))
             token = token_user[0]
             user = token_user[1]
             res = await self.db_get(key_balance(token, user))
             data = {
-                "balance": f'{res}',
+                "balance": f"{res}",
             }
             print(f"s{self.server_id} response: {res}")
             return web.json_response(data)
@@ -78,24 +91,25 @@ class Server:
             log_file = open(f"/usr/src/hbswap/log/mpc_server_{self.server_id}.log", "r")
             lines = log_file.readlines()
             last_lines = lines[-n:]
-            res = ''
+            res = ""
             for line in last_lines:
                 res += line
             data = {
-                "log": f'{res}',
+                "log": f"{res}",
             }
             print(f"s{self.server_id} response: {res}")
             return web.json_response(data)
 
         app = web.Application()
 
-        cors = aiohttp_cors.setup(app, defaults={
-            "*": aiohttp_cors.ResourceOptions(
-                allow_credentials=True,
-                expose_headers="*",
-                allow_headers="*",
-            )
-        })
+        cors = aiohttp_cors.setup(
+            app,
+            defaults={
+                "*": aiohttp_cors.ResourceOptions(
+                    allow_credentials=True, expose_headers="*", allow_headers="*",
+                )
+            },
+        )
 
         resource = cors.add(app.router.add_resource("/inputmasks/{mask_idxes}"))
         cors.add(resource.add_route("GET", handler_inputmask))
