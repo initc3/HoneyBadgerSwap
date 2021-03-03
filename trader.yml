@@ -46,7 +46,7 @@ services:
     #command: ["bash", "client-secret-deposit.sh", "$HBSWAP_ETHNODE"]
 
   trade-1:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
@@ -65,13 +65,14 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
 
   trade-2:
-    image: hbswap
+    image: hbswap:local
     build:
       context: .
       dockerfile: Dockerfile
@@ -90,5 +91,5 @@ services:
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]

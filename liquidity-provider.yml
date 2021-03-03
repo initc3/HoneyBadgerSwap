@@ -21,6 +21,5 @@ services:
     entrypoint: ""
     # TODO wait for contract to be deployed/available
     #command: ["bash", "init-pool.sh", "ethnode"]
-    command: ["bash", "init-pool.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1
-", "testnet"]
+    command: ["bash", "init-pool.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "init-pool.sh", "$HBSWAP_ETHNODE"]

@@ -23,8 +23,8 @@ httpserver() {
 }
 
 mpcserver() {
-  #go run $go_code_path/server/server.go $1 $leader_hostname > /usr/src/hbswap/log/mpc_server_$1.log 2>&1
-  go run $go_code_path/server/server.go $1 $leader_hostname
+  go run $go_code_path/server/server.go $1 $leader_hostname > /usr/src/hbswap/log/mpc_server_$1.log 2>&1
+  #go run $go_code_path/server/server.go $1 $leader_hostname
   #> /usr/src/hbswap/log/mpc_server_$1.log 2>&1
 }
 
