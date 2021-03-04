@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/initc3/HoneyBadgerSwap/src/go/client/lib"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"math/big"
 	"os"
@@ -22,6 +23,13 @@ func secretWithdraw(conn *ethclient.Client, auth *bind.TransactOpts, token commo
 }
 
 func main() {
+	var configfile string
+	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/server.toml", "Config file. Default: /opt/hbswap/conf/server.toml")
+	flag.Parse()
+	config := lib.ParseClientConfig(configfile)
+	network := config.EthNode.Network
+	fmt.Println("Eth network: ", network)
+
 	user := os.Args[1]
 	tokenA, tokenB := common.HexToAddress(os.Args[2]), common.HexToAddress(os.Args[3])
 	amtA, amtB := os.Args[4], os.Args[5]

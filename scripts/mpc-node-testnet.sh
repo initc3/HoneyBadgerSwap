@@ -4,6 +4,7 @@ set -e
 #host=${1:-localhost}
 node_id=$1
 leader_hostname=$2
+config=${3:-/opt/hbswap/conf/server.toml}
 go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
@@ -23,9 +24,7 @@ httpserver() {
 }
 
 mpcserver() {
-  go run $go_code_path/server/server.go $1 $leader_hostname > /usr/src/hbswap/log/mpc_server_$1.log 2>&1
-  #go run $go_code_path/server/server.go $1 $leader_hostname
-  #> /usr/src/hbswap/log/mpc_server_$1.log 2>&1
+  go run $go_code_path/server/server.go -config $config $1 $leader_hostname > /usr/src/hbswap/log/mpc_server_$1.log 2>&1
 }
 
 setup_data

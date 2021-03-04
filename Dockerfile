@@ -90,5 +90,6 @@ RUN pip install --editable .
 ARG http_server_config=conf/server.toml
 COPY $http_server_config /opt/hbswap/conf/server.toml
 COPY scripts/mpc-node.sh /usr/src/hbswap/mpc-node.sh
+COPY scripts/mpc-node-testnet.sh /usr/src/hbswap/mpc-node-testnet.sh
 COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY poa/keystore /opt/poa/keystore

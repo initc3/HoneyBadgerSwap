@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/initc3/HoneyBadgerSwap/src/go/client/lib"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"math/big"
 	"os"
@@ -41,10 +42,12 @@ func depositTOK(network string, conn *ethclient.Client, auth *bind.TransactOpts,
 }
 
 func main() {
-	_network := flag.String("n", "testnet", "Type 'testnet' or 'privatenet'. Default: testnet")
+	var configfile string
+	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/server.toml", "Config file. Default: /opt/hbswap/conf/server.toml")
 	flag.Parse()
-	network := *_network
-	fmt.Println(network)
+	config := lib.ParseClientConfig(configfile)
+	network := config.EthNode.Network
+	fmt.Println("Eth network: ", network)
 
 	user := utils.GetAccount(fmt.Sprintf("account_%s", os.Args[3]))
 	tokenA, tokenB := common.HexToAddress(os.Args[4]), common.HexToAddress(os.Args[5])
