@@ -1,30 +1,37 @@
 # MPC network configuation
 
 # MPC network params
-n = 4
-t = 1
+N = 4
+T = 1
+LeaderHostname = "mpcnode0"
 
-# MPC servers
-[[servers]]
-id = 0
-host = "mpcnode0"
-http_port = 8080
-http_host = "0.0.0.0"
+[EthNode]
+Network = "privatenet"
+Hostname = "ethnode"
+HttpPort = 8545
+WsPort  = 8546
 
-[[servers]]
-id = 1
-host = "mpcnode1"
-http_port = 8080
-http_host = "0.0.0.0"
+# MPC Server
+[[Servers]]
+Id = 0
+Host = "mpcnode0"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
 
-[[servers]]
-id = 2
-host = "mpcnode2"
-http_port = 8080
-http_host = "0.0.0.0"
+[[Servers]]
+Id = 1
+Host = "mpcnode1"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
 
-[[servers]]
-id = 3
-host = "mpcnode3"
-http_port = 8080
-http_host = "0.0.0.0"
+[[Servers]]
+Id = 2
+Host = "mpcnode2"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
+
+[[Servers]]
+Id = 3
+Host = "mpcnode3"
+HttpPort = 8080
+HttpHost = "0.0.0.0"

@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/initc3/HoneyBadgerSwap/src/go/server/lib"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
@@ -28,12 +29,11 @@ const (
 	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 	nshares   = 1000
 	prepDir   = "/opt/hbswap/preprocessing-data"
-	batch	  = 1
-
+	batch     = 1
 )
 
 var (
-	network 	   string
+	network        string
 	serverID       string
 	conn           *ethclient.Client
 	server         *bind.TransactOpts
@@ -416,7 +416,7 @@ func processTasks() {
 				updateBalance(tokenB, user, changeB, "0")
 
 				seq, _ := strconv.Atoi(tradeSeq)
-				if seq % batch == 0 {
+				if seq%batch == 0 {
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_set_data", serverID, tokenA, tokenB)
 					utils.ExecCmd(cmd)
 					os.RemoveAll(fmt.Sprintf(prepDir))
@@ -454,13 +454,16 @@ func processTasks() {
 }
 
 func main() {
-	_network := flag.String("n", "testnet", "Type 'testnet' or 'privatenet'. Default: testnet")
+	var configfile string
+	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/server.toml", "Config file. Default: /opt/hbswap/conf/server.toml")
 	flag.Parse()
-	network = *_network
-	fmt.Println(network)
+	config := lib.ParseServerConfig(configfile)
+	network = config.EthNode.Network
+	fmt.Println("Eth network: ", network)
+	//leaderHostname := config.Get("ethnode.leader_hostname").(string)
 
 	var wsUrl string
-	if (network == "privatenet") {
+	if network == "privatenet" {
 		serverID = os.Args[3]
 		fmt.Printf("Starting mpc server %v\n", serverID)
 		server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))

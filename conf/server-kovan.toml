@@ -5,8 +5,11 @@ N = 4
 T = 1
 
 [EthNode]
-Network = "privatenet"
-Hostname = "ethnode"
+Network = "testnet"
+Hostname = "kovan.infura.io"
+LeaderHostname = "mpcnode0"
+HttpEndpoint = "https://kovan.infura.io/v2/6a82d2519efb4d748c02552e02e369c1"
+WsEndpoint   = "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
 HttpPort = 8545
 WsPort  = 8546
 
@@ -15,18 +18,22 @@ WsPort  = 8546
 Id = 0
 Host = "mpcnode0"
 HttpPort = 8080
+HttpHost = "0.0.0.0"
 
 [[Servers]]
 Id = 1
 Host = "mpcnode1"
 HttpPort = 8080
+HttpHost = "0.0.0.0"
 
 [[Servers]]
 Id = 2
 Host = "mpcnode2"
 HttpPort = 8080
+HttpHost = "0.0.0.0"
 
 [[Servers]]
 Id = 3
 Host = "mpcnode3"
 HttpPort = 8080
+HttpHost = "0.0.0.0"

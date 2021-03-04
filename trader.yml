@@ -14,6 +14,7 @@ services:
       - hbswap
     working_dir: /usr/src/scripts
     volumes:
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./scripts:/usr/src/scripts
@@ -36,6 +37,7 @@ services:
       - hbswap
     working_dir: /usr/src/scripts
     volumes:
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./scripts:/usr/src/scripts
@@ -64,9 +66,10 @@ services:
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./src/python:/usr/src/honeybadgerswap-python
     working_dir: /usr/src/scripts
-    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "1.1", "-2.5"]
     #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade.sh", "ethnode", "0", "-1.1", "2"]
@@ -90,6 +93,8 @@ services:
       - ./scripts:/usr/src/scripts
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./src/python:/usr/src/honeybadgerswap-python
     working_dir: /usr/src/scripts
-    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
+    command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "ethnode"]
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]

@@ -5,7 +5,8 @@ set -e
 node_id=$1
 eth_hostname=$2
 leader_hostname=$3
-network=${4:-privatenet}
+#network=${4:-privatenet}
+config=${4:-/opt/hbswap/conf/server.toml}
 go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
@@ -25,7 +26,8 @@ httpserver() {
 }
 
 mpcserver() {
-  go run $go_code_path/server/server.go -n $network $1 $leader_hostname $eth_hostname
+  #go run $go_code_path/server/server.go -n $network $1 $leader_hostname $eth_hostname
+  go run $go_code_path/server/server.go -config $config $1 $leader_hostname $eth_hostname
 }
 
 setup_data
