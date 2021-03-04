@@ -108,9 +108,7 @@ services:
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0"]
 
   mpcnode1:
     image: hbswap:local
@@ -135,9 +133,7 @@ services:
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1"]
 
   mpcnode2:
     #image: hbswap
@@ -163,9 +159,7 @@ services:
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2"]
 
   mpcnode3:
     #image: hbswap
@@ -191,9 +185,7 @@ services:
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3", "ethnode", "mpcnode0"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3"]
 
 secrets:
    P0.key:

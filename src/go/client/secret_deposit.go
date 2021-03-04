@@ -24,18 +24,22 @@ func secretDeposit(network string, conn *ethclient.Client, auth *bind.TransactOp
 }
 
 func main() {
+	// parse cmd line arguments/flags
 	var configfile string
-	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/server.toml", "Config file. Default: /opt/hbswap/conf/server.toml")
+	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/client.toml", "Config file. Default: /opt/hbswap/conf/client.toml")
 	flag.Parse()
+
+	// parse config file
 	config := lib.ParseClientConfig(configfile)
 	network := config.EthNode.Network
+	ethHostname := config.EthNode.Hostname
 	fmt.Println("Eth network: ", network)
+	fmt.Println("Eth hostname: ", ethHostname)
 
 	user := os.Args[3]
 	tokenA, tokenB := common.HexToAddress(os.Args[4]), common.HexToAddress(os.Args[5])
 	amtA, amtB := os.Args[6], os.Args[7]
 
-	ethHostname := os.Args[8]
 	ethUrl := ethHostname
 	if network == "privatenet" {
 		ethUrl = utils.GetEthURL(ethHostname)
