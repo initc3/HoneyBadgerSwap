@@ -44,7 +44,7 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
@@ -57,9 +57,7 @@ services:
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["bash", "mpc-node-testnet.sh", "0", "mpcnode0"]
+    command: ["bash", "mpc-node-testnet.sh", "0"]
 
   mpcnode1:
     image: hbswap:local
@@ -75,7 +73,7 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
@@ -85,9 +83,7 @@ services:
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["bash", "mpc-node-testnet.sh", "1", "mpcnode0"]
+    command: ["bash", "mpc-node-testnet.sh", "1"]
 
   mpcnode2:
     image: hbswap:local
@@ -103,7 +99,7 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
@@ -113,9 +109,7 @@ services:
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["bash", "mpc-node-testnet.sh", "2", "mpcnode0"]
+    command: ["bash", "mpc-node-testnet.sh", "2"]
 
   mpcnode3:
     image: hbswap:local
@@ -131,7 +125,7 @@ services:
     volumes:
       - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
       - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-      - ./conf/server.toml:/opt/hbswap/conf/server.toml
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
       - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
@@ -141,9 +135,7 @@ services:
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
-    # NOTE IMPORTANT!
-    # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
-    command: ["bash", "mpc-node-testnet.sh", "3", "mpcnode0"]
+    command: ["bash", "mpc-node-testnet.sh", "3"]
 
 secrets:
    P0.key:

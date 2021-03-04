@@ -3,11 +3,13 @@
 # MPC network params
 N = 4
 T = 1
+# IMPORTANT!
+# The leader hostname be the one of MPC player 0
+LeaderHostname = "mpcnode0"
 
 [EthNode]
 Network = "testnet"
 Hostname = "kovan.infura.io"
-LeaderHostname = "mpcnode0"
 HttpEndpoint = "https://kovan.infura.io/v2/6a82d2519efb4d748c02552e02e369c1"
 WsEndpoint   = "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
 HttpPort = 8545

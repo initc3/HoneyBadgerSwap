@@ -454,32 +454,32 @@ func processTasks() {
 }
 
 func main() {
+	// parse cmd line arguments/flags
 	var configfile string
 	flag.StringVar(&configfile, "config", "/opt/hbswap/conf/server.toml", "Config file. Default: /opt/hbswap/conf/server.toml")
+	flag.StringVar(&serverID, "id", "0", "Server id. Default: 0")
 	flag.Parse()
+
+	// parse config file
 	config := lib.ParseServerConfig(configfile)
+
 	network = config.EthNode.Network
+	ethHostname := config.EthNode.Hostname
+	leaderHostname = config.LeaderHostname
 	fmt.Println("Eth network: ", network)
-	//leaderHostname := config.Get("ethnode.leader_hostname").(string)
+	fmt.Println("Eth hostname: ", ethHostname)
+	fmt.Println("Leader hostname: ", leaderHostname)
+
+	fmt.Printf("Starting mpc server %v\n", serverID)
+	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
+	eventSet = map[utils.EventID]bool{}
 
 	var wsUrl string
 	if network == "privatenet" {
-		serverID = os.Args[3]
-		fmt.Printf("Starting mpc server %v\n", serverID)
-		server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
-		eventSet = map[utils.EventID]bool{}
-		leaderHostname = os.Args[4]
-		ethHostname := os.Args[5]
 		wsUrl = utils.GetEthWsURL(ethHostname)
-
 	} else {
-		serverID = os.Args[1]
-		fmt.Printf("Starting mpc server %v\n", serverID)
-		server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
-		eventSet = map[utils.EventID]bool{}
-
-		leaderHostname = os.Args[2]
 		wsUrl = utils.TestnetWsEndpoint
+		//wsUrl = config.EthNode.WsEndpoint
 	}
 	conn = utils.GetEthClient(wsUrl)
 
