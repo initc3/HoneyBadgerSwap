@@ -8,10 +8,12 @@ import (
 )
 
 type EthNodeConfig struct {
-	Network  string
-	Hostname string
-	HttpPort int
-	WsPort   int
+	Network      string
+	Hostname     string
+	HttpEndpoint string
+	WsEndpoint   string
+	HttpPort     int
+	WsPort       int
 }
 
 type _ServerConfig struct {

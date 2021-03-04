@@ -27,6 +27,10 @@ clean-mpc-progs:
 clean-player-data:
 	docker-compose run --rm mpc.trusted.setup rm -rf Player-Data/*
 
+clean-local-files:
+	find . -name "*.pyc" -exec rm -f {} \;
+	find . -name "*~" -exec rm -f {} \;
+
 #down: down-init
 down:
 	docker-compose -f docker-compose.yml -f liquidity-provider.yml -f trader.yml down --remove-orphans

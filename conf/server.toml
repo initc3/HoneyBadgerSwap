@@ -3,15 +3,19 @@
 # MPC network params
 N = 4
 T = 1
+# IMPORTANT!
+# The leader hostname be the one of MPC player 0
 LeaderHostname = "mpcnode0"
 
 [EthNode]
 Network = "privatenet"
 Hostname = "ethnode"
+HttpEndpoint = ""
+WsEndpoint   = ""
 HttpPort = 8545
 WsPort  = 8546
 
-# MPC Server
+# MPC servers
 [[Servers]]
 Id = 0
 Host = "mpcnode0"
