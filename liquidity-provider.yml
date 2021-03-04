@@ -14,12 +14,13 @@ services:
       - hbswap
     working_dir: /usr/src/scripts
     volumes:
+      - ./conf/client.toml:/opt/hbswap/conf/client.toml
       - ./poa:/opt/poa
       - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
       - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
       - ./scripts:/usr/src/scripts
     entrypoint: ""
     # TODO wait for contract to be deployed/available
-    #command: ["bash", "init-pool.sh", "ethnode"]
-    command: ["bash", "init-pool.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
+    command: ["bash", "init-pool.sh", "ethnode"]
+    #command: ["bash", "init-pool.sh", "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1", "testnet"]
     #command: ["bash", "init-pool.sh", "$HBSWAP_ETHNODE"]

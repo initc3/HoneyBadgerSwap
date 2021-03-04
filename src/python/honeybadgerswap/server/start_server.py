@@ -9,12 +9,12 @@ from .Server import Server
 async def main(node_id, config_file):
     config = toml.load(config_file)
 
-    n = config["n"]
-    t = config["t"]
+    n = config["N"]
+    t = config["T"]
 
-    server_config = config["servers"][node_id]
+    server_config = config["Servers"][node_id]
     server = Server(
-        n, t, server_id, server_config["http_host"], server_config["http_port"]
+        n, t, server_id, server_config["HttpHost"], server_config["HttpPort"]
     )
 
     tasks = []

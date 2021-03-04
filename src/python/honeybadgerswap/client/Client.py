@@ -17,9 +17,9 @@ class Client:
     def from_toml_config(self, config_file):
         config = toml.load(config_file)
 
-        n = config["n"]
-        t = config["t"]
-        servers = config["servers"]
+        n = config["N"]
+        t = config["T"]
+        servers = config["Servers"]
 
         return Client(n, t, servers)
 
@@ -49,8 +49,8 @@ class Client:
     async def get_inputmasks(self, inputmask_idxes):
         tasks = []
         for server in self.servers:
-            host = server["host"]
-            port = server["http_port"]
+            host = server["Host"]
+            port = server["HttpPort"]
 
             task = asyncio.ensure_future(
                 self.req_inputmask_shares(host, port, inputmask_idxes)
@@ -80,8 +80,8 @@ class Client:
     async def get_balance(self, token, user):
         tasks = []
         for server in self.servers:
-            host = server["host"]
-            port = server["http_port"]
+            host = server["Host"]
+            port = server["HttpPort"]
 
             task = asyncio.ensure_future(
                 self.req_balance_shares(host, port, token, user)
@@ -106,8 +106,8 @@ class Client:
     async def get_price(self, seq):
         tasks = []
         for server in self.servers:
-            host = server["host"]
-            port = server["http_port"]
+            host = server["Host"]
+            port = server["HttpPort"]
 
             task = asyncio.ensure_future(self.req_price(host, port, seq))
             tasks.append(task)

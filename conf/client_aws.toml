@@ -1,26 +1,26 @@
 # MPC network configuation
 
 # MPC network params
-n = 4
-t = 1
+N = 4
+T = 1
 
 # MPC servers
-[[servers]]
-id = 0
-host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
-http_port = 8080
+[[Servers]]
+Id = 0
+Host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
+HttpPort = 8080
 
-[[servers]]
-id = 1
-host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
-http_port = 8081
+[[Servers]]
+Id = 1
+Host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
+HttpPort = 8081
 
-[[servers]]
-id = 2
-host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
-http_port = 8082
+[[Servers]]
+Id = 2
+Host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
+HttpPort = 8082
 
-[[servers]]
-id = 3
-host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
-http_port = 8083
+[[Servers]]
+Id = 3
+Host = "aws-LoadBal-1VP1WJT5CUI8T-43b39cb4a8b33309.elb.eu-west-3.amazonaws.com"
+HttpPort = 8083
