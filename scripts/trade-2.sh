@@ -2,7 +2,7 @@
 set -e
 
 eth_host=${1:-localhost}
-network=${2:-privatenet}
+config=${4:-/opt/hbswap/conf/client.toml}
 go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 #user=$2
 #amt_A=$3
@@ -12,7 +12,7 @@ go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 . utils.sh
 
 trade() {
-    go run $go_code_path/client/trade.go -n $network $1 $2 $3 $4 $5 $eth_host
+    go run $go_code_path/client/trade.go -config $config $1 $2 $3 $4 $5 $eth_host
 }
 
 #trade 0 $eth $token_1 1.1 -2.5
