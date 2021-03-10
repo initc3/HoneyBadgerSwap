@@ -14,6 +14,7 @@ import (
 /********** external functions **********/
 
 func FundETH(network string, conn *ethclient.Client, toAddr common.Address, amount *big.Int) {
+	fmt.Println("FundEth ...")
 	adminAuth := GetAccount("server_0")
 	transferETH(conn, chainID[network], adminAuth, toAddr, amount)
 
@@ -21,7 +22,7 @@ func FundETH(network string, conn *ethclient.Client, toAddr common.Address, amou
 	//fmt.Printf("Funded account %s to %v ETH\n", toAddr.Hex(), balance)
 }
 
-func GetBalanceETH(conn *ethclient.Client, addr common.Address) (*big.Int) {
+func GetBalanceETH(conn *ethclient.Client, addr common.Address) *big.Int {
 	balance, err := conn.BalanceAt(context.Background(), addr, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -48,12 +49,15 @@ func fundGas(network string, conn *ethclient.Client, toAddr common.Address) {
 }
 
 func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.TransactOpts, toAddr common.Address, amount *big.Int) {
+	log.Println("transferETH ...")
 	ctx := context.Background()
 
+	log.Printf("transfer ctx: %s", ctx)
 	fromAddr := fromAuth.From
 
 	nonce, err := conn.PendingNonceAt(ctx, fromAddr)
 	if err != nil {
+		log.Printf("getting nonce error for address: %s, and context: %s", fromAddr.Hex(), ctx)
 		log.Fatal(err)
 	}
 
@@ -69,7 +73,7 @@ func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.Transact
 		log.Fatal(err)
 	}
 
-	//fmt.Printf("Sending %v wei from %s to %s\n", amount, fromAddr.Hex(), toAddr.Hex())
+	fmt.Printf("Sending %v wei from %s to %s\n", amount, fromAddr.Hex(), toAddr.Hex())
 	err = conn.SendTransaction(ctx, signedTx)
 	if err != nil {
 		log.Fatal(err)

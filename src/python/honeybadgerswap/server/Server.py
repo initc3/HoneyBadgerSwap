@@ -42,6 +42,12 @@ class Server:
                 return v
 
     async def http_server(self):
+        async def handler_info(request):
+            data = {
+                "info": "hbswap http server",
+            }
+            return web.json_response(data)
+
         async def handler_inputmask(request):
             print(f"s{self.server_id} request: {request}")
             mask_idxes = re.split(",", request.match_info.get("mask_idxes"))
@@ -111,6 +117,8 @@ class Server:
             },
         )
 
+        resource = cors.add(app.router.add_resource("/info"))
+        cors.add(resource.add_route("GET", handler_info))
         resource = cors.add(app.router.add_resource("/inputmasks/{mask_idxes}"))
         cors.add(resource.add_route("GET", handler_inputmask))
         resource = cors.add(app.router.add_resource("/price/{trade_seq}"))

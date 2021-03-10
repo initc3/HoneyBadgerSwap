@@ -19,6 +19,20 @@ COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY poa/keystore /opt/poa/keystore
 
 
+# MPC program compilation to bytecodes
+FROM python:3.8 as mpc-bytecodes
+
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /usr/src
+COPY MP-SPDZ/compile.py .
+COPY MP-SPDZ/Compiler Compiler
+RUN mkdir -p Programs/Source
+COPY src/mpc Programs/Source
+COPY scripts/compile.sh .
+RUN bash compile.sh
+
+
 # main image
 FROM python:3.8
 
@@ -90,6 +104,11 @@ RUN pip install --editable .
 ARG http_server_config=conf/server.toml
 COPY $http_server_config /opt/hbswap/conf/server.toml
 COPY scripts/mpc-node.sh /usr/src/hbswap/mpc-node.sh
-COPY scripts/mpc-node-testnet.sh /usr/src/hbswap/mpc-node-testnet.sh
 COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY poa/keystore /opt/poa/keystore
+
+# MPC bytecodes and schedules -- from the compilation stage
+WORKDIR $HBSWAP_HOME
+RUN mkdir -p Programs
+COPY --from=mpc-bytecodes /usr/src/Programs/Bytecode /usr/src/hbswap/Programs/Bytecode
+COPY --from=mpc-bytecodes /usr/src/Programs/Schedules /usr/src/hbswap/Programs/Schedules

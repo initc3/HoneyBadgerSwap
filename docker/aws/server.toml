@@ -1,30 +1,41 @@
 # MPC network configuation
 
 # MPC network params
-n = 4
-t = 1
+N = 4
+T = 1
+# IMPORTANT!
+# The leader Hostname be the one of MPC player 0
+LeaderHostname = "mpcnode0"
+
+[EthNode]
+Network = "testnet"
+Hostname = "kovan.infura.io"
+HttpEndpoint = "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
+WsEndpoint   = "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
+HttpPort = 8545
+WsPort  = 8546
 
 # MPC servers
-[[servers]]
+[[Servers]]
 id = 0
-host = "mpcnode0"
-http_port = 8080
-http_host = "0.0.0.0"
+Host = "mpcnode0"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
 
-[[servers]]
+[[Servers]]
 id = 1
-host = "mpcnode1"
-http_port = 8081
-http_host = "0.0.0.0"
+Host = "mpcnode1"
+HttpPort = 8081
+HttpHost = "0.0.0.0"
 
-[[servers]]
+[[Servers]]
 id = 2
-host = "mpcnode2"
-http_port = 8082
-http_host = "0.0.0.0"
+Host = "mpcnode2"
+HttpPort = 8082
+HttpHost = "0.0.0.0"
 
-[[servers]]
+[[Servers]]
 id = 3
-host = "mpcnode3"
-http_port = 8083
-http_host = "0.0.0.0"
+Host = "mpcnode3"
+HttpPort = 8083
+HttpHost = "0.0.0.0"

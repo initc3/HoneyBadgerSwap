@@ -21,11 +21,11 @@ services:
   #  command: ["wait-for-it", "ethnode:8545", "--", "go", "run", "deploy/deploy.go", "ethnode"]
 
   # pre-compiled MPC programs
-  mpccompile:
-    image: sbellem/hbswapmpcbytecodes
-    volumes:
-      - mpc-bytecodes:/usr/src/Programs/Bytecode
-      - mpc-schedules:/usr/src/Programs/Schedules
+  #mpccompile:
+  #  image: sbellem/hbswapmpcbytecodes
+  #  volumes:
+  #    - mpc-bytecodes:/usr/src/Programs/Bytecode
+  #    - mpc-schedules:/usr/src/Programs/Schedules
 
   mpcnode0:
     image: sbellem/hbswap:aws
@@ -33,9 +33,9 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 8080:8080
-    volumes:
-      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #volumes:
+    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
         #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
         #- ppdata-p0:/opt/hbswap/preprocessing-data
         #- persistence-p0:/usr/src/hbswap/Persistence
@@ -45,7 +45,7 @@ services:
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     #command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0", "ethnode", "mpcnode0"]
-    command: ["bash", "mpc-node-testnet.sh", "0", "mpcnode0"]
+    command: ["bash", "mpc-node.sh", "0"]
 
   mpcnode1:
     image: sbellem/hbswap:aws
@@ -53,16 +53,16 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 8081:8081
-    volumes:
-      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #volumes:
+    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     #command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1", "ethnode", "mpcnode0"]
-    command: ["bash", "mpc-node-testnet.sh", "1", "mpcnode0"]
+    command: ["bash", "mpc-node.sh", "1"]
 
   mpcnode2:
     image: sbellem/hbswap:aws
@@ -70,16 +70,16 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 8082:8082
-    volumes:
-      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #volumes:
+    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     #command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2", "ethnode", "mpcnode0"]
-    command: ["bash", "mpc-node-testnet.sh", "2", "mpcnode0"]
+    command: ["bash", "mpc-node.sh", "2"]
 
   mpcnode3:
     image: sbellem/hbswap:aws
@@ -87,16 +87,16 @@ services:
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 8083:8083
-    volumes:
-      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #volumes:
+    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
     # NOTE IMPORTANT!
     # The hostname (2nd arg) must be the one of player 0, i.e. "mpcnode0"
     #command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3", "ethnode", "mpcnode0"]
-    command: ["bash", "mpc-node-testnet.sh", "3", "mpcnode0"]
+    command: ["bash", "mpc-node.sh", "3"]
 
 #secrets:
 #   P0.key:

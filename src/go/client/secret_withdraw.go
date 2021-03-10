@@ -43,6 +43,9 @@ func main() {
 	if network == "privatenet" {
 		ethUrl = utils.GetEthURL(ethHostname)
 	}
+	} else {
+		ethUrl = config.EthNode.HttpEndpoint
+	}
 	conn := utils.GetEthClient(ethUrl)
 
 	owner := utils.GetAccount(fmt.Sprintf("account_%s", user))
