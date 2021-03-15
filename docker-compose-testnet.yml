@@ -31,7 +31,7 @@ volumes:
 services:
 
   mpcnode0:
-    image: hbswap:local
+    image: hbswap:kovan
     build:
       context: .
       dockerfile: Dockerfile
@@ -62,7 +62,7 @@ services:
     command: ["bash", "mpc-node-testnet.sh", "0", "mpcnode0"]
 
   mpcnode1:
-    image: hbswap:local
+    image: hbswap:kovan
     build:
       context: .
       dockerfile: Dockerfile
@@ -90,7 +90,7 @@ services:
     command: ["bash", "mpc-node-testnet.sh", "1", "mpcnode0"]
 
   mpcnode2:
-    image: hbswap:local
+    image: hbswap:kovan
     build:
       context: .
       dockerfile: Dockerfile
@@ -118,7 +118,7 @@ services:
     command: ["bash", "mpc-node-testnet.sh", "2", "mpcnode0"]
 
   mpcnode3:
-    image: hbswap:local
+    image: hbswap:kovan
     build:
       context: .
       dockerfile: Dockerfile
