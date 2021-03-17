@@ -48,6 +48,8 @@ func main() {
 	ethUrl := ethHostname
 	if network == "privatenet" {
 		ethUrl = utils.GetEthURL(ethHostname)
+	} else {
+		ethUrl = config.EthNode.HttpEndpoint
 	}
 	conn := utils.GetEthClient(ethUrl)
 
