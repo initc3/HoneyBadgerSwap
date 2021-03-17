@@ -14,6 +14,7 @@ import (
 )
 
 func depositETH(network string, conn *ethclient.Client, auth *bind.TransactOpts, _amt string) {
+	fmt.Println("depositETH ...")
 	amt := utils.StrToBig(_amt)
 	if amt.Cmp(big.NewInt(0)) == 0 {
 		return
@@ -53,6 +54,7 @@ func main() {
 	ethHostname := config.EthNode.Hostname
 	fmt.Println("Eth network: ", network)
 	fmt.Println("Eth hostname: ", ethHostname)
+	fmt.Println("Eth http endpoint: ", config.EthNode.HttpEndpoint)
 
 	user := utils.GetAccount(fmt.Sprintf("account_%s", os.Args[3]))
 	tokenA, tokenB := common.HexToAddress(os.Args[4]), common.HexToAddress(os.Args[5])
@@ -61,8 +63,11 @@ func main() {
 	ethUrl := ethHostname
 	if network == "privatenet" {
 		ethUrl = utils.GetEthURL(ethHostname)
+	} else {
+		ethUrl = config.EthNode.HttpEndpoint
 	}
 	conn := utils.GetEthClient(ethUrl)
+	fmt.Println("Eth client connection: %s", conn)
 
 	if bytes.Equal(tokenA.Bytes(), utils.EthAddr.Bytes()) {
 		depositETH(network, conn, user, amtA)
