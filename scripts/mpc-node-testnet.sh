@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-node_id=$1
-config=${2:-/opt/hbswap/conf/server.toml}
+config=${1:-/opt/hbswap/conf/server.toml}
 go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
@@ -13,16 +12,18 @@ setup_data() {
     # Copy the public keys of all players
     cp /opt/hbswap/public-keys/* Player-Data/
     # Symlink to the private key, to where MP-SPDZ expects it to be (under Player-Data/).
-    ln -s /run/secrets/P$node_id.key Player-Data/P$node_id.key
+    ln -s /run/secrets/P$NODE_ID.key Player-Data/P$NODE_ID.key
 }
 
 
 httpserver() {
-  python -m honeybadgerswap.server.start_server $node_id
+    #python -m honeybadgerswap.server.main
+    hbswap-start-httpserver
+    #uvicorn honeybadgerswap.server.main:app --host 0.0.0.0 --port 8080
 }
 
 mpcserver() {
-  go run $go_code_path/server/server.go -config $config -id $node_id > /usr/src/hbswap/log/mpc_server_$node_id.log 2>&1
+  go run $go_code_path/server/server.go -config $config -id $NODE_ID > /usr/src/hbswap/log/mpc_server_$NODE_ID.log 2>&1
 }
 
 setup_data

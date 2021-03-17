@@ -84,7 +84,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY src/python /usr/src/honeybadgerswap-python
 WORKDIR /usr/src/honeybadgerswap-python
-RUN pip install --editable .
+RUN pip install --editable .[dev,test]
 
 ### In development contexts, these files can be mounted along with the src code
 ARG http_server_config=conf/server.toml

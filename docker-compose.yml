@@ -88,6 +88,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      NODE_ID: 0
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 58080:8080
@@ -108,7 +109,7 @@ services:
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "0"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh"]
 
   mpcnode1:
     image: hbswap:local
@@ -116,6 +117,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      NODE_ID: 1
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 58081:8080
@@ -133,7 +135,7 @@ services:
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "1"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh"]
 
   mpcnode2:
     #image: hbswap
@@ -142,6 +144,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      NODE_ID: 2
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 58082:8080
@@ -159,7 +162,7 @@ services:
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "2"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh"]
 
   mpcnode3:
     #image: hbswap
@@ -168,6 +171,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      NODE_ID: 3
       POA_KEYSTORE: /opt/poa/keystore
     ports:
       - 58083:8080
@@ -185,7 +189,7 @@ services:
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
-    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh", "3"]
+    command: ["wait-for-it", "ethnode:8545", "--", "bash", "mpc-node.sh"]
 
 secrets:
    P0.key:
