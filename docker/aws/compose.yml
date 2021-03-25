@@ -33,7 +33,10 @@ services:
       NODE_ID: 0
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8080:8080
+      - target: 8080
+        published: 8080
+        #protocol: tcp
+        x-aws-protocol: https
     #volumes:
     #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
     #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -54,7 +57,10 @@ services:
       NODE_ID: 1
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8081:8081
+      - target: 8081
+        published: 8081
+        #protocol: tcp
+        x-aws-protocol: https
     #volumes:
     #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
     #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -72,7 +78,10 @@ services:
       NODE_ID: 2
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8082:8082
+      - target: 8082
+        published: 8082
+        #protocol: tcp
+        x-aws-protocol: https
     #volumes:
     #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
     #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -90,7 +99,10 @@ services:
       NODE_ID: 3
       POA_KEYSTORE: /opt/poa/keystore
     ports:
-      - 8083:8083
+      - target: 8083
+        published: 8083
+        #protocol: tcp
+        x-aws-protocol: https
     #volumes:
     #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
     #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
@@ -125,3 +137,45 @@ secrets:
      file: secrets/P2.key
    P3.key:
      file: secrets/P3.key
+
+
+#x-aws-loadbalancer: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
+#x-aws-loadbalancer: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/net/nlb-hbswap/091e4b24631f891e"
+x-aws-cloudformation:
+  Resources:
+    #Mpcnode0TCP8080Listener:
+    Mpcnode08080Listener:
+      Properties:
+        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
+        Certificates:
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
+        #Protocol: TLS
+        Protocol: HTTPS
+      Type: AWS::ElasticLoadBalancingV2::Listener
+    #Mpcnode1TCP8081Listener:
+    Mpcnode18081Listener:
+      Properties:
+        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
+        Certificates:
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
+        #Protocol: TLS
+        Protocol: HTTPS
+      Type: AWS::ElasticLoadBalancingV2::Listener
+    #Mpcnode2TCP8082Listener:
+    Mpcnode28082Listener:
+      Properties:
+        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
+        Certificates:
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
+        #Protocol: TLS
+        Protocol: HTTPS
+      Type: AWS::ElasticLoadBalancingV2::Listener
+    #Mpcnode3TCP8083Listener:
+    Mpcnode38083Listener:
+      Properties:
+        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
+        Certificates:
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
+        #Protocol: TLS
+        Protocol: HTTPS
+      Type: AWS::ElasticLoadBalancingV2::Listener
