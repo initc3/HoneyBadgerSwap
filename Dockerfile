@@ -78,6 +78,8 @@ RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
 COPY testkeys/public /opt/hbswap/public-keys
 #############################################################################
 
+ENV DB_PATH /opt/hbswap/db
+
 # GO (server) dependencies
 ENV PATH /usr/local/go/bin:$PATH
 COPY --from=golang:1.15.8-buster /usr/local/go /usr/local/go
@@ -85,9 +87,7 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 COPY --from=go-deps /go/src /go/src
-#############################################################################
-
-ENV DB_PATH /opt/hbswap/db
+RUN go build -o $HBSWAP_HOME/mpcserver /go/src/github.com/initc3/HoneyBadgerSwap/src/go/server/server.go
 
 # Python (HTTP server) dependencies for HTTP server
 RUN apt-get update && apt-get install -y --no-install-recommends \

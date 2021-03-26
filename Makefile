@@ -159,7 +159,17 @@ up-init: down-init rm-init
 	docker-compose -f hbswap-init.yml up mpcnode0 mpcnode1 mpcnode2 mpcnode3
 	#docker-compose -f hbswap-init.yml up mpc.allnodes
 
-testnet: down mpc-compile
+build-mpcnode0:
+	docker-compose -f docker-compose-testnet.yml build mpcnode0
+
+testnet: down build-mpcnode0 mpc-compile
+	docker-compose -f docker-compose-testnet.yml up --detach \
+		mpcnode0 \
+		mpcnode1 \
+		mpcnode2 \
+		mpcnode3
+
+testnet-nobuild: down mpc-compile
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \
