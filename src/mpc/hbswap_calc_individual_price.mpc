@@ -1,0 +1,38 @@
+n = 4
+fee_rate = 0.003
+
+def read_sint(idx):
+    start = regint(idx * 32)
+    end = regint()
+    share = sint()
+    readsharesfromfile(start, end, share)
+    return share
+
+def read_sfix(idx):
+    return sfix._new(read_sint(idx))
+
+def write_sfix(x):
+    writesharestofile(x.v)
+
+def public_reveal(x):
+    for i in range(n):
+        x.reveal_to(i)
+
+def main():
+    change_B = read_sfix(0)
+    print_ln('change_B %s', change_B.reveal())
+
+    change_A = read_sfix(1)
+    print_ln('change_A %s', change_A.reveal())
+
+    price = -change_B / change_A
+    print_ln('price %s', price.reveal())
+    write_sfix(price)
+
+    total_price = read_sfix(2)
+    print_ln('total_price %s', total_price.reveal())
+    total_price += price
+    print_ln('total_price %s', total_price.reveal())
+    write_sfix(total_price)
+
+main()

@@ -162,14 +162,21 @@ up-init: down-init rm-init
 build-mpcnode0:
 	docker-compose -f docker-compose-testnet.yml build mpcnode0
 
-testnet: down build-mpcnode0 mpc-compile
+testnet-build: down build-mpcnode0 mpc-compile
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \
 		mpcnode2 \
 		mpcnode3
 
-testnet-nobuild: down mpc-compile
+testnet: down
+	docker-compose -f docker-compose-testnet.yml up --detach \
+		mpcnode0 \
+		mpcnode1 \
+		mpcnode2 \
+		mpcnode3
+
+testnet-compile: down mpc-compile
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \

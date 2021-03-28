@@ -1,41 +1,76 @@
+n = 4
+
 def read_sint(idx):
     start = regint(idx * 32)
     end = regint()
-    masked_value = sint()
-    readsharesfromfile(start, end, masked_value)
-    return masked_value
+    share = sint()
+    readsharesfromfile(start, end, share)
+    return share
 
-def sint_to_sfix(x):
-    return sfix._new(x)
+def read_sfix(idx):
+    return sfix._new(read_sint(idx))
 
-def sfix_to_sint(x):
-    return x.v
+def write_sfix(x):
+    writesharestofile(x.v)
+
+def public_reveal(x):
+    for i in range(n):
+        x.reveal_to(i)
 
 def main():
-    pool_A = sint_to_sfix(read_sint(0))
-    pool_B = sint_to_sfix(read_sint(1))
+    balance_LT = read_sfix(0)
+    print_ln('balance_LT %s', balance_LT.reveal())
+    amt = read_sfix(1)
+    print_ln('amt %s', amt.reveal())
+    enough_LT = balance_LT >= amt
+    print_ln('enough_LT %s', enough_LT.reveal())
+    positive_LT = amt > 0
+    print_ln('positive_LT %s', positive_LT.reveal())
+
+    valid_order = enough_LT * positive_LT
+    print_ln('valid_order %s', valid_order.reveal())
+
+    pool_A = read_sfix(2)
     print_ln('pool_A %s', pool_A.reveal())
+    pool_B = read_sfix(3)
     print_ln('pool_B %s', pool_B.reveal())
 
-    amt_liquidity = sint_to_sfix(read_sint(2))
-    print_ln('amt_liquidity %s', amt_liquidity.reveal())
+    change_LT = valid_order * amt
+    print_ln('change_LT %s', change_LT.reveal())
+    total_supply_LT = read_sfix(4)
+    print_ln('total_supply_LT %s', total_supply_LT.reveal())
+    change_A = change_LT * pool_A / total_supply_LT
+    print_ln('change_A %s', change_A.reveal())
+    change_B = change_LT * pool_B / total_supply_LT
+    print_ln('change_B %s', change_B.reveal())
 
-    total_supply = sint_to_sfix(read_sint(3))
-    print_ln('total_supply %s', total_supply.reveal())
-
-    amt_A = amt_liquidity * pool_A / total_supply
-    amt_B = amt_liquidity * pool_B / total_supply
-    print_ln('amt_A %s', amt_A.reveal())
-    print_ln('amt_B %s', amt_B.reveal())
-
-    pool_A = pool_A - amt_A
-    pool_B = pool_B - amt_B
+    pool_A -= change_A
     print_ln('pool_A %s', pool_A.reveal())
+    write_sfix(pool_A)
+    pool_B -= change_B
     print_ln('pool_B %s', pool_B.reveal())
+    write_sfix(pool_B)
 
-    writesharestofile(sfix_to_sint(pool_A))
-    writesharestofile(sfix_to_sint(pool_B))
-    writesharestofile(sfix_to_sint(amt_A))
-    writesharestofile(sfix_to_sint(amt_B))
+    balance_A = read_sfix(5)
+    print_ln('balance_A %s', balance_A.reveal())
+    balance_A += change_A
+    print_ln('balance_A %s', balance_A.reveal())
+    write_sfix(balance_A)
+    balance_B = read_sfix(6)
+    print_ln('balance_B %s', balance_B.reveal())
+    balance_B += change_B
+    print_ln('balance_B %s', balance_B.reveal())
+    write_sfix(balance_B)
+
+    balance_LT -= change_LT
+    print_ln('balance_LT %s', balance_LT.reveal())
+    write_sfix(balance_LT)
+
+    total_supply_LT -= change_LT
+    print_ln('total_supply_LT %s', total_supply_LT.reveal())
+    write_sfix(total_supply_LT)
+
+    zero_total_LT = total_supply_LT == 0
+    public_reveal(zero_total_LT)
 
 main()

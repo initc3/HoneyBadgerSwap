@@ -1,0 +1,41 @@
+n = 4
+
+def read_sint(idx):
+    start = regint(idx * 32)
+    end = regint()
+    share = sint()
+    readsharesfromfile(start, end, share)
+    return share
+
+def read_sfix(idx):
+    return sfix._new(read_sint(idx))
+
+def public_reveal(x):
+    for i in range(n):
+        x.reveal_to(i)
+
+def main():
+    balance_A = read_sfix(0)
+    print_ln('balance_A %s', balance_A.reveal())
+    amt_A = read_sfix(1)
+    print_ln('amt_A %s', amt_A.reveal())
+    enough_A = balance_A >= amt_A
+    print_ln('enough_A %s', enough_A.reveal())
+
+    balance_B = read_sfix(2)
+    print_ln('balance_B %s', balance_B.reveal())
+    amt_B = read_sfix(3)
+    print_ln('amt_B %s', amt_B.reveal())
+    enough_B = balance_B >= amt_B
+    print_ln('enough_B %s', enough_B.reveal())
+
+    total_supply_LT = read_sfix(4)
+    print_ln('total_supply_LT %s', total_supply_LT.reveal())
+    zero_total_LT = total_supply_LT == 0
+    print_ln('zero_total_LT %s', zero_total_LT.reveal())
+
+    valid_order = enough_A * enough_B * zero_total_LT
+    print_ln('valid_order %s', valid_order.reveal())
+    public_reveal(valid_order)
+
+main()

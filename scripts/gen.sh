@@ -1,3 +1,5 @@
+# bash scripts/gen.sh
+
 set -e
 
 truffle_complie() {
@@ -19,12 +21,13 @@ abigen_files() {
 }
 
 sync_go_binding() {
-#  extract_abi_bin $1
+  extract_abi_bin $1
   abigen_files $1 $2
 }
 
-#truffle_complie
+cd src
+truffle_complie
 sync_go_binding HbSwap hbswap
-#sync_go_binding Token token
+sync_go_binding Token token
 
 #truffle-flattener contracts/HbSwap.sol --output contracts/FlattenedHbSwap.sol
