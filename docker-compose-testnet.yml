@@ -52,9 +52,6 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
-        #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
-        #- ppdata-p0:/opt/hbswap/preprocessing-data
-        #- persistence-p0:/usr/src/hbswap/Persistence
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
@@ -142,11 +139,11 @@ services:
     command: ["bash", "mpc-node-testnet.sh"]
 
 secrets:
-   P0.key:
-     file: testkeys/secret/P0.key
-   P1.key:
-     file: testkeys/secret/P1.key
-   P2.key:
-     file: testkeys/secret/P2.key
-   P3.key:
-     file: testkeys/secret/P3.key
+  P0.key:
+    file: testkeys/secret/P0.key
+  P1.key:
+    file: testkeys/secret/P1.key
+  P2.key:
+    file: testkeys/secret/P2.key
+  P3.key:
+    file: testkeys/secret/P3.key

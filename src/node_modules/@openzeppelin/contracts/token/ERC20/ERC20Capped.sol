@@ -1,13 +1,11 @@
-// SPDX-License-Identifier: MIT
+pragma solidity ^0.5.0;
 
-pragma solidity ^0.6.0;
-
-import "./ERC20.sol";
+import "./ERC20Mintable.sol";
 
 /**
- * @dev Extension of {ERC20} that adds a cap to the supply of tokens.
+ * @dev Extension of {ERC20Mintable} that adds a cap to the supply of tokens.
  */
-abstract contract ERC20Capped is ERC20 {
+contract ERC20Capped is ERC20Mintable {
     uint256 private _cap;
 
     /**
@@ -27,17 +25,14 @@ abstract contract ERC20Capped is ERC20 {
     }
 
     /**
-     * @dev See {ERC20-_beforeTokenTransfer}.
+     * @dev See {ERC20Mintable-mint}.
      *
      * Requirements:
      *
-     * - minted tokens must not cause the total supply to go over the cap.
+     * - `value` must not cause the total supply to go over the cap.
      */
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        super._beforeTokenTransfer(from, to, amount);
-
-        if (from == address(0)) { // When minting tokens
-            require(totalSupply().add(amount) <= _cap, "ERC20Capped: cap exceeded");
-        }
+    function _mint(address account, uint256 value) internal {
+        require(totalSupply().add(value) <= _cap, "ERC20Capped: cap exceeded");
+        super._mint(account, value);
     }
 }

@@ -1,3 +1,5 @@
+// go run /go/src/github.com/initc3/HoneyBadgerSwap/src/go/deploy/deploy.go
+
 package main
 
 import (
@@ -11,24 +13,18 @@ import (
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/token"
 	"log"
 	"math/big"
-	"os"
-)
-
-const (
-	n = 4
-	t = 1
 )
 
 func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) common.Address {
 	fmt.Println("Deploying HbSwap contract...")
 
 	var servers []common.Address
-	for i := 0; i < n; i++ {
+	for i := 0; i < utils.N; i++ {
 		transactOpt := utils.GetAccount(fmt.Sprintf("server_%v", i))
 		servers = append(servers, transactOpt.From)
 	}
 
-	hbswapAddr, tx, _, err := hbswap.DeployHbSwap(auth, conn, servers, big.NewInt(t))
+	hbswapAddr, tx, _, err := hbswap.DeployHbSwap(auth, conn, servers, big.NewInt(utils.T))
 	if err != nil {
 		log.Fatalf("Failed to deploy HbSwap: %v", err)
 	}
@@ -68,15 +64,15 @@ func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) common.Address
 }
 
 func main() {
-	ethHostname := os.Args[1]
-	ethUrl := utils.GetEthURL(ethHostname)
-	conn := utils.GetEthClient(ethUrl)
+	//ethHostname := os.Args[1]
+	//ethUrl := utils.GetEthURL(ethHostname)
+	//conn := utils.GetEthClient(ethUrl)
 
-	//conn := utils.GetEthClient(utils.TestnetWsEndpoint)
+	conn := utils.GetEthClient(utils.TestnetWsEndpoint)
 
 	owner := utils.GetAccount("server_0")
 
 	DeployHbSwap(conn, owner)
-	DeployToken(conn, owner)
-	DeployToken(conn, owner)
+	//DeployToken(conn, owner)
+	//DeployToken(conn, owner)
 }

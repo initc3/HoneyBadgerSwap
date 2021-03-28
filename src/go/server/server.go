@@ -11,9 +11,7 @@ import (
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
-	"math"
 	"math/big"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -28,8 +26,9 @@ const (
 	mpcPort   = "5000"
 	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 	nshares   = 1000
-	prepDir   = "/opt/hbswap/preprocessing-data"
-	batch     = 1
+	//prepDir   = "/opt/hbswap/preprocessing-data"
+	batchSize       = 2
+	returnPriceInterval = 10
 )
 
 var (
@@ -39,8 +38,10 @@ var (
 	server         *bind.TransactOpts
 	pq             utils.PriorityQueue
 	mutexPQ        = &sync.Mutex{}
-	eventSet       map[utils.EventID]bool
+	mutexTask      = &sync.Mutex{}
+	eventSet       = map[utils.EventID]bool{}
 	leaderHostname string
+	tokenPairs     = map[string]bool{}
 )
 
 func checkBalance(token string, user string, amt string) int {
@@ -69,16 +70,18 @@ func genInputmask() {
 		cnt := utils.GetInputmaskCnt(network, conn)
 
 		if cnt+100 > tot {
-			fmt.Printf("Generating new inputmasks...\n")
+			go func() {
+				fmt.Printf("Generating new inputmasks...\n")
 
-			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
-			utils.ExecCmd(cmd)
+				cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
+				utils.ExecCmd(cmd)
 
-			cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
-			utils.ExecCmd(cmd)
+				cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
+				utils.ExecCmd(cmd)
 
-			tot += nshares
-			fmt.Printf("Total inputmask number: %v\n", tot)
+				tot += nshares
+				fmt.Printf("Total inputmask number: %v\n", tot)
+			}()
 		}
 
 		time.Sleep(30 * time.Second)
@@ -167,8 +170,10 @@ func watch() {
 						strings.ToLower(oce.User.String()),
 						strings.ToLower(oce.TokenA.String()),
 						strings.ToLower(oce.TokenB.String()),
-						oce.AmtA.String(),
-						oce.AmtB.String(),
+						oce.IdxA.String(),
+						oce.IdxB.String(),
+						oce.MaskedAmtA.String(),
+						oce.MaskedAmtB.String(),
 					},
 				}
 				mutexPQ.Lock()
@@ -192,7 +197,8 @@ func watch() {
 						strings.ToLower(oce.User.String()),
 						strings.ToLower(oce.TokenA.String()),
 						strings.ToLower(oce.TokenB.String()),
-						oce.Amt.String(),
+						oce.Idx.String(),
+						oce.MaskedAmt.String(),
 					},
 				}
 				mutexPQ.Lock()
@@ -219,8 +225,8 @@ func watch() {
 						strings.ToLower(oce.TokenB.String()),
 						oce.IdxA.String(),
 						oce.IdxB.String(),
-						oce.MaskedA.String(),
-						oce.MaskedB.String(),
+						oce.MaskedAmtA.String(),
+						oce.MaskedAmtB.String(),
 					},
 				}
 				mutexPQ.Lock()
@@ -249,7 +255,6 @@ func watch() {
 				mutexPQ.Lock()
 				heap.Push(&pq, &task)
 				mutexPQ.Unlock()
-
 			}()
 
 		case err := <-secretWithdrawSub.Err():
@@ -294,158 +299,202 @@ func processTasks() {
 
 			switch task.EventName {
 			case "InitPool":
-				fmt.Printf("**** InitPool ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				user := task.Parameters[0]
-				tokenA := task.Parameters[1]
-				tokenB := task.Parameters[2]
-				amtA := task.Parameters[3]
-				amtB := task.Parameters[4]
+					fmt.Printf("**** InitPool ****\n")
 
-				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
-					_amtA, _ := strconv.Atoi(amtA)
-					_amtB, _ := strconv.Atoi(amtB)
-					amtLiquidity := fmt.Sprintf("%f", math.Sqrt(float64(_amtA*_amtB)))
-					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.init_pool", serverID, tokenA, tokenB, amtA, amtB, amtLiquidity)
+					user := task.Parameters[0]
+					tokenA := task.Parameters[1]
+					tokenB := task.Parameters[2]
+					amtA := task.Parameters[3] // fix
+					amtB := task.Parameters[4] // fix
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.init_pool_set_data", serverID, user, tokenA, tokenB, amtA, amtB)
 					utils.ExecCmd(cmd)
 
-					updateBalance(tokenA, user, fmt.Sprintf("-%s", amtA), "1")
-					updateBalance(tokenB, user, fmt.Sprintf("-%s", amtB), "1")
-					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, "1")
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_init_pool")
+					utils.ExecCmd(cmd)
 
-					_tokenA := common.HexToAddress(tokenA)
-					_tokenB := common.HexToAddress(tokenB)
-					price := fmt.Sprintf("%f", float64(_amtB)/float64(_amtA))
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.init_pool_org_data", serverID, tokenA, tokenB, user, amtA, amtB)
+					stdout := utils.ExecCmd(cmd)
+					outputs := strings.Split(stdout[:len(stdout) - 1], "\n")
+					validOrder, _ := strconv.Atoi(outputs[0])
+					if validOrder == 1 {
+						price := outputs[1]
+						utils.UpdatePrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB), big.NewInt(0), price)
+					}
 
-					utils.UpdatePrice(network, conn, server, _tokenA, _tokenB, big.NewInt(0), price)
-				}
+					mutexTask.Unlock()
+				}()
 
 			case "AddLiquidity":
-				fmt.Printf("**** AddLiquidity ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				user := task.Parameters[0]
-				tokenA := task.Parameters[1]
-				tokenB := task.Parameters[2]
-				amtA := task.Parameters[3]
-				amtB := task.Parameters[4]
+					fmt.Printf("**** AddLiquidity ****\n")
 
-				if checkBalance(tokenA, user, amtA) == 1 && checkBalance(tokenB, user, amtB) == 1 {
-					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_set_data", serverID, user, tokenA, tokenB, amtA, amtB)
+					user := task.Parameters[0]
+					tokenA := task.Parameters[1]
+					tokenB := task.Parameters[2]
+					idxA := task.Parameters[3]
+					idxB := task.Parameters[4]
+					maskedAmtA := task.Parameters[5]
+					maskedAmtB := task.Parameters[6]
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_set_data", serverID, user, tokenA, tokenB, idxA, maskedAmtA, idxB, maskedAmtB)
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_add_liquidity")
 					utils.ExecCmd(cmd)
 
-					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_org_data", serverID, tokenA, tokenB)
-					stdout := utils.ExecCmd(cmd)
-					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
-					amtA = amts[0]
-					amtB = amts[1]
-					amtLiquidity := amts[2]
-					fmt.Printf("amt_A %s amt_B %s amt %s\n", amtA, amtB, amtLiquidity)
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_org_data", serverID, user, tokenA, tokenB, user)
+					utils.ExecCmd(cmd)
 
-					updateBalance(tokenA, user, fmt.Sprintf("-%s", amtA), "0")
-					updateBalance(tokenB, user, fmt.Sprintf("-%s", amtB), "0")
-					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity, "0")
-				}
+					mutexTask.Unlock()
+				}()
 
 			case "RemoveLiquidity":
-				fmt.Printf("**** RemoveLiquidity ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				user := task.Parameters[0]
-				tokenA := task.Parameters[1]
-				tokenB := task.Parameters[2]
-				amtLiquidity := task.Parameters[3]
+					fmt.Printf("**** RemoveLiquidity ****\n")
 
-				if checkBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, amtLiquidity) == 1 {
-					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_set_data", serverID, user, tokenA, tokenB, amtLiquidity)
+					user := task.Parameters[0]
+					tokenA := task.Parameters[1]
+					tokenB := task.Parameters[2]
+					idx := task.Parameters[3]
+					maskedAmt := task.Parameters[4]
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_set_data", serverID, user, tokenA, tokenB, idx, maskedAmt)
 					utils.ExecCmd(cmd)
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_remove_liquidity")
 					utils.ExecCmd(cmd)
 
-					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_org_data", serverID, tokenA, tokenB, amtLiquidity)
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_org_data", serverID, user, tokenA, tokenB)
 					stdout := utils.ExecCmd(cmd)
-					amts := strings.Split(strings.Split(stdout, "\n")[0], " ")
-					amtA := amts[0]
-					amtB := amts[1]
-					fmt.Printf("amt_A %s amt_B %s\n", amtA, amtB)
+					zeroTotalLT, _ := strconv.Atoi(stdout[:1])
+					if zeroTotalLT == 1 {
+						utils.ResetPrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB))
+					}
 
-					updateBalance(tokenA, user, amtA, "0")
-					updateBalance(tokenB, user, amtB, "0")
-					updateBalance(fmt.Sprintf("%s+%s", tokenA, tokenB), user, fmt.Sprintf("-%s", amtLiquidity), "1")
-				}
+					mutexTask.Unlock()
+				}()
 
 			case "SecretDeposit":
-				fmt.Printf("**** SecretDeposit ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				token := task.Parameters[0]
-				user := task.Parameters[1]
-				amt := task.Parameters[2]
+					fmt.Printf("**** SecretDeposit ****\n")
 
-				updateBalance(token, user, amt, "1")
+					token := task.Parameters[0]
+					user := task.Parameters[1]
+					amt := task.Parameters[2] // fix
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_deposit", serverID, token, user, amt)
+					utils.ExecCmd(cmd)
+
+					mutexTask.Unlock()
+				}()
 
 			case "Trade":
-				fmt.Printf("**** Trade ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				tradeSeq := task.Parameters[0]
-				user := task.Parameters[1]
-				tokenA := task.Parameters[2]
-				tokenB := task.Parameters[3]
-				idxA := task.Parameters[4]
-				idxB := task.Parameters[5]
-				maskedA := task.Parameters[6]
-				maskedB := task.Parameters[7]
+					fmt.Printf("**** Trade ****\n")
 
-				cmd := exec.Command("python3", "-m", "honeybadgerswap.server.trade_set_data", serverID, user, tokenA, tokenB, idxA, idxB, maskedA, maskedB)
-				utils.ExecCmd(cmd)
-				os.RemoveAll(fmt.Sprintf(prepDir))
-				os.Mkdir(fmt.Sprintf(prepDir), 0777)
+					tradeSeq := task.Parameters[0]
+					user := task.Parameters[1]
+					tokenA := task.Parameters[2]
+					tokenB := task.Parameters[3]
+					idxA := task.Parameters[4]
+					idxB := task.Parameters[5]
+					maskedAmtA := task.Parameters[6]
+					maskedAmtB := task.Parameters[7]
 
-				cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_trade")
-				utils.ExecCmd(cmd)
-
-				cmd = exec.Command("python3", "-m", "honeybadgerswap.server.trade_org_data", serverID, tokenA, tokenB, tradeSeq)
-				stdout := utils.ExecCmd(cmd)
-				changes := strings.Split(strings.Split(stdout, "\n")[0], " ")
-				changeA := changes[0]
-				changeB := changes[1]
-				fmt.Printf("changeA %s changeB %s\n", changeA, changeB)
-
-				updateBalance(tokenA, user, changeA, "0")
-				updateBalance(tokenB, user, changeB, "0")
-
-				seq, _ := strconv.Atoi(tradeSeq)
-				if seq%batch == 0 {
-					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_set_data", serverID, tokenA, tokenB)
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.trade_set_data", serverID, user, tokenA, tokenB, idxA, maskedAmtA, idxB, maskedAmtB)
 					utils.ExecCmd(cmd)
-					os.RemoveAll(fmt.Sprintf(prepDir))
-					os.Mkdir(fmt.Sprintf(prepDir), 0777)
 
-					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_calc_price")
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_trade")
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.trade_org_data", serverID, user, tokenA, tokenB)
 					stdout := utils.ExecCmd(cmd)
+					outputs := strings.Split(stdout, "\n")
+					orderSucceed, _ := strconv.Atoi(outputs[0][:1])
 
-					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_price_org_data", serverID)
+					time.Sleep(returnPriceInterval * time.Second)
+
+					balanceA := outputs[1]
+					balanceB := outputs[2]
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.trade_update_balance", serverID, user, tokenA, tokenB, balanceA, balanceB)
+					utils.ExecCmd(cmd)
+
+					if orderSucceed == 1 {
+						changeB := outputs[3]
+						changeA := outputs[4]
+
+						cmd := exec.Command("python3", "-m", "honeybadgerswap.server.calc_individual_price_set_data", serverID, changeB, changeA, tokenA, tokenB)
+						utils.ExecCmd(cmd)
+
+						cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_calc_individual_price")
+						utils.ExecCmd(cmd)
+
+						cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_individual_price_org_data", serverID, tokenA, tokenB, tradeSeq)
+						utils.ExecCmd(cmd)
+
+					} else {
+						cmd = exec.Command("python3", "-m", "honeybadgerswap.server.set_price_zero", serverID, tradeSeq)
+						utils.ExecCmd(cmd)
+					}
+
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_set_data", serverID, tokenA, tokenB)
 					stdout = utils.ExecCmd(cmd)
-					price := strings.Split(stdout, "\n")[0]
-					fmt.Printf("avg_price %s\n", price)
-					_tokenA := common.HexToAddress(tokenA)
-					_tokenB := common.HexToAddress(tokenB)
-					utils.UpdatePrice(network, conn, server, _tokenA, _tokenB, big.NewInt(int64(seq)), price)
-				}
+					cnt, _ := strconv.ParseFloat(strings.Split(stdout[:len(stdout) - 1], " ")[1], 32)
+					fmt.Println("cnt", cnt)
+
+					if cnt >= batchSize {
+						cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_calc_batch_price")
+						stdout := utils.ExecCmd(cmd)
+
+						cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_org_data", serverID, tokenA, tokenB)
+						stdout = utils.ExecCmd(cmd)
+						batchPrice := stdout[:len(stdout) - 1]
+						fmt.Println(batchPrice)
+						seq, _ := strconv.Atoi(tradeSeq)
+						utils.UpdatePrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB), big.NewInt(int64(seq)), batchPrice)
+					}
+
+					mutexTask.Unlock()
+				}()
 
 			case "SecretWithdraw":
-				fmt.Printf("**** SecretWithdraw ****\n")
+				go func() {
+					mutexTask.Lock()
 
-				seq := task.Parameters[0]
-				token := task.Parameters[1]
-				user := task.Parameters[2]
-				amt := task.Parameters[3]
+					fmt.Printf("**** SecretWithdraw ****\n")
 
-				if checkBalance(token, user, amt) == 1 {
-					utils.Consent(network, conn, server, utils.StrToBig(seq))
-					updateBalance(token, user, fmt.Sprintf("-%s", amt), "1")
-				}
+					seq := task.Parameters[0]
+					token := task.Parameters[1]
+					user := task.Parameters[2]
+					amt := task.Parameters[3]
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_set_data", serverID, user, token, amt)
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_secret_withdraw")
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_org_data", serverID, token, user, amt)
+					stdout := utils.ExecCmd(cmd)
+					enough, _ := strconv.Atoi(stdout[:1])
+					if enough == 1 {
+						utils.Consent(network, conn, server, utils.StrToBig(seq))
+					}
+
+					mutexTask.Unlock()
+				}()
 
 			}
 		}
@@ -472,7 +521,6 @@ func main() {
 
 	fmt.Printf("Starting mpc server %v\n", serverID)
 	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
-	eventSet = map[utils.EventID]bool{}
 
 	var wsUrl string
 	if network == "privatenet" {
@@ -482,6 +530,15 @@ func main() {
 		//wsUrl = config.EthNode.WsEndpoint
 	}
 	conn = utils.GetEthClient(wsUrl)
+
+	//TODO: deleting this after testing
+	if serverID == "0" && network == "testnet"{
+		utils.ResetPrice(network, conn, server, utils.EthAddr, utils.TokenAddrs[network][0])
+		utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
+		for _, tokenAddr := range utils.TokenAddrs[network] {
+			utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
+		}
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)

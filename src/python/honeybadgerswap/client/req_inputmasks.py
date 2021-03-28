@@ -4,7 +4,7 @@ import sys
 
 from .Client import Client
 
-from ..utils import from_float
+from ..utils import float_to_fix
 
 if __name__ == "__main__":
     config = os.getenv("HBSWAP_CLIENT_CONFIG", "/opt/hbswap/conf/client.toml")
@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     values = []
     for value in sys.argv[2::2]:
-        values.append(from_float(value))
+        values.append(float_to_fix(value))
 
     masked_values = []
     for (inputmask, value) in zip(inputmasks, values):

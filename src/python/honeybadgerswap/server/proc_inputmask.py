@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from ..utils import key_inputmask, location_db, location_inputmask, openDB, to_hex, p
+from ..utils import key_inputmask, location_db, location_inputmask, openDB, int_to_hex, p
 
 logger = logging.getLogger(name=__name__)
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         idx = init_idx
         for line in f.readlines():
             key = key_inputmask(idx)
-            share = to_hex(int(line) % p)
+            share = int_to_hex(int(line) % p)
             logger.info(
                 f"will write to db: inputmasks {idx}, key: {key}, share: {share}"
             )

@@ -1,7 +1,6 @@
 import aiohttp_cors
 import asyncio
 import re
-import time
 
 from aiohttp import web
 
@@ -9,45 +8,46 @@ from .config import settings
 from ..utils import (
     key_balance,
     key_inputmask,
-    key_trade_price,
-    key_trade_time,
+    key_individual_price,
     location_db,
     openDB,
     get_value,
-    from_hex,
+    hex_to_int,
 )
 
 
-async def db_get(key):
-    db = openDB(location_db(settings.NODE_ID))
-    return from_hex(get_value(db, key))
+# async def db_get(key):
+#     db = openDB(location_db(settings.NODE_ID))
+#     return hex_to_int(get_value(db, key))
+# 
+# 
+# async def db_get_non_balance(key):
+#     while True:
+#         v = await db_get(key)
+#         if v == 0:
+#             print(f"{key} not ready. Try again...")
+#             time.sleep(10)
+#         else:
+#             return v
 
-
-async def db_get_non_balance(key):
-    while True:
-        v = await db_get(key)
-        if v == 0:
-            print(f"{key} not ready. Try again...")
-            time.sleep(10)
-        else:
-            return v
-
+# async def db_get(key):
+#     db = openDB(location_db(settings.NODE_ID))
+#     return hex_to_int(get_value(db, key))
 
 async def http_server():
-    async def handler_info(request):
-        data = {
-            "info": "hbswap http server",
-        }
-        return web.json_response(data)
-
     async def handler_inputmask(request):
         print(f"s{settings.NODE_ID} request: {request}")
         mask_idxes = re.split(",", request.match_info.get("mask_idxes"))
         res = ""
         for mask_idx in mask_idxes:
+            db = openDB(location_db(settings.NODE_ID))
+            try:
+                share = db.Get(key_inputmask(mask_idx))
+            except KeyError:
+                res = ''
+                break
             res += (
-                f"{',' if len(res) > 0 else ''}"
-                f"{await db_get_non_balance(key_inputmask(mask_idx))}"
+                f"{',' if len(res) > 0 else share}"
             )
         data = {
             "inputmask_shares": res,
@@ -59,12 +59,17 @@ async def http_server():
         print(f"s{settings.NODE_ID} request: {request}")
         trade_seq = request.match_info.get("trade_seq")
 
-        cur_time = int(time.time())
-        prev_time = await db_get_non_balance(key_trade_time(trade_seq))
-        passed_time = cur_time - prev_time
-        time.sleep(max(0, 10 - passed_time))
+        # cur_time = int(time.time())
+        # prev_time = await db_get_non_balance(key_trade_time(trade_seq))
+        # passed_time = cur_time - prev_time
+        # time.sleep(max(0, 10 - passed_time))
 
-        res = await db_get_non_balance(key_trade_price(trade_seq))
+        db = openDB(location_db(settings.NODE_ID))
+        res = ''
+        try:
+            res = db.Get(key_individual_price(trade_seq))
+        except KeyError:
+            pass
         data = {
             "price": f"{res}",
         }
@@ -76,7 +81,8 @@ async def http_server():
         token_user = re.split(",", request.match_info.get("token_user"))
         token = token_user[0]
         user = token_user[1]
-        res = await db_get(key_balance(token, user))
+        db = openDB(location_db(settings.NODE_ID))
+        res = await get_value(db, key_balance(token, user))
         data = {
             "balance": f"{res}",
         }
@@ -109,8 +115,6 @@ async def http_server():
         },
     )
 
-    resource = cors.add(app.router.add_resource("/info"))
-    cors.add(resource.add_route("GET", handler_info))
     resource = cors.add(app.router.add_resource("/inputmasks/{mask_idxes}"))
     cors.add(resource.add_route("GET", handler_inputmask))
     resource = cors.add(app.router.add_resource("/price/{trade_seq}"))
