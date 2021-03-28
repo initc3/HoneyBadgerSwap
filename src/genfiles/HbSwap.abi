@@ -12,6 +12,7 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -39,13 +40,25 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amtA",
+        "name": "idxA",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amtB",
+        "name": "idxB",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maskedAmtA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maskedAmtB",
         "type": "uint256"
       }
     ],
@@ -94,6 +107,19 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256[]",
+        "name": "inpusMaskIndexes",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "InputMask",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "user",
         "type": "address"
@@ -113,7 +139,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amt",
+        "name": "idx",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maskedAmt",
         "type": "uint256"
       }
     ],
@@ -218,13 +250,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maskedA",
+        "name": "maskedAmtA",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maskedB",
+        "name": "maskedAmtB",
         "type": "uint256"
       }
     ],
@@ -232,76 +264,9 @@
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "idxA",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "idxB",
-        "type": "uint256"
-      }
-    ],
-    "name": "TradePrep",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "tokenA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "tokenB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "price",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "time",
-        "type": "uint256"
-      }
-    ],
-    "name": "UpdatePrice",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "balances",
     "constant": true,
+    "inputs": [],
+    "name": "Decimals",
     "outputs": [
       {
         "internalType": "uint256",
@@ -309,10 +274,27 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "Fp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "uint256",
@@ -333,10 +315,12 @@
         "type": "bool"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "uint256",
@@ -352,13 +336,14 @@
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "inputmaskCnt",
-    "constant": true,
     "outputs": [
       {
         "internalType": "uint256",
@@ -366,10 +351,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -390,10 +377,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -407,7 +396,6 @@
       }
     ],
     "name": "prices",
-    "constant": true,
     "outputs": [
       {
         "internalType": "string",
@@ -415,10 +403,38 @@
         "type": "string"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "publicBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "secretWithdrawCnt",
     "outputs": [
@@ -428,10 +444,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "uint256",
@@ -457,10 +475,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -476,10 +496,12 @@
         "type": "bool"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "threshold",
     "outputs": [
@@ -489,10 +511,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "tradeCnt",
     "outputs": [
@@ -502,10 +526,122 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amt",
+        "type": "uint256"
+      }
+    ],
+    "name": "publicDeposit",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amt",
+        "type": "uint256"
+      }
+    ],
+    "name": "secretDeposit",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amt",
+        "type": "uint256"
+      }
+    ],
+    "name": "secretWithdraw",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_seq",
+        "type": "uint256"
+      }
+    ],
+    "name": "consent",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amt",
+        "type": "uint256"
+      }
+    ],
+    "name": "publicWithdraw",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_num",
+        "type": "uint256"
+      }
+    ],
+    "name": "reserveInput",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -530,10 +666,12 @@
     ],
     "name": "initPool",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -547,21 +685,33 @@
       },
       {
         "internalType": "uint256",
-        "name": "_amtA",
+        "name": "_idxA",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_amtB",
+        "name": "_idxB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maskedAmtA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maskedAmtB",
         "type": "uint256"
       }
     ],
     "name": "addLiquidity",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -575,108 +725,23 @@
       },
       {
         "internalType": "uint256",
-        "name": "_amt",
+        "name": "_idx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maskedAmt",
         "type": "uint256"
       }
     ],
     "name": "removeLiquidity",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amt",
-        "type": "uint256"
-      }
-    ],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amt",
-        "type": "uint256"
-      }
-    ],
-    "name": "secretDeposit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amt",
-        "type": "uint256"
-      }
-    ],
-    "name": "secretWithdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_seq",
-        "type": "uint256"
-      }
-    ],
-    "name": "consent",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amt",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tradePrep",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -711,10 +776,12 @@
     ],
     "name": "trade",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -739,6 +806,52 @@
     ],
     "name": "updatePrice",
     "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenA",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_tokenB",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_servers",
+        "type": "address[]"
+      }
+    ],
+    "name": "resetPrice",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "resetBalance",
+    "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   }

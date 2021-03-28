@@ -1,5 +1,5 @@
 // Based on https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/examples/SimpleToken.sol
-pragma solidity ^0.6.1;
+pragma solidity ^0.5.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -16,7 +16,7 @@ contract Token is ERC20 {
     /**
      * @notice Constructor that gives msg.sender all of existing tokens.
      */
-    constructor () public ERC20("Token", "token") {
+    constructor () public ERC20() {
         _mint(msg.sender, INITIAL_SUPPLY);
     }
 }

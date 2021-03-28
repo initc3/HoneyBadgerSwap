@@ -28,10 +28,10 @@ var (
 )
 
 // HbSwapABI is the input ABI used to generate the binding from.
-const HbSwapABI = "[{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_servers\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_threshold\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtB\",\"type\":\"uint256\"}],\"name\":\"AddLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtB\",\"type\":\"uint256\"}],\"name\":\"InitPool\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"name\":\"RemoveLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"name\":\"SecretDeposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"seq\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"name\":\"SecretWithdraw\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tradeSeq\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxB\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedB\",\"type\":\"uint256\"}],\"name\":\"Trade\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxB\",\"type\":\"uint256\"}],\"name\":\"TradePrep\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"price\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"time\",\"type\":\"uint256\"}],\"name\":\"UpdatePrice\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"balances\",\"constant\":true,\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"consentRecord\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"inputMaskOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"inputmaskCnt\",\"constant\":true,\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lastUpdateSeq\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"prices\",\"constant\":true,\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"secretWithdrawCnt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"secretWithdrawMap\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"servers\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"threshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tradeCnt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amtA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amtB\",\"type\":\"uint256\"}],\"name\":\"initPool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amtA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amtB\",\"type\":\"uint256\"}],\"name\":\"addLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"removeLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"secretDeposit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"secretWithdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_seq\",\"type\":\"uint256\"}],\"name\":\"consent\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tradePrep\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_idxA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_idxB\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedB\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_checkpointSeq\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_price\",\"type\":\"string\"}],\"name\":\"updatePrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const HbSwapABI = "[{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_servers\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_threshold\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxB\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedAmtA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedAmtB\",\"type\":\"uint256\"}],\"name\":\"AddLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amtB\",\"type\":\"uint256\"}],\"name\":\"InitPool\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"inpusMaskIndexes\",\"type\":\"uint256[]\"}],\"name\":\"InputMask\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idx\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedAmt\",\"type\":\"uint256\"}],\"name\":\"RemoveLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"name\":\"SecretDeposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"seq\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"name\":\"SecretWithdraw\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tradeSeq\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"idxB\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedAmtA\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"maskedAmtB\",\"type\":\"uint256\"}],\"name\":\"Trade\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"Decimals\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"Fp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"consentRecord\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"inputMaskOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"inputmaskCnt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lastUpdateSeq\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"prices\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"publicBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"secretWithdrawCnt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"secretWithdrawMap\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"servers\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"threshold\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"tradeCnt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"publicDeposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"secretDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"secretWithdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_seq\",\"type\":\"uint256\"}],\"name\":\"consent\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amt\",\"type\":\"uint256\"}],\"name\":\"publicWithdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_num\",\"type\":\"uint256\"}],\"name\":\"reserveInput\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amtA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amtB\",\"type\":\"uint256\"}],\"name\":\"initPool\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_idxA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_idxB\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedAmtA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedAmtB\",\"type\":\"uint256\"}],\"name\":\"addLiquidity\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_idx\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedAmt\",\"type\":\"uint256\"}],\"name\":\"removeLiquidity\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_idxA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_idxB\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedA\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maskedB\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_checkpointSeq\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_price\",\"type\":\"string\"}],\"name\":\"updatePrice\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_tokenB\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_servers\",\"type\":\"address[]\"}],\"name\":\"resetPrice\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"resetBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // HbSwapBin is the compiled bytecode used for deploying new contracts.
-var HbSwapBin = "0x60806040523480156200001157600080fd5b5060405162002ed538038062002ed5833981810160405260408110156200003757600080fd5b81019080805160405193929190846401000000008211156200005857600080fd5b838201915060208201858111156200006f57600080fd5b82518660208202830111640100000000821117156200008d57600080fd5b8083526020830192505050908051906020019060200280838360005b83811015620000c6578082015181840152602081019050620000a9565b505050509050016040526020018051906020019092919050505060008090505b8251811015620001695760018060008584815181106200010257fe5b602002602001015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055508080600101915050620000e6565b50806000819055505050612d5280620001836000396000f3fe6080604052600436106101355760003560e01c80639eef6ce8116100ab578063b7deef821161006f578063b7deef82146107cf578063c23f001f1461084a578063cf6c62ea146108cf578063d752fab214610954578063dee40595146109cf578063f3fef3a314610a2a57610135565b80639eef6ce8146105f0578063a4bea6c81461062b578063ade28aad146106b0578063af4170c41461070b578063b72a21391461073657610135565b80633394dc6f116100fd5780633394dc6f1461039c5780633766dba7146103c757806342cde4e81461049757806347e7ef24146104c25780637aa6fd651461051057806393910e66146105c557610135565b8063064d48101461013a57806312ada8de146101515780631768af96146101ba5780631f3124041461022d5780632f8a68c514610317575b600080fd5b34801561014657600080fd5b5061014f610a85565b005b34801561015d57600080fd5b506101a06004803603602081101561017457600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610bc2565b604051808215151515815260200191505060405180910390f35b3480156101c657600080fd5b50610213600480360360408110156101dd57600080fd5b8101908080359060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610be2565b604051808215151515815260200191505060405180910390f35b34801561023957600080fd5b5061029c6004803603604081101561025057600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610c11565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156102dc5780820151818401526020810190506102c1565b50505050905090810190601f1680156103095780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561032357600080fd5b5061039a6004803603608081101561033a57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919080359060200190929190505050610cce565b005b3480156103a857600080fd5b506103b1610e50565b6040518082815260200191505060405180910390f35b3480156103d357600080fd5b50610495600480360360808110156103ea57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561045157600080fd5b82018360208201111561046357600080fd5b8035906020019184600183028401116401000000008311171561048557600080fd5b9091929391929390505050610e56565b005b3480156104a357600080fd5b506104ac6114a0565b6040518082815260200191505060405180910390f35b61050e600480360360408110156104d857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291905050506114a6565b005b34801561051c57600080fd5b506105496004803603602081101561053357600080fd5b8101908080359060200190929190505050611632565b604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001935050505060405180910390f35b3480156105d157600080fd5b506105da61169c565b6040518082815260200191505060405180910390f35b3480156105fc57600080fd5b506106296004803603602081101561061357600080fd5b81019080803590602001909291905050506116a2565b005b34801561063757600080fd5b5061069a6004803603604081101561064e57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050611aaf565b6040518082815260200191505060405180910390f35b3480156106bc57600080fd5b50610709600480360360408110156106d357600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050611ad4565b005b34801561071757600080fd5b50610720611cf9565b6040518082815260200191505060405180910390f35b34801561074257600080fd5b506107cd600480360360c081101561075957600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291908035906020019092919080359060200190929190505050611cff565b005b3480156107db57600080fd5b50610808600480360360208110156107f257600080fd5b810190808035906020019092919050505061205c565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561085657600080fd5b506108b96004803603604081101561086d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061208f565b6040518082815260200191505060405180910390f35b3480156108db57600080fd5b50610952600480360360808110156108f257600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291905050506120b4565b005b34801561096057600080fd5b506109cd6004803603606081101561097757600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050612236565b005b3480156109db57600080fd5b50610a28600480360360408110156109f257600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291905050506123af565b005b348015610a3657600080fd5b50610a8360048036036040811015610a4d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919050505061256a565b005b60003390508060046000600254815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508060046000600160025401815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055507fb2fd402d6b838b10cf190139b9d4495eefcfea7543bc1056544d13732d82e6ac33600254600160025401604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001838152602001828152602001935050505060405180910390a16002806000828254019250508190555050565b60016020528060005260406000206000915054906101000a900460ff1681565b60086020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b600b602052816000526040600020602052806000526040600020600091509150508054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610cc65780601f10610c9b57610100808354040283529160200191610cc6565b820191906000526020600020905b815481529060010190602001808311610ca957829003601f168201915b505050505081565b8273ffffffffffffffffffffffffffffffffffffffff168473ffffffffffffffffffffffffffffffffffffffff1610610d6f576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b7ffaaebcb30b1b421f4f2ca7f2620e5add6a64532c087ee0646fd665a33d36fdf53385858585604051808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018381526020018281526020019550505050505060405180910390a150505050565b60065481565b8373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff1610610ef7576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b6000339050600160008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16610fbb576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f6e6f7420612076616c696420736572766572000000000000000000000000000081525060200191505060405180910390fd5b600e60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600085815260200190815260200160002060008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16611498576001600e60008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600086815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055506001600d60008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000868152602001908152602001600020848460405180838380828437808301925050509250505090815260200160405180910390206000828254019250508190555060008414806113845750600054600d60008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600086815260200190815260200160002084846040518083838082843780830192505050925050509081526020016040518091039020541180156113835750600c60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205484115b5b15611497578282600b60008973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000209190611414929190612c00565b5083600c60008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055505b5b505050505050565b60005481565b6000339050600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16141561156f5734600560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254019250508190555061162d565b60008390506115a18230858473ffffffffffffffffffffffffffffffffffffffff1661273b909392919063ffffffff16565b82600560008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282540192505081905550505b505050565b60076020528060005260406000206000915090508060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16908060010160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16908060020154905083565b60025481565b6000339050600160008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16611766576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f6e6f7420612076616c696420736572766572000000000000000000000000000081525060200191505060405180910390fd5b6008600083815260200190815260200160002060008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff1615611837576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f616c726561647920636f6e73656e74000000000000000000000000000000000081525060200191505060405180910390fd5b60016008600084815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055506001600960008481526020019081526020016000206000828254019250508190555060005460096000848152602001908152602001600020541180156119045750600a600083815260200190815260200160002060009054906101000a900460ff16155b15611aab57611911612c80565b600760008481526020019081526020016000206040518060600160405290816000820160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020016001820160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020016002820154815250509050806040015160056000836000015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000836020015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055506001600a600085815260200190815260200160002060006101000a81548160ff021916908315150217905550505b5050565b600c602052816000526040600020602052806000526040600020600091509150505481565b600033905081600560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020541015611bcb576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f6e6f7420656e6f7567682062616c616e6365000000000000000000000000000081525060200191505060405180910390fd5b81600560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055507f07c06144435b7d2bdccf9ee7e5a7022c63382ac7c3a0e14ed08b5969dedf0ecf838284604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001935050505060405180910390a1505050565b60035481565b8473ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff1610611da0576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b60003390508073ffffffffffffffffffffffffffffffffffffffff166004600087815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614611e79576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff166004600086815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614611f4d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b60016003600082825401925050819055507f2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae660035433898989898989604051808981526020018873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018581526020018481526020018381526020018281526020019850505050505050505060405180910390a150505050505050565b60046020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6005602052816000526040600020602052806000526040600020600091509150505481565b8273ffffffffffffffffffffffffffffffffffffffff168473ffffffffffffffffffffffffffffffffffffffff1610612155576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b7fc33fbc9654f9c0dcfcbd829113bdb10afe95619bc0824bc5959ad82fd6952bd93385858585604051808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018381526020018281526020019550505050505060405180910390a150505050565b8173ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16106122d7576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b7f2a1a4e62bda5b4987b9aa2f23ddbb29e434808f7a717452a3226bc15243c927733848484604051808573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200194505050505060405180910390a1505050565b6000339050600160066000828254019250508190555060405180606001604052808473ffffffffffffffffffffffffffffffffffffffff1681526020018273ffffffffffffffffffffffffffffffffffffffff1681526020018381525060076000600654815260200190815260200160002060008201518160000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060208201518160010160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550604082015181600201559050507f4ef3cc4825a92c3b6922acc8a45152cc96ef48463e8ed500dacd5df9e29a67f3600654848385604051808581526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200194505050505060405180910390a1505050565b6000339050600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16141561267a5781600560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055508073ffffffffffffffffffffffffffffffffffffffff166108fc839081150290604051600060405180830381858888f19350505050158015612674573d6000803e3d6000fd5b50612736565b60008390506126aa82848373ffffffffffffffffffffffffffffffffffffffff166128289092919063ffffffff16565b82600560008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282540392505081905550505b505050565b612822846323b872dd60e01b858585604051602401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050604051602081830303815290604052907bffffffffffffffffffffffffffffffffffffffffffffffffffffffff19166020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff83818316178352505050506128e0565b50505050565b6128db8363a9059cbb60e01b8484604051602401808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050604051602081830303815290604052907bffffffffffffffffffffffffffffffffffffffffffffffffffffffff19166020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff83818316178352505050506128e0565b505050565b6060612942826040518060400160405280602081526020017f5361666545524332303a206c6f772d6c6576656c2063616c6c206661696c65648152508573ffffffffffffffffffffffffffffffffffffffff166129cf9092919063ffffffff16565b90506000815111156129ca5780806020019051602081101561296357600080fd5b81019080805190602001909291905050506129c9576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602a815260200180612cf3602a913960400191505060405180910390fd5b5b505050565b60606129de84846000856129e7565b90509392505050565b60606129f285612bed565b612a64576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252601d8152602001807f416464726573733a2063616c6c20746f206e6f6e2d636f6e747261637400000081525060200191505060405180910390fd5b600060608673ffffffffffffffffffffffffffffffffffffffff1685876040518082805190602001908083835b60208310612ab45780518252602082019150602081019050602083039250612a91565b6001836020036101000a03801982511681845116808217855250505050505090500191505060006040518083038185875af1925050503d8060008114612b16576040519150601f19603f3d011682016040523d82523d6000602084013e612b1b565b606091505b50915091508115612b30578092505050612be5565b600081511115612b435780518082602001fd5b836040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825283818151815260200191508051906020019080838360005b83811015612baa578082015181840152602081019050612b8f565b50505050905090810190601f168015612bd75780820380516001836020036101000a031916815260200191505b509250505060405180910390fd5b949350505050565b600080823b905060008111915050919050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10612c4157803560ff1916838001178555612c6f565b82800160010185558215612c6f579182015b82811115612c6e578235825591602001919060010190612c53565b5b509050612c7c9190612ccd565b5090565b6040518060600160405280600073ffffffffffffffffffffffffffffffffffffffff168152602001600073ffffffffffffffffffffffffffffffffffffffff168152602001600081525090565b612cef91905b80821115612ceb576000816000905550600101612cd3565b5090565b9056fe5361666545524332303a204552433230206f7065726174696f6e20646964206e6f742073756363656564a2646970667358221220bebe15760418f65ee376d989f912bce38ca540c8fcb27c637d8a701c5aa3c07064736f6c634300060a0033"
+var HbSwapBin = "0x60806040523480156200001157600080fd5b506040516200396a3803806200396a833981810160405260408110156200003757600080fd5b81019080805160405193929190846401000000008211156200005857600080fd5b838201915060208201858111156200006f57600080fd5b82518660208202830111640100000000821117156200008d57600080fd5b8083526020830192505050908051906020019060200280838360005b83811015620000c6578082015181840152602081019050620000a9565b505050509050016040526020018051906020019092919050505060008090505b8251811015620001695760018060008584815181106200010257fe5b602002602001015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055508080600101915050620000e6565b508060008190555050506137e780620001836000396000f3fe6080604052600436106101815760003560e01c80639eef6ce8116100d1578063b7deef821161008a578063ca7b58ad11610064578063ca7b58ad14610b95578063cc5bd7fa14610c06578063dee4059514610c41578063e7e8927614610c9c57610181565b8063b7deef8214610a94578063bc94e7cf14610b0f578063c6ceb50b14610b6a57610181565b80639eef6ce81461088a578063a45b6ce6146108c5578063a4bea6c8146108f0578063ade28aad14610975578063af4170c4146109d0578063b72a2139146109fb57610181565b80633766dba71161013e5780637aa6fd65116101185780637aa6fd651461065757806393910e661461070c57806393f54644146107375780639450fb261461078557610181565b80633766dba7146104955780633ee7f9d3146105a757806342cde4e81461062c57610181565b806312ada8de146101865780631768af96146101ef5780631f312404146102625780632f8a68c51461034c5780633351733f146103d15780633394dc6f1461046a575b600080fd5b34801561019257600080fd5b506101d5600480360360208110156101a957600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610d21565b604051808215151515815260200191505060405180910390f35b3480156101fb57600080fd5b506102486004803603604081101561021257600080fd5b8101908080359060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610d41565b604051808215151515815260200191505060405180910390f35b34801561026e57600080fd5b506102d16004803603604081101561028557600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610d70565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156103115780820151818401526020810190506102f6565b50505050905090810190601f16801561033e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561035857600080fd5b506103cf6004803603608081101561036f57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019092919080359060200190929190505050610e2d565b005b3480156103dd57600080fd5b50610468600480360360c08110156103f457600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291908035906020019092919080359060200190929190505050611037565b005b34801561047657600080fd5b5061047f611379565b6040518082815260200191505060405180910390f35b3480156104a157600080fd5b506105a5600480360360808110156104b857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291908035906020019064010000000081111561051f57600080fd5b82018360208201111561053157600080fd5b8035906020019184600183028401116401000000008311171561055357600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f82011690508083019250505050505050919291929050505061137f565b005b3480156105b357600080fd5b5061062a600480360360808110156105ca57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291905050506119b3565b005b34801561063857600080fd5b50610641611c0f565b6040518082815260200191505060405180910390f35b34801561066357600080fd5b506106906004803603602081101561067a57600080fd5b8101908080359060200190929190505050611c15565b604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001935050505060405180910390f35b34801561071857600080fd5b50610721611c7f565b6040518082815260200191505060405180910390f35b6107836004803603604081101561074d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050611c85565b005b34801561079157600080fd5b50610888600480360360608110156107a857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291908035906020019064010000000081111561080557600080fd5b82018360208201111561081757600080fd5b8035906020019184602083028401116401000000008311171561083957600080fd5b919080806020026020016040519081016040528093929190818152602001838360200280828437600081840152601f19601f820116905080830192505050505050509192919290505050611e89565b005b34801561089657600080fd5b506108c3600480360360208110156108ad57600080fd5b8101908080359060200190929190505050612192565b005b3480156108d157600080fd5b506108da61259f565b6040518082815260200191505060405180910390f35b3480156108fc57600080fd5b5061095f6004803603604081101561091357600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506125a6565b6040518082815260200191505060405180910390f35b34801561098157600080fd5b506109ce6004803603604081101561099857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291905050506125cb565b005b3480156109dc57600080fd5b506109e56127fc565b6040518082815260200191505060405180910390f35b348015610a0757600080fd5b50610a92600480360360c0811015610a1e57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291908035906020019092919080359060200190929190505050612802565b005b348015610aa057600080fd5b50610acd60048036036020811015610ab757600080fd5b8101908080359060200190929190505050612b5f565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b348015610b1b57600080fd5b50610b6860048036036040811015610b3257600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050612b92565b005b348015610b7657600080fd5b50610b7f612df5565b6040518082815260200191505060405180910390f35b348015610ba157600080fd5b50610c0460048036036040811015610bb857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050612dfa565b005b348015610c1257600080fd5b50610c3f60048036036020811015610c2957600080fd5b8101908080359060200190929190505050612e80565b005b348015610c4d57600080fd5b50610c9a60048036036040811015610c6457600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050612fd3565b005b348015610ca857600080fd5b50610d0b60048036036040811015610cbf57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050613204565b6040518082815260200191505060405180910390f35b60016020528060005260406000206000915054906101000a900460ff1681565b60056020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b600b602052816000526040600020602052806000526040600020600091509150508054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610e255780601f10610dfa57610100808354040283529160200191610e25565b820191906000526020600020905b815481529060010190602001808311610e0857829003601f168201915b505050505081565b8273ffffffffffffffffffffffffffffffffffffffff168473ffffffffffffffffffffffffffffffffffffffff1610610ece576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b600082118015610ede5750600081115b610f50576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f696e76616c696420616d6f756e7400000000000000000000000000000000000081525060200191505060405180910390fd5b60003390507ffaaebcb30b1b421f4f2ca7f2620e5add6a64532c087ee0646fd665a33d36fdf53386868686604051808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018381526020018281526020019550505050505060405180910390a15050505050565b8473ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16106110d8576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b60003390508073ffffffffffffffffffffffffffffffffffffffff166009600087815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16146111b1576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff166009600086815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614611285576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b7fec7d4752dd44bf7fc59045c9d80163de2a1b9dbd9032d11cb1156f7f867c641181888888888888604051808873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200185815260200184815260200183815260200182815260200197505050505050505060405180910390a150505050505050565b60035481565b6000339050600160008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16611443576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f6e6f7420612076616c696420736572766572000000000000000000000000000081525060200191505060405180910390fd5b600e60008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600084815260200190815260200160002060008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff1615806115275750600083145b156119ac576001600e60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600085815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055506001600d60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000858152602001908152602001600020836040518082805190602001908083835b602083106116d257805182526020820191506020810190506020830392506116af565b6001836020036101000a038019825116818451168082178552505050505050905001915050908152602001604051809103902060008282540192505081905550600054600d60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000858152602001908152602001600020836040518082805190602001908083835b602083106117d657805182526020820191506020810190506020830392506117b3565b6001836020036101000a0380198251168184511680821785525050505050509050019150509081526020016040518091039020541180156118935750600c60008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020548310155b156119ab5781600b60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000209080519060200190611928929190613696565b5082600c60008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055505b5b5050505050565b8273ffffffffffffffffffffffffffffffffffffffff168473ffffffffffffffffffffffffffffffffffffffff1610611a54576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b60003390508073ffffffffffffffffffffffffffffffffffffffff166009600085815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614611b2d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b7fa8dbaaebbb025c88e9e34c84635cd8238043556e9af43fb161508c898a8e1ef98186868686604051808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018381526020018281526020019550505050505060405180910390a15050505050565b60005481565b60046020528060005260406000206000915090508060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16908060010160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16908060020154905083565b60085481565b600033905060008211611d00576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f696e76616c696420616d6f756e7400000000000000000000000000000000000081525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff161415611db7576001820262010000340214611db2576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260118152602001807f616d6f756e7473206e6f74206d6174636800000000000000000000000000000081525060200191505060405180910390fd5b611dfa565b6000839050611df882306001620100008781611dcf57fe5b04028473ffffffffffffffffffffffffffffffffffffffff16613229909392919063ffffffff16565b505b81600260008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282540192505081905550505050565b60405180602001604052806000815250600b60008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000209080519060200190611f28929190613696565b506000600c60008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000208190555060008090505b81518110156120bd576000600e60008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000808152602001908152602001600020600084848151811061205757fe5b602002602001015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055508080600101915050611fb1565b506000600d60008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600080815260200190815260200160002060405180807f302e3000000000000000000000000000000000000000000000000000000000008152506003019050908152602001604051809103902081905550505050565b6000339050600160008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff16612256576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f6e6f7420612076616c696420736572766572000000000000000000000000000081525060200191505060405180910390fd5b6005600083815260200190815260200160002060008273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a900460ff1615612327576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f616c726561647920636f6e73656e74000000000000000000000000000000000081525060200191505060405180910390fd5b60016005600084815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a81548160ff0219169083151502179055506001600660008481526020019081526020016000206000828254019250508190555060005460066000848152602001908152602001600020541180156123f457506007600083815260200190815260200160002060009054906101000a900460ff16155b1561259b57612401613716565b600460008481526020019081526020016000206040518060600160405290816000820160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020016001820160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020016002820154815250509050806040015160026000836000015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000836020015173ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254019250508190555060016007600085815260200190815260200160002060006101000a81548160ff021916908315150217905550505b5050565b6201000081565b600c602052816000526040600020602052806000526040600020600091509150505481565b600033905060008211801561265c575081600260008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205410155b6126ce576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f696e76616c696420616d6f756e7400000000000000000000000000000000000081525060200191505060405180910390fd5b81600260008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055507f07c06144435b7d2bdccf9ee7e5a7022c63382ac7c3a0e14ed08b5969dedf0ecf838284604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001935050505060405180910390a1505050565b600a5481565b8473ffffffffffffffffffffffffffffffffffffffff168673ffffffffffffffffffffffffffffffffffffffff16106128a3576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260148152602001807f696e76616c69642074726164696e67207061697200000000000000000000000081525060200191505060405180910390fd5b60003390508073ffffffffffffffffffffffffffffffffffffffff166009600087815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161461297c576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff166009600086815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614612a50576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260168152602001807f756e617574686f72697a656420696e7075746d61736b0000000000000000000081525060200191505060405180910390fd5b6001600a600082825401925050819055507f2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae6600a5482898989898989604051808981526020018873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018581526020018481526020018381526020018281526020019850505050505050505060405180910390a150505050505050565b60096020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000339050600082118015612c23575081600260008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205410155b612c95576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f696e76616c696420616d6f756e7400000000000000000000000000000000000081525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff161415612d25578073ffffffffffffffffffffffffffffffffffffffff166108fc6001620100008581612cf257fe5b04029081150290604051600060405180830381858888f19350505050158015612d1f573d6000803e3d6000fd5b50612d66565b6000839050612d64826001620100008681612d3c57fe5b04028373ffffffffffffffffffffffffffffffffffffffff1661332f9092919063ffffffff16565b505b81600260008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282540392505081905550505050565b600181565b6000600260008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055505050565b6000339050606082604051908082528060200260200182016040528015612eb65781602001602082028038833980820191505090505b50905060008090505b83811015612f5557600060086000815480929190600101919050559050836009600083815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555080838381518110612f3b57fe5b602002602001018181525050508080600101915050612ebf565b507fff742b54a62e49c065680fc16aa208f37f60ded27e03a3d19e6088ba0c7b41d4816040518080602001828103825283818151815260200191508051906020019060200280838360005b83811015612fbb578082015181840152602081019050612fa0565b505050509050019250505060405180910390a1505050565b60003390506000821161304e576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f696e76616c696420616d6f756e7400000000000000000000000000000000000081525060200191505060405180910390fd5b600160036000828254019250508190555060405180606001604052808473ffffffffffffffffffffffffffffffffffffffff1681526020018273ffffffffffffffffffffffffffffffffffffffff1681526020018381525060046000600354815260200190815260200160002060008201518160000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060208201518160010160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550604082015181600201559050507f4ef3cc4825a92c3b6922acc8a45152cc96ef48463e8ed500dacd5df9e29a67f3600354848385604051808581526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200194505050505060405180910390a1505050565b6002602052816000526040600020602052806000526040600020600091509150505481565b613329848573ffffffffffffffffffffffffffffffffffffffff166323b872dd905060e01b858585604051602401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050604051602081830303815290604052907bffffffffffffffffffffffffffffffffffffffffffffffffffffffff19166020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff8381831617835250505050613400565b50505050565b6133fb838473ffffffffffffffffffffffffffffffffffffffff1663a9059cbb905060e01b8484604051602401808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050604051602081830303815290604052907bffffffffffffffffffffffffffffffffffffffffffffffffffffffff19166020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff8381831617835250505050613400565b505050565b61341f8273ffffffffffffffffffffffffffffffffffffffff1661364b565b613491576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252601f8152602001807f5361666545524332303a2063616c6c20746f206e6f6e2d636f6e74726163740081525060200191505060405180910390fd5b600060608373ffffffffffffffffffffffffffffffffffffffff16836040518082805190602001908083835b602083106134e057805182526020820191506020810190506020830392506134bd565b6001836020036101000a0380198251168184511680821785525050505050509050019150506000604051808303816000865af19150503d8060008114613542576040519150601f19603f3d011682016040523d82523d6000602084013e613547565b606091505b5091509150816135bf576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f5361666545524332303a206c6f772d6c6576656c2063616c6c206661696c656481525060200191505060405180910390fd5b600081511115613645578080602001905160208110156135de57600080fd5b8101908080519060200190929190505050613644576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602a815260200180613789602a913960400191505060405180910390fd5b5b50505050565b60008060007fc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a47060001b9050833f915080821415801561368d57506000801b8214155b92505050919050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106136d757805160ff1916838001178555613705565b82800160010185558215613705579182015b828111156137045782518255916020019190600101906136e9565b5b5090506137129190613763565b5090565b6040518060600160405280600073ffffffffffffffffffffffffffffffffffffffff168152602001600073ffffffffffffffffffffffffffffffffffffffff168152602001600081525090565b61378591905b80821115613781576000816000905550600101613769565b5090565b9056fe5361666545524332303a204552433230206f7065726174696f6e20646964206e6f742073756363656564a265627a7a72315820822d2d89c121eafc100a03f84ca1756f66a19afcc16c7fe2907c725b81421d2564736f6c63430005110032"
 
 // DeployHbSwap deploys a new Ethereum contract, binding an instance of HbSwap to it.
 func DeployHbSwap(auth *bind.TransactOpts, backend bind.ContractBackend, _servers []common.Address, _threshold *big.Int) (common.Address, *types.Transaction, *HbSwap, error) {
@@ -189,30 +189,108 @@ func (_HbSwap *HbSwapTransactorRaw) Transact(opts *bind.TransactOpts, method str
 	return _HbSwap.Contract.contract.Transact(opts, method, params...)
 }
 
-// Balances is a free data retrieval call binding the contract method 0xc23f001f.
+// Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function balances(address , address ) constant returns(uint256)
-func (_HbSwap *HbSwapCaller) Balances(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+// Solidity: function Decimals() constant returns(uint256)
+func (_HbSwap *HbSwapCaller) Decimals(opts *bind.CallOpts) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "balances", arg0, arg1)
+	err := _HbSwap.contract.Call(opts, out, "Decimals")
 	return *ret0, err
 }
 
-// Balances is a free data retrieval call binding the contract method 0xc23f001f.
+// Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function balances(address , address ) constant returns(uint256)
-func (_HbSwap *HbSwapSession) Balances(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
-	return _HbSwap.Contract.Balances(&_HbSwap.CallOpts, arg0, arg1)
+// Solidity: function Decimals() constant returns(uint256)
+func (_HbSwap *HbSwapSession) Decimals() (*big.Int, error) {
+	return _HbSwap.Contract.Decimals(&_HbSwap.CallOpts)
 }
 
-// Balances is a free data retrieval call binding the contract method 0xc23f001f.
+// Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function balances(address , address ) constant returns(uint256)
-func (_HbSwap *HbSwapCallerSession) Balances(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
-	return _HbSwap.Contract.Balances(&_HbSwap.CallOpts, arg0, arg1)
+// Solidity: function Decimals() constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) Decimals() (*big.Int, error) {
+	return _HbSwap.Contract.Decimals(&_HbSwap.CallOpts)
+}
+
+// Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
+//
+// Solidity: function Fp() constant returns(uint256)
+func (_HbSwap *HbSwapCaller) Fp(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "Fp")
+	return *ret0, err
+}
+
+// Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
+//
+// Solidity: function Fp() constant returns(uint256)
+func (_HbSwap *HbSwapSession) Fp() (*big.Int, error) {
+	return _HbSwap.Contract.Fp(&_HbSwap.CallOpts)
+}
+
+// Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
+//
+// Solidity: function Fp() constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) Fp() (*big.Int, error) {
+	return _HbSwap.Contract.Fp(&_HbSwap.CallOpts)
+}
+
+// ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
+//
+// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+func (_HbSwap *HbSwapCaller) ConsentRecord(opts *bind.CallOpts, arg0 *big.Int, arg1 common.Address) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "consentRecord", arg0, arg1)
+	return *ret0, err
+}
+
+// ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
+//
+// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+func (_HbSwap *HbSwapSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (bool, error) {
+	return _HbSwap.Contract.ConsentRecord(&_HbSwap.CallOpts, arg0, arg1)
+}
+
+// ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
+//
+// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+func (_HbSwap *HbSwapCallerSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (bool, error) {
+	return _HbSwap.Contract.ConsentRecord(&_HbSwap.CallOpts, arg0, arg1)
+}
+
+// InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
+//
+// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+func (_HbSwap *HbSwapCaller) InputMaskOwner(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "inputMaskOwner", arg0)
+	return *ret0, err
+}
+
+// InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
+//
+// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+func (_HbSwap *HbSwapSession) InputMaskOwner(arg0 *big.Int) (common.Address, error) {
+	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.CallOpts, arg0)
+}
+
+// InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
+//
+// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+func (_HbSwap *HbSwapCallerSession) InputMaskOwner(arg0 *big.Int) (common.Address, error) {
+	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.CallOpts, arg0)
 }
 
 // InputmaskCnt is a free data retrieval call binding the contract method 0x93910e66.
@@ -241,6 +319,32 @@ func (_HbSwap *HbSwapCallerSession) InputmaskCnt() (*big.Int, error) {
 	return _HbSwap.Contract.InputmaskCnt(&_HbSwap.CallOpts)
 }
 
+// LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
+//
+// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapCaller) LastUpdateSeq(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "lastUpdateSeq", arg0, arg1)
+	return *ret0, err
+}
+
+// LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
+//
+// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.CallOpts, arg0, arg1)
+}
+
+// LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
+//
+// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.CallOpts, arg0, arg1)
+}
+
 // Prices is a free data retrieval call binding the contract method 0x1f312404.
 //
 // Solidity: function prices(address , address ) constant returns(string)
@@ -267,25 +371,195 @@ func (_HbSwap *HbSwapCallerSession) Prices(arg0 common.Address, arg1 common.Addr
 	return _HbSwap.Contract.Prices(&_HbSwap.CallOpts, arg0, arg1)
 }
 
-// AddLiquidity is a paid mutator transaction binding the contract method 0xcf6c62ea.
+// PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _amtA, uint256 _amtB) returns()
-func (_HbSwap *HbSwapTransactor) AddLiquidity(opts *bind.TransactOpts, _tokenA common.Address, _tokenB common.Address, _amtA *big.Int, _amtB *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "addLiquidity", _tokenA, _tokenB, _amtA, _amtB)
+// Solidity: function publicBalance(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapCaller) PublicBalance(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "publicBalance", arg0, arg1)
+	return *ret0, err
 }
 
-// AddLiquidity is a paid mutator transaction binding the contract method 0xcf6c62ea.
+// PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _amtA, uint256 _amtB) returns()
-func (_HbSwap *HbSwapSession) AddLiquidity(_tokenA common.Address, _tokenB common.Address, _amtA *big.Int, _amtB *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.AddLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _amtA, _amtB)
+// Solidity: function publicBalance(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapSession) PublicBalance(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	return _HbSwap.Contract.PublicBalance(&_HbSwap.CallOpts, arg0, arg1)
 }
 
-// AddLiquidity is a paid mutator transaction binding the contract method 0xcf6c62ea.
+// PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _amtA, uint256 _amtB) returns()
-func (_HbSwap *HbSwapTransactorSession) AddLiquidity(_tokenA common.Address, _tokenB common.Address, _amtA *big.Int, _amtB *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.AddLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _amtA, _amtB)
+// Solidity: function publicBalance(address , address ) constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) PublicBalance(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
+	return _HbSwap.Contract.PublicBalance(&_HbSwap.CallOpts, arg0, arg1)
+}
+
+// SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
+//
+// Solidity: function secretWithdrawCnt() constant returns(uint256)
+func (_HbSwap *HbSwapCaller) SecretWithdrawCnt(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "secretWithdrawCnt")
+	return *ret0, err
+}
+
+// SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
+//
+// Solidity: function secretWithdrawCnt() constant returns(uint256)
+func (_HbSwap *HbSwapSession) SecretWithdrawCnt() (*big.Int, error) {
+	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.CallOpts)
+}
+
+// SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
+//
+// Solidity: function secretWithdrawCnt() constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) SecretWithdrawCnt() (*big.Int, error) {
+	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.CallOpts)
+}
+
+// SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
+//
+// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+func (_HbSwap *HbSwapCaller) SecretWithdrawMap(opts *bind.CallOpts, arg0 *big.Int) (struct {
+	Token common.Address
+	User  common.Address
+	Amt   *big.Int
+}, error) {
+	ret := new(struct {
+		Token common.Address
+		User  common.Address
+		Amt   *big.Int
+	})
+	out := ret
+	err := _HbSwap.contract.Call(opts, out, "secretWithdrawMap", arg0)
+	return *ret, err
+}
+
+// SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
+//
+// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+func (_HbSwap *HbSwapSession) SecretWithdrawMap(arg0 *big.Int) (struct {
+	Token common.Address
+	User  common.Address
+	Amt   *big.Int
+}, error) {
+	return _HbSwap.Contract.SecretWithdrawMap(&_HbSwap.CallOpts, arg0)
+}
+
+// SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
+//
+// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+func (_HbSwap *HbSwapCallerSession) SecretWithdrawMap(arg0 *big.Int) (struct {
+	Token common.Address
+	User  common.Address
+	Amt   *big.Int
+}, error) {
+	return _HbSwap.Contract.SecretWithdrawMap(&_HbSwap.CallOpts, arg0)
+}
+
+// Servers is a free data retrieval call binding the contract method 0x12ada8de.
+//
+// Solidity: function servers(address ) constant returns(bool)
+func (_HbSwap *HbSwapCaller) Servers(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "servers", arg0)
+	return *ret0, err
+}
+
+// Servers is a free data retrieval call binding the contract method 0x12ada8de.
+//
+// Solidity: function servers(address ) constant returns(bool)
+func (_HbSwap *HbSwapSession) Servers(arg0 common.Address) (bool, error) {
+	return _HbSwap.Contract.Servers(&_HbSwap.CallOpts, arg0)
+}
+
+// Servers is a free data retrieval call binding the contract method 0x12ada8de.
+//
+// Solidity: function servers(address ) constant returns(bool)
+func (_HbSwap *HbSwapCallerSession) Servers(arg0 common.Address) (bool, error) {
+	return _HbSwap.Contract.Servers(&_HbSwap.CallOpts, arg0)
+}
+
+// Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
+//
+// Solidity: function threshold() constant returns(uint256)
+func (_HbSwap *HbSwapCaller) Threshold(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "threshold")
+	return *ret0, err
+}
+
+// Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
+//
+// Solidity: function threshold() constant returns(uint256)
+func (_HbSwap *HbSwapSession) Threshold() (*big.Int, error) {
+	return _HbSwap.Contract.Threshold(&_HbSwap.CallOpts)
+}
+
+// Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
+//
+// Solidity: function threshold() constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) Threshold() (*big.Int, error) {
+	return _HbSwap.Contract.Threshold(&_HbSwap.CallOpts)
+}
+
+// TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
+//
+// Solidity: function tradeCnt() constant returns(uint256)
+func (_HbSwap *HbSwapCaller) TradeCnt(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _HbSwap.contract.Call(opts, out, "tradeCnt")
+	return *ret0, err
+}
+
+// TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
+//
+// Solidity: function tradeCnt() constant returns(uint256)
+func (_HbSwap *HbSwapSession) TradeCnt() (*big.Int, error) {
+	return _HbSwap.Contract.TradeCnt(&_HbSwap.CallOpts)
+}
+
+// TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
+//
+// Solidity: function tradeCnt() constant returns(uint256)
+func (_HbSwap *HbSwapCallerSession) TradeCnt() (*big.Int, error) {
+	return _HbSwap.Contract.TradeCnt(&_HbSwap.CallOpts)
+}
+
+// AddLiquidity is a paid mutator transaction binding the contract method 0x3351733f.
+//
+// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _idxA, uint256 _idxB, uint256 _maskedAmtA, uint256 _maskedAmtB) returns()
+func (_HbSwap *HbSwapTransactor) AddLiquidity(opts *bind.TransactOpts, _tokenA common.Address, _tokenB common.Address, _idxA *big.Int, _idxB *big.Int, _maskedAmtA *big.Int, _maskedAmtB *big.Int) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "addLiquidity", _tokenA, _tokenB, _idxA, _idxB, _maskedAmtA, _maskedAmtB)
+}
+
+// AddLiquidity is a paid mutator transaction binding the contract method 0x3351733f.
+//
+// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _idxA, uint256 _idxB, uint256 _maskedAmtA, uint256 _maskedAmtB) returns()
+func (_HbSwap *HbSwapSession) AddLiquidity(_tokenA common.Address, _tokenB common.Address, _idxA *big.Int, _idxB *big.Int, _maskedAmtA *big.Int, _maskedAmtB *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.AddLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _idxA, _idxB, _maskedAmtA, _maskedAmtB)
+}
+
+// AddLiquidity is a paid mutator transaction binding the contract method 0x3351733f.
+//
+// Solidity: function addLiquidity(address _tokenA, address _tokenB, uint256 _idxA, uint256 _idxB, uint256 _maskedAmtA, uint256 _maskedAmtB) returns()
+func (_HbSwap *HbSwapTransactorSession) AddLiquidity(_tokenA common.Address, _tokenB common.Address, _idxA *big.Int, _idxB *big.Int, _maskedAmtA *big.Int, _maskedAmtB *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.AddLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _idxA, _idxB, _maskedAmtA, _maskedAmtB)
 }
 
 // Consent is a paid mutator transaction binding the contract method 0x9eef6ce8.
@@ -309,48 +583,6 @@ func (_HbSwap *HbSwapTransactorSession) Consent(_seq *big.Int) (*types.Transacti
 	return _HbSwap.Contract.Consent(&_HbSwap.TransactOpts, _seq)
 }
 
-// ConsentRecord is a paid mutator transaction binding the contract method 0x1768af96.
-//
-// Solidity: function consentRecord(uint256 , address ) returns(bool)
-func (_HbSwap *HbSwapTransactor) ConsentRecord(opts *bind.TransactOpts, arg0 *big.Int, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "consentRecord", arg0, arg1)
-}
-
-// ConsentRecord is a paid mutator transaction binding the contract method 0x1768af96.
-//
-// Solidity: function consentRecord(uint256 , address ) returns(bool)
-func (_HbSwap *HbSwapSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.ConsentRecord(&_HbSwap.TransactOpts, arg0, arg1)
-}
-
-// ConsentRecord is a paid mutator transaction binding the contract method 0x1768af96.
-//
-// Solidity: function consentRecord(uint256 , address ) returns(bool)
-func (_HbSwap *HbSwapTransactorSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.ConsentRecord(&_HbSwap.TransactOpts, arg0, arg1)
-}
-
-// Deposit is a paid mutator transaction binding the contract method 0x47e7ef24.
-//
-// Solidity: function deposit(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactor) Deposit(opts *bind.TransactOpts, _token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "deposit", _token, _amt)
-}
-
-// Deposit is a paid mutator transaction binding the contract method 0x47e7ef24.
-//
-// Solidity: function deposit(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapSession) Deposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.Deposit(&_HbSwap.TransactOpts, _token, _amt)
-}
-
-// Deposit is a paid mutator transaction binding the contract method 0x47e7ef24.
-//
-// Solidity: function deposit(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactorSession) Deposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.Deposit(&_HbSwap.TransactOpts, _token, _amt)
-}
-
 // InitPool is a paid mutator transaction binding the contract method 0x2f8a68c5.
 //
 // Solidity: function initPool(address _tokenA, address _tokenB, uint256 _amtA, uint256 _amtB) returns()
@@ -372,67 +604,130 @@ func (_HbSwap *HbSwapTransactorSession) InitPool(_tokenA common.Address, _tokenB
 	return _HbSwap.Contract.InitPool(&_HbSwap.TransactOpts, _tokenA, _tokenB, _amtA, _amtB)
 }
 
-// InputMaskOwner is a paid mutator transaction binding the contract method 0xb7deef82.
+// PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function inputMaskOwner(uint256 ) returns(address)
-func (_HbSwap *HbSwapTransactor) InputMaskOwner(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "inputMaskOwner", arg0)
+// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapTransactor) PublicDeposit(opts *bind.TransactOpts, _token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "publicDeposit", _token, _amt)
 }
 
-// InputMaskOwner is a paid mutator transaction binding the contract method 0xb7deef82.
+// PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function inputMaskOwner(uint256 ) returns(address)
-func (_HbSwap *HbSwapSession) InputMaskOwner(arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.TransactOpts, arg0)
+// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapSession) PublicDeposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.PublicDeposit(&_HbSwap.TransactOpts, _token, _amt)
 }
 
-// InputMaskOwner is a paid mutator transaction binding the contract method 0xb7deef82.
+// PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function inputMaskOwner(uint256 ) returns(address)
-func (_HbSwap *HbSwapTransactorSession) InputMaskOwner(arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.TransactOpts, arg0)
+// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapTransactorSession) PublicDeposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.PublicDeposit(&_HbSwap.TransactOpts, _token, _amt)
 }
 
-// LastUpdateSeq is a paid mutator transaction binding the contract method 0xa4bea6c8.
+// PublicWithdraw is a paid mutator transaction binding the contract method 0xbc94e7cf.
 //
-// Solidity: function lastUpdateSeq(address , address ) returns(uint256)
-func (_HbSwap *HbSwapTransactor) LastUpdateSeq(opts *bind.TransactOpts, arg0 common.Address, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "lastUpdateSeq", arg0, arg1)
+// Solidity: function publicWithdraw(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapTransactor) PublicWithdraw(opts *bind.TransactOpts, _token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "publicWithdraw", _token, _amt)
 }
 
-// LastUpdateSeq is a paid mutator transaction binding the contract method 0xa4bea6c8.
+// PublicWithdraw is a paid mutator transaction binding the contract method 0xbc94e7cf.
 //
-// Solidity: function lastUpdateSeq(address , address ) returns(uint256)
-func (_HbSwap *HbSwapSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.TransactOpts, arg0, arg1)
+// Solidity: function publicWithdraw(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapSession) PublicWithdraw(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.PublicWithdraw(&_HbSwap.TransactOpts, _token, _amt)
 }
 
-// LastUpdateSeq is a paid mutator transaction binding the contract method 0xa4bea6c8.
+// PublicWithdraw is a paid mutator transaction binding the contract method 0xbc94e7cf.
 //
-// Solidity: function lastUpdateSeq(address , address ) returns(uint256)
-func (_HbSwap *HbSwapTransactorSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.TransactOpts, arg0, arg1)
+// Solidity: function publicWithdraw(address _token, uint256 _amt) returns()
+func (_HbSwap *HbSwapTransactorSession) PublicWithdraw(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.PublicWithdraw(&_HbSwap.TransactOpts, _token, _amt)
 }
 
-// RemoveLiquidity is a paid mutator transaction binding the contract method 0xd752fab2.
+// RemoveLiquidity is a paid mutator transaction binding the contract method 0x3ee7f9d3.
 //
-// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactor) RemoveLiquidity(opts *bind.TransactOpts, _tokenA common.Address, _tokenB common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "removeLiquidity", _tokenA, _tokenB, _amt)
+// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _idx, uint256 _maskedAmt) returns()
+func (_HbSwap *HbSwapTransactor) RemoveLiquidity(opts *bind.TransactOpts, _tokenA common.Address, _tokenB common.Address, _idx *big.Int, _maskedAmt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "removeLiquidity", _tokenA, _tokenB, _idx, _maskedAmt)
 }
 
-// RemoveLiquidity is a paid mutator transaction binding the contract method 0xd752fab2.
+// RemoveLiquidity is a paid mutator transaction binding the contract method 0x3ee7f9d3.
 //
-// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _amt) returns()
-func (_HbSwap *HbSwapSession) RemoveLiquidity(_tokenA common.Address, _tokenB common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.RemoveLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _amt)
+// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _idx, uint256 _maskedAmt) returns()
+func (_HbSwap *HbSwapSession) RemoveLiquidity(_tokenA common.Address, _tokenB common.Address, _idx *big.Int, _maskedAmt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.RemoveLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _idx, _maskedAmt)
 }
 
-// RemoveLiquidity is a paid mutator transaction binding the contract method 0xd752fab2.
+// RemoveLiquidity is a paid mutator transaction binding the contract method 0x3ee7f9d3.
 //
-// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactorSession) RemoveLiquidity(_tokenA common.Address, _tokenB common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.RemoveLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _amt)
+// Solidity: function removeLiquidity(address _tokenA, address _tokenB, uint256 _idx, uint256 _maskedAmt) returns()
+func (_HbSwap *HbSwapTransactorSession) RemoveLiquidity(_tokenA common.Address, _tokenB common.Address, _idx *big.Int, _maskedAmt *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.RemoveLiquidity(&_HbSwap.TransactOpts, _tokenA, _tokenB, _idx, _maskedAmt)
+}
+
+// ReserveInput is a paid mutator transaction binding the contract method 0xcc5bd7fa.
+//
+// Solidity: function reserveInput(uint256 _num) returns()
+func (_HbSwap *HbSwapTransactor) ReserveInput(opts *bind.TransactOpts, _num *big.Int) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "reserveInput", _num)
+}
+
+// ReserveInput is a paid mutator transaction binding the contract method 0xcc5bd7fa.
+//
+// Solidity: function reserveInput(uint256 _num) returns()
+func (_HbSwap *HbSwapSession) ReserveInput(_num *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.ReserveInput(&_HbSwap.TransactOpts, _num)
+}
+
+// ReserveInput is a paid mutator transaction binding the contract method 0xcc5bd7fa.
+//
+// Solidity: function reserveInput(uint256 _num) returns()
+func (_HbSwap *HbSwapTransactorSession) ReserveInput(_num *big.Int) (*types.Transaction, error) {
+	return _HbSwap.Contract.ReserveInput(&_HbSwap.TransactOpts, _num)
+}
+
+// ResetBalance is a paid mutator transaction binding the contract method 0xca7b58ad.
+//
+// Solidity: function resetBalance(address _token, address _user) returns()
+func (_HbSwap *HbSwapTransactor) ResetBalance(opts *bind.TransactOpts, _token common.Address, _user common.Address) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "resetBalance", _token, _user)
+}
+
+// ResetBalance is a paid mutator transaction binding the contract method 0xca7b58ad.
+//
+// Solidity: function resetBalance(address _token, address _user) returns()
+func (_HbSwap *HbSwapSession) ResetBalance(_token common.Address, _user common.Address) (*types.Transaction, error) {
+	return _HbSwap.Contract.ResetBalance(&_HbSwap.TransactOpts, _token, _user)
+}
+
+// ResetBalance is a paid mutator transaction binding the contract method 0xca7b58ad.
+//
+// Solidity: function resetBalance(address _token, address _user) returns()
+func (_HbSwap *HbSwapTransactorSession) ResetBalance(_token common.Address, _user common.Address) (*types.Transaction, error) {
+	return _HbSwap.Contract.ResetBalance(&_HbSwap.TransactOpts, _token, _user)
+}
+
+// ResetPrice is a paid mutator transaction binding the contract method 0x9450fb26.
+//
+// Solidity: function resetPrice(address _tokenA, address _tokenB, address[] _servers) returns()
+func (_HbSwap *HbSwapTransactor) ResetPrice(opts *bind.TransactOpts, _tokenA common.Address, _tokenB common.Address, _servers []common.Address) (*types.Transaction, error) {
+	return _HbSwap.contract.Transact(opts, "resetPrice", _tokenA, _tokenB, _servers)
+}
+
+// ResetPrice is a paid mutator transaction binding the contract method 0x9450fb26.
+//
+// Solidity: function resetPrice(address _tokenA, address _tokenB, address[] _servers) returns()
+func (_HbSwap *HbSwapSession) ResetPrice(_tokenA common.Address, _tokenB common.Address, _servers []common.Address) (*types.Transaction, error) {
+	return _HbSwap.Contract.ResetPrice(&_HbSwap.TransactOpts, _tokenA, _tokenB, _servers)
+}
+
+// ResetPrice is a paid mutator transaction binding the contract method 0x9450fb26.
+//
+// Solidity: function resetPrice(address _tokenA, address _tokenB, address[] _servers) returns()
+func (_HbSwap *HbSwapTransactorSession) ResetPrice(_tokenA common.Address, _tokenB common.Address, _servers []common.Address) (*types.Transaction, error) {
+	return _HbSwap.Contract.ResetPrice(&_HbSwap.TransactOpts, _tokenA, _tokenB, _servers)
 }
 
 // SecretDeposit is a paid mutator transaction binding the contract method 0xade28aad.
@@ -477,90 +772,6 @@ func (_HbSwap *HbSwapTransactorSession) SecretWithdraw(_token common.Address, _a
 	return _HbSwap.Contract.SecretWithdraw(&_HbSwap.TransactOpts, _token, _amt)
 }
 
-// SecretWithdrawCnt is a paid mutator transaction binding the contract method 0x3394dc6f.
-//
-// Solidity: function secretWithdrawCnt() returns(uint256)
-func (_HbSwap *HbSwapTransactor) SecretWithdrawCnt(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "secretWithdrawCnt")
-}
-
-// SecretWithdrawCnt is a paid mutator transaction binding the contract method 0x3394dc6f.
-//
-// Solidity: function secretWithdrawCnt() returns(uint256)
-func (_HbSwap *HbSwapSession) SecretWithdrawCnt() (*types.Transaction, error) {
-	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.TransactOpts)
-}
-
-// SecretWithdrawCnt is a paid mutator transaction binding the contract method 0x3394dc6f.
-//
-// Solidity: function secretWithdrawCnt() returns(uint256)
-func (_HbSwap *HbSwapTransactorSession) SecretWithdrawCnt() (*types.Transaction, error) {
-	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.TransactOpts)
-}
-
-// SecretWithdrawMap is a paid mutator transaction binding the contract method 0x7aa6fd65.
-//
-// Solidity: function secretWithdrawMap(uint256 ) returns(address token, address user, uint256 amt)
-func (_HbSwap *HbSwapTransactor) SecretWithdrawMap(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "secretWithdrawMap", arg0)
-}
-
-// SecretWithdrawMap is a paid mutator transaction binding the contract method 0x7aa6fd65.
-//
-// Solidity: function secretWithdrawMap(uint256 ) returns(address token, address user, uint256 amt)
-func (_HbSwap *HbSwapSession) SecretWithdrawMap(arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.SecretWithdrawMap(&_HbSwap.TransactOpts, arg0)
-}
-
-// SecretWithdrawMap is a paid mutator transaction binding the contract method 0x7aa6fd65.
-//
-// Solidity: function secretWithdrawMap(uint256 ) returns(address token, address user, uint256 amt)
-func (_HbSwap *HbSwapTransactorSession) SecretWithdrawMap(arg0 *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.SecretWithdrawMap(&_HbSwap.TransactOpts, arg0)
-}
-
-// Servers is a paid mutator transaction binding the contract method 0x12ada8de.
-//
-// Solidity: function servers(address ) returns(bool)
-func (_HbSwap *HbSwapTransactor) Servers(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "servers", arg0)
-}
-
-// Servers is a paid mutator transaction binding the contract method 0x12ada8de.
-//
-// Solidity: function servers(address ) returns(bool)
-func (_HbSwap *HbSwapSession) Servers(arg0 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.Servers(&_HbSwap.TransactOpts, arg0)
-}
-
-// Servers is a paid mutator transaction binding the contract method 0x12ada8de.
-//
-// Solidity: function servers(address ) returns(bool)
-func (_HbSwap *HbSwapTransactorSession) Servers(arg0 common.Address) (*types.Transaction, error) {
-	return _HbSwap.Contract.Servers(&_HbSwap.TransactOpts, arg0)
-}
-
-// Threshold is a paid mutator transaction binding the contract method 0x42cde4e8.
-//
-// Solidity: function threshold() returns(uint256)
-func (_HbSwap *HbSwapTransactor) Threshold(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "threshold")
-}
-
-// Threshold is a paid mutator transaction binding the contract method 0x42cde4e8.
-//
-// Solidity: function threshold() returns(uint256)
-func (_HbSwap *HbSwapSession) Threshold() (*types.Transaction, error) {
-	return _HbSwap.Contract.Threshold(&_HbSwap.TransactOpts)
-}
-
-// Threshold is a paid mutator transaction binding the contract method 0x42cde4e8.
-//
-// Solidity: function threshold() returns(uint256)
-func (_HbSwap *HbSwapTransactorSession) Threshold() (*types.Transaction, error) {
-	return _HbSwap.Contract.Threshold(&_HbSwap.TransactOpts)
-}
-
 // Trade is a paid mutator transaction binding the contract method 0xb72a2139.
 //
 // Solidity: function trade(address _tokenA, address _tokenB, uint256 _idxA, uint256 _idxB, uint256 _maskedA, uint256 _maskedB) returns()
@@ -582,48 +793,6 @@ func (_HbSwap *HbSwapTransactorSession) Trade(_tokenA common.Address, _tokenB co
 	return _HbSwap.Contract.Trade(&_HbSwap.TransactOpts, _tokenA, _tokenB, _idxA, _idxB, _maskedA, _maskedB)
 }
 
-// TradeCnt is a paid mutator transaction binding the contract method 0xaf4170c4.
-//
-// Solidity: function tradeCnt() returns(uint256)
-func (_HbSwap *HbSwapTransactor) TradeCnt(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "tradeCnt")
-}
-
-// TradeCnt is a paid mutator transaction binding the contract method 0xaf4170c4.
-//
-// Solidity: function tradeCnt() returns(uint256)
-func (_HbSwap *HbSwapSession) TradeCnt() (*types.Transaction, error) {
-	return _HbSwap.Contract.TradeCnt(&_HbSwap.TransactOpts)
-}
-
-// TradeCnt is a paid mutator transaction binding the contract method 0xaf4170c4.
-//
-// Solidity: function tradeCnt() returns(uint256)
-func (_HbSwap *HbSwapTransactorSession) TradeCnt() (*types.Transaction, error) {
-	return _HbSwap.Contract.TradeCnt(&_HbSwap.TransactOpts)
-}
-
-// TradePrep is a paid mutator transaction binding the contract method 0x064d4810.
-//
-// Solidity: function tradePrep() returns()
-func (_HbSwap *HbSwapTransactor) TradePrep(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "tradePrep")
-}
-
-// TradePrep is a paid mutator transaction binding the contract method 0x064d4810.
-//
-// Solidity: function tradePrep() returns()
-func (_HbSwap *HbSwapSession) TradePrep() (*types.Transaction, error) {
-	return _HbSwap.Contract.TradePrep(&_HbSwap.TransactOpts)
-}
-
-// TradePrep is a paid mutator transaction binding the contract method 0x064d4810.
-//
-// Solidity: function tradePrep() returns()
-func (_HbSwap *HbSwapTransactorSession) TradePrep() (*types.Transaction, error) {
-	return _HbSwap.Contract.TradePrep(&_HbSwap.TransactOpts)
-}
-
 // UpdatePrice is a paid mutator transaction binding the contract method 0x3766dba7.
 //
 // Solidity: function updatePrice(address _tokenA, address _tokenB, uint256 _checkpointSeq, string _price) returns()
@@ -643,27 +812,6 @@ func (_HbSwap *HbSwapSession) UpdatePrice(_tokenA common.Address, _tokenB common
 // Solidity: function updatePrice(address _tokenA, address _tokenB, uint256 _checkpointSeq, string _price) returns()
 func (_HbSwap *HbSwapTransactorSession) UpdatePrice(_tokenA common.Address, _tokenB common.Address, _checkpointSeq *big.Int, _price string) (*types.Transaction, error) {
 	return _HbSwap.Contract.UpdatePrice(&_HbSwap.TransactOpts, _tokenA, _tokenB, _checkpointSeq, _price)
-}
-
-// Withdraw is a paid mutator transaction binding the contract method 0xf3fef3a3.
-//
-// Solidity: function withdraw(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactor) Withdraw(opts *bind.TransactOpts, _token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.contract.Transact(opts, "withdraw", _token, _amt)
-}
-
-// Withdraw is a paid mutator transaction binding the contract method 0xf3fef3a3.
-//
-// Solidity: function withdraw(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapSession) Withdraw(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.Withdraw(&_HbSwap.TransactOpts, _token, _amt)
-}
-
-// Withdraw is a paid mutator transaction binding the contract method 0xf3fef3a3.
-//
-// Solidity: function withdraw(address _token, uint256 _amt) returns()
-func (_HbSwap *HbSwapTransactorSession) Withdraw(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
-	return _HbSwap.Contract.Withdraw(&_HbSwap.TransactOpts, _token, _amt)
 }
 
 // HbSwapAddLiquidityIterator is returned from FilterAddLiquidity and is used to iterate over the raw logs and unpacked data for AddLiquidity events raised by the HbSwap contract.
@@ -735,17 +883,19 @@ func (it *HbSwapAddLiquidityIterator) Close() error {
 
 // HbSwapAddLiquidity represents a AddLiquidity event raised by the HbSwap contract.
 type HbSwapAddLiquidity struct {
-	User   common.Address
-	TokenA common.Address
-	TokenB common.Address
-	AmtA   *big.Int
-	AmtB   *big.Int
-	Raw    types.Log // Blockchain specific contextual infos
+	User       common.Address
+	TokenA     common.Address
+	TokenB     common.Address
+	IdxA       *big.Int
+	IdxB       *big.Int
+	MaskedAmtA *big.Int
+	MaskedAmtB *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterAddLiquidity is a free log retrieval operation binding the contract event 0xc33fbc9654f9c0dcfcbd829113bdb10afe95619bc0824bc5959ad82fd6952bd9.
+// FilterAddLiquidity is a free log retrieval operation binding the contract event 0xec7d4752dd44bf7fc59045c9d80163de2a1b9dbd9032d11cb1156f7f867c6411.
 //
-// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 amtA, uint256 amtB)
+// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) FilterAddLiquidity(opts *bind.FilterOpts) (*HbSwapAddLiquidityIterator, error) {
 
 	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "AddLiquidity")
@@ -755,9 +905,9 @@ func (_HbSwap *HbSwapFilterer) FilterAddLiquidity(opts *bind.FilterOpts) (*HbSwa
 	return &HbSwapAddLiquidityIterator{contract: _HbSwap.contract, event: "AddLiquidity", logs: logs, sub: sub}, nil
 }
 
-// WatchAddLiquidity is a free log subscription operation binding the contract event 0xc33fbc9654f9c0dcfcbd829113bdb10afe95619bc0824bc5959ad82fd6952bd9.
+// WatchAddLiquidity is a free log subscription operation binding the contract event 0xec7d4752dd44bf7fc59045c9d80163de2a1b9dbd9032d11cb1156f7f867c6411.
 //
-// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 amtA, uint256 amtB)
+// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) WatchAddLiquidity(opts *bind.WatchOpts, sink chan<- *HbSwapAddLiquidity) (event.Subscription, error) {
 
 	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "AddLiquidity")
@@ -792,9 +942,9 @@ func (_HbSwap *HbSwapFilterer) WatchAddLiquidity(opts *bind.WatchOpts, sink chan
 	}), nil
 }
 
-// ParseAddLiquidity is a log parse operation binding the contract event 0xc33fbc9654f9c0dcfcbd829113bdb10afe95619bc0824bc5959ad82fd6952bd9.
+// ParseAddLiquidity is a log parse operation binding the contract event 0xec7d4752dd44bf7fc59045c9d80163de2a1b9dbd9032d11cb1156f7f867c6411.
 //
-// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 amtA, uint256 amtB)
+// Solidity: event AddLiquidity(address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) ParseAddLiquidity(log types.Log) (*HbSwapAddLiquidity, error) {
 	event := new(HbSwapAddLiquidity)
 	if err := _HbSwap.contract.UnpackLog(event, "AddLiquidity", log); err != nil {
@@ -940,6 +1090,139 @@ func (_HbSwap *HbSwapFilterer) ParseInitPool(log types.Log) (*HbSwapInitPool, er
 	return event, nil
 }
 
+// HbSwapInputMaskIterator is returned from FilterInputMask and is used to iterate over the raw logs and unpacked data for InputMask events raised by the HbSwap contract.
+type HbSwapInputMaskIterator struct {
+	Event *HbSwapInputMask // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *HbSwapInputMaskIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(HbSwapInputMask)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(HbSwapInputMask)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *HbSwapInputMaskIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *HbSwapInputMaskIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// HbSwapInputMask represents a InputMask event raised by the HbSwap contract.
+type HbSwapInputMask struct {
+	InpusMaskIndexes []*big.Int
+	Raw              types.Log // Blockchain specific contextual infos
+}
+
+// FilterInputMask is a free log retrieval operation binding the contract event 0xff742b54a62e49c065680fc16aa208f37f60ded27e03a3d19e6088ba0c7b41d4.
+//
+// Solidity: event InputMask(uint256[] inpusMaskIndexes)
+func (_HbSwap *HbSwapFilterer) FilterInputMask(opts *bind.FilterOpts) (*HbSwapInputMaskIterator, error) {
+
+	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "InputMask")
+	if err != nil {
+		return nil, err
+	}
+	return &HbSwapInputMaskIterator{contract: _HbSwap.contract, event: "InputMask", logs: logs, sub: sub}, nil
+}
+
+// WatchInputMask is a free log subscription operation binding the contract event 0xff742b54a62e49c065680fc16aa208f37f60ded27e03a3d19e6088ba0c7b41d4.
+//
+// Solidity: event InputMask(uint256[] inpusMaskIndexes)
+func (_HbSwap *HbSwapFilterer) WatchInputMask(opts *bind.WatchOpts, sink chan<- *HbSwapInputMask) (event.Subscription, error) {
+
+	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "InputMask")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(HbSwapInputMask)
+				if err := _HbSwap.contract.UnpackLog(event, "InputMask", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseInputMask is a log parse operation binding the contract event 0xff742b54a62e49c065680fc16aa208f37f60ded27e03a3d19e6088ba0c7b41d4.
+//
+// Solidity: event InputMask(uint256[] inpusMaskIndexes)
+func (_HbSwap *HbSwapFilterer) ParseInputMask(log types.Log) (*HbSwapInputMask, error) {
+	event := new(HbSwapInputMask)
+	if err := _HbSwap.contract.UnpackLog(event, "InputMask", log); err != nil {
+		return nil, err
+	}
+	return event, nil
+}
+
 // HbSwapRemoveLiquidityIterator is returned from FilterRemoveLiquidity and is used to iterate over the raw logs and unpacked data for RemoveLiquidity events raised by the HbSwap contract.
 type HbSwapRemoveLiquidityIterator struct {
 	Event *HbSwapRemoveLiquidity // Event containing the contract specifics and raw log
@@ -1009,16 +1292,17 @@ func (it *HbSwapRemoveLiquidityIterator) Close() error {
 
 // HbSwapRemoveLiquidity represents a RemoveLiquidity event raised by the HbSwap contract.
 type HbSwapRemoveLiquidity struct {
-	User   common.Address
-	TokenA common.Address
-	TokenB common.Address
-	Amt    *big.Int
-	Raw    types.Log // Blockchain specific contextual infos
+	User      common.Address
+	TokenA    common.Address
+	TokenB    common.Address
+	Idx       *big.Int
+	MaskedAmt *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterRemoveLiquidity is a free log retrieval operation binding the contract event 0x2a1a4e62bda5b4987b9aa2f23ddbb29e434808f7a717452a3226bc15243c9277.
+// FilterRemoveLiquidity is a free log retrieval operation binding the contract event 0xa8dbaaebbb025c88e9e34c84635cd8238043556e9af43fb161508c898a8e1ef9.
 //
-// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 amt)
+// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 idx, uint256 maskedAmt)
 func (_HbSwap *HbSwapFilterer) FilterRemoveLiquidity(opts *bind.FilterOpts) (*HbSwapRemoveLiquidityIterator, error) {
 
 	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "RemoveLiquidity")
@@ -1028,9 +1312,9 @@ func (_HbSwap *HbSwapFilterer) FilterRemoveLiquidity(opts *bind.FilterOpts) (*Hb
 	return &HbSwapRemoveLiquidityIterator{contract: _HbSwap.contract, event: "RemoveLiquidity", logs: logs, sub: sub}, nil
 }
 
-// WatchRemoveLiquidity is a free log subscription operation binding the contract event 0x2a1a4e62bda5b4987b9aa2f23ddbb29e434808f7a717452a3226bc15243c9277.
+// WatchRemoveLiquidity is a free log subscription operation binding the contract event 0xa8dbaaebbb025c88e9e34c84635cd8238043556e9af43fb161508c898a8e1ef9.
 //
-// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 amt)
+// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 idx, uint256 maskedAmt)
 func (_HbSwap *HbSwapFilterer) WatchRemoveLiquidity(opts *bind.WatchOpts, sink chan<- *HbSwapRemoveLiquidity) (event.Subscription, error) {
 
 	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "RemoveLiquidity")
@@ -1065,9 +1349,9 @@ func (_HbSwap *HbSwapFilterer) WatchRemoveLiquidity(opts *bind.WatchOpts, sink c
 	}), nil
 }
 
-// ParseRemoveLiquidity is a log parse operation binding the contract event 0x2a1a4e62bda5b4987b9aa2f23ddbb29e434808f7a717452a3226bc15243c9277.
+// ParseRemoveLiquidity is a log parse operation binding the contract event 0xa8dbaaebbb025c88e9e34c84635cd8238043556e9af43fb161508c898a8e1ef9.
 //
-// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 amt)
+// Solidity: event RemoveLiquidity(address user, address tokenA, address tokenB, uint256 idx, uint256 maskedAmt)
 func (_HbSwap *HbSwapFilterer) ParseRemoveLiquidity(log types.Log) (*HbSwapRemoveLiquidity, error) {
 	event := new(HbSwapRemoveLiquidity)
 	if err := _HbSwap.contract.UnpackLog(event, "RemoveLiquidity", log); err != nil {
@@ -1416,20 +1700,20 @@ func (it *HbSwapTradeIterator) Close() error {
 
 // HbSwapTrade represents a Trade event raised by the HbSwap contract.
 type HbSwapTrade struct {
-	TradeSeq *big.Int
-	User     common.Address
-	TokenA   common.Address
-	TokenB   common.Address
-	IdxA     *big.Int
-	IdxB     *big.Int
-	MaskedA  *big.Int
-	MaskedB  *big.Int
-	Raw      types.Log // Blockchain specific contextual infos
+	TradeSeq   *big.Int
+	User       common.Address
+	TokenA     common.Address
+	TokenB     common.Address
+	IdxA       *big.Int
+	IdxB       *big.Int
+	MaskedAmtA *big.Int
+	MaskedAmtB *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
 // FilterTrade is a free log retrieval operation binding the contract event 0x2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae6.
 //
-// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedA, uint256 maskedB)
+// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) FilterTrade(opts *bind.FilterOpts) (*HbSwapTradeIterator, error) {
 
 	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "Trade")
@@ -1441,7 +1725,7 @@ func (_HbSwap *HbSwapFilterer) FilterTrade(opts *bind.FilterOpts) (*HbSwapTradeI
 
 // WatchTrade is a free log subscription operation binding the contract event 0x2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae6.
 //
-// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedA, uint256 maskedB)
+// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) WatchTrade(opts *bind.WatchOpts, sink chan<- *HbSwapTrade) (event.Subscription, error) {
 
 	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "Trade")
@@ -1478,281 +1762,10 @@ func (_HbSwap *HbSwapFilterer) WatchTrade(opts *bind.WatchOpts, sink chan<- *HbS
 
 // ParseTrade is a log parse operation binding the contract event 0x2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae6.
 //
-// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedA, uint256 maskedB)
+// Solidity: event Trade(uint256 tradeSeq, address user, address tokenA, address tokenB, uint256 idxA, uint256 idxB, uint256 maskedAmtA, uint256 maskedAmtB)
 func (_HbSwap *HbSwapFilterer) ParseTrade(log types.Log) (*HbSwapTrade, error) {
 	event := new(HbSwapTrade)
 	if err := _HbSwap.contract.UnpackLog(event, "Trade", log); err != nil {
-		return nil, err
-	}
-	return event, nil
-}
-
-// HbSwapTradePrepIterator is returned from FilterTradePrep and is used to iterate over the raw logs and unpacked data for TradePrep events raised by the HbSwap contract.
-type HbSwapTradePrepIterator struct {
-	Event *HbSwapTradePrep // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *HbSwapTradePrepIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(HbSwapTradePrep)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(HbSwapTradePrep)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *HbSwapTradePrepIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *HbSwapTradePrepIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// HbSwapTradePrep represents a TradePrep event raised by the HbSwap contract.
-type HbSwapTradePrep struct {
-	User common.Address
-	IdxA *big.Int
-	IdxB *big.Int
-	Raw  types.Log // Blockchain specific contextual infos
-}
-
-// FilterTradePrep is a free log retrieval operation binding the contract event 0xb2fd402d6b838b10cf190139b9d4495eefcfea7543bc1056544d13732d82e6ac.
-//
-// Solidity: event TradePrep(address user, uint256 idxA, uint256 idxB)
-func (_HbSwap *HbSwapFilterer) FilterTradePrep(opts *bind.FilterOpts) (*HbSwapTradePrepIterator, error) {
-
-	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "TradePrep")
-	if err != nil {
-		return nil, err
-	}
-	return &HbSwapTradePrepIterator{contract: _HbSwap.contract, event: "TradePrep", logs: logs, sub: sub}, nil
-}
-
-// WatchTradePrep is a free log subscription operation binding the contract event 0xb2fd402d6b838b10cf190139b9d4495eefcfea7543bc1056544d13732d82e6ac.
-//
-// Solidity: event TradePrep(address user, uint256 idxA, uint256 idxB)
-func (_HbSwap *HbSwapFilterer) WatchTradePrep(opts *bind.WatchOpts, sink chan<- *HbSwapTradePrep) (event.Subscription, error) {
-
-	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "TradePrep")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(HbSwapTradePrep)
-				if err := _HbSwap.contract.UnpackLog(event, "TradePrep", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTradePrep is a log parse operation binding the contract event 0xb2fd402d6b838b10cf190139b9d4495eefcfea7543bc1056544d13732d82e6ac.
-//
-// Solidity: event TradePrep(address user, uint256 idxA, uint256 idxB)
-func (_HbSwap *HbSwapFilterer) ParseTradePrep(log types.Log) (*HbSwapTradePrep, error) {
-	event := new(HbSwapTradePrep)
-	if err := _HbSwap.contract.UnpackLog(event, "TradePrep", log); err != nil {
-		return nil, err
-	}
-	return event, nil
-}
-
-// HbSwapUpdatePriceIterator is returned from FilterUpdatePrice and is used to iterate over the raw logs and unpacked data for UpdatePrice events raised by the HbSwap contract.
-type HbSwapUpdatePriceIterator struct {
-	Event *HbSwapUpdatePrice // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *HbSwapUpdatePriceIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(HbSwapUpdatePrice)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(HbSwapUpdatePrice)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *HbSwapUpdatePriceIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *HbSwapUpdatePriceIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// HbSwapUpdatePrice represents a UpdatePrice event raised by the HbSwap contract.
-type HbSwapUpdatePrice struct {
-	TokenA common.Address
-	TokenB common.Address
-	Price  string
-	Time   *big.Int
-	Raw    types.Log // Blockchain specific contextual infos
-}
-
-// FilterUpdatePrice is a free log retrieval operation binding the contract event 0x768a9235e77345cf2e5d38042be1a15e329aa5d7b3a228aa9a881a0b919500b3.
-//
-// Solidity: event UpdatePrice(address tokenA, address tokenB, string price, uint256 time)
-func (_HbSwap *HbSwapFilterer) FilterUpdatePrice(opts *bind.FilterOpts) (*HbSwapUpdatePriceIterator, error) {
-
-	logs, sub, err := _HbSwap.contract.FilterLogs(opts, "UpdatePrice")
-	if err != nil {
-		return nil, err
-	}
-	return &HbSwapUpdatePriceIterator{contract: _HbSwap.contract, event: "UpdatePrice", logs: logs, sub: sub}, nil
-}
-
-// WatchUpdatePrice is a free log subscription operation binding the contract event 0x768a9235e77345cf2e5d38042be1a15e329aa5d7b3a228aa9a881a0b919500b3.
-//
-// Solidity: event UpdatePrice(address tokenA, address tokenB, string price, uint256 time)
-func (_HbSwap *HbSwapFilterer) WatchUpdatePrice(opts *bind.WatchOpts, sink chan<- *HbSwapUpdatePrice) (event.Subscription, error) {
-
-	logs, sub, err := _HbSwap.contract.WatchLogs(opts, "UpdatePrice")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(HbSwapUpdatePrice)
-				if err := _HbSwap.contract.UnpackLog(event, "UpdatePrice", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUpdatePrice is a log parse operation binding the contract event 0x768a9235e77345cf2e5d38042be1a15e329aa5d7b3a228aa9a881a0b919500b3.
-//
-// Solidity: event UpdatePrice(address tokenA, address tokenB, string price, uint256 time)
-func (_HbSwap *HbSwapFilterer) ParseUpdatePrice(log types.Log) (*HbSwapUpdatePrice, error) {
-	event := new(HbSwapUpdatePrice)
-	if err := _HbSwap.contract.UnpackLog(event, "UpdatePrice", log); err != nil {
 		return nil, err
 	}
 	return event, nil

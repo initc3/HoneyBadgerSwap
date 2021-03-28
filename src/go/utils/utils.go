@@ -22,6 +22,11 @@ import (
 	"time"
 )
 
+const (
+	N = 4
+	T = 1
+)
+
 var (
 	GOPATH     = os.Getenv("GOPATH")
 	KEYSTORE   = os.Getenv("POA_KEYSTORE")
@@ -34,7 +39,7 @@ var (
 
 	EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	HbswapAddr = map[string]common.Address{
-		"testnet":    common.HexToAddress("0xf534d94c9ade708d03710a23dfb1aa0ae873ddb1"),
+		"testnet":    common.HexToAddress("0xf3448a67a26e97462a9d3c3182a791915c147ea5"),
 		"privatenet": common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2"),
 	}
 	TokenAddrs = map[string][]common.Address{
@@ -47,6 +52,8 @@ var (
 			common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
 		},
 	}
+	//TODO: delete it after testing
+	UserAddr = common.HexToAddress("0xc33a4b5b609fcc294dca060347761226e78c0b7a")
 
 	HttpPort = 8545
 	WsPort  = 8546
@@ -60,7 +67,10 @@ func ExecCmd(cmd *exec.Cmd) string {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+	start := time.Now()
 	err := cmd.Run()
+	duration := time.Since(start)
+	fmt.Printf("Execution time: %s\n", duration)
 	if err != nil {
 		fmt.Printf("err:\n%s\n", stderr.String())
 		log.Fatalf("cmd.Run() failed with %s\n", err)

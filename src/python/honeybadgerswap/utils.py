@@ -23,12 +23,12 @@ def key_pool(token_A, token_B, token):
     return f"pool_{token_A}_{token_B}_{token}".encode()
 
 
-def key_trade_price(trade_seq):
+def key_individual_price(trade_seq):
     return f"trade_price_{trade_seq}".encode()
 
 
-def key_trade_time(trade_seq):
-    return f"trade_time_{trade_seq}".encode()
+# def key_trade_time(trade_seq):
+#     return f"trade_time_{trade_seq}".encode()
 
 
 def key_total_price(token_A, token_B):
@@ -83,11 +83,11 @@ def openDB(location):
             time.sleep(10)
 
 
-def get_value(db, key):
+def get_value(db, key): # return: hex
     try:
         return bytes(db.Get(key))
     except KeyError:
-        return to_hex(0)
+        return int_to_hex(0)
 
 
 def get_inverse(a):
@@ -101,18 +101,19 @@ def get_inverse(a):
     return ret
 
 
-def from_float(x):
-    return int(round(float(x) * (2 ** fp)))
-
-def to_float(x):
-    return 1. * x / (2 ** fp)
+# def float_to_fix(x):
+#     return int(round(float(x) * fp))
 
 
-def from_hex(x):
+def fix_to_float(x):
+    return 1. * x / fp
+
+
+def hex_to_int(x):
     return int((mpz_from_old_binary(x) * inverse_R) % p)
 
 
-def to_hex(x):
+def int_to_hex(x):
     x = mpz(x)
     x = (x * R) % p
     x = binary(int(x))
@@ -136,13 +137,19 @@ def reconstruct(shares, n):
                 continue
             tot = tot * j * get_inverse(j - i) % p
         inputmask = (inputmask + shares[i - 1] * tot) % p
+    print(inputmask)
     return inputmask
 
+def recover_input(db, masked_value, idx): # return: hex
+    input_mask_share = hex_to_int(get_value(db, key_inputmask(idx)))
+    return int_to_hex((masked_value - input_mask_share) % p)
 
 n = 4
 t = 1
 p = 52435875175126190479447740508185965837690552500527637822603658699938581184513
 R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
 inverse_R = get_inverse(R)
-fp = 16
+fp = 1 << 16
 sz = 32
+
+display_precision = 4

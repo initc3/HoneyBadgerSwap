@@ -7,28 +7,12 @@ from .config import settings
 from ..utils import (
     key_balance,
     key_inputmask,
-    key_trade_price,
-    key_trade_time,
+    key_individual_price,
     location_db,
     openDB,
     get_value,
-    from_hex,
+    hex_to_int
 )
-
-
-async def db_get(key):
-    db = openDB(location_db(settings.NODE_ID))
-    return from_hex(get_value(db, key))
-
-
-async def db_get_non_balance(key):
-    while True:
-        v = await db_get(key)
-        if v == 0:
-            raise HTTPException(status_code=404, detail=f"Key {key} not found")
-        else:
-            return v
-
 
 app = FastAPI()
 
@@ -54,12 +38,19 @@ async def info():
 @app.get("/inputmasks/{mask_idxes}")
 async def get_inputmasks(mask_idxes: str):
     print(f"s{settings.NODE_ID} processing request GET /inputmasks/{mask_idxes}")
-    _mask_idxes = mask_idxes.split(",")
+    mask_idx_list = mask_idxes.split(",")
     res = ""
-    for mask_idx in _mask_idxes:
+    print(mask_idx_list)
+    db = openDB(location_db(settings.NODE_ID))
+    for mask_idx in mask_idx_list:
+        try:
+            share = hex_to_int(bytes(db.Get(key_inputmask(mask_idx))))
+        except KeyError:
+            print('key error: ', mask_idx)
+            res = ''
+            break
         res += (
-            f"{',' if len(res) > 0 else ''}"
-            f"{await db_get_non_balance(key_inputmask(mask_idx))}"
+            f"{',' if len(res) > 0 else ''}{share}"
         )
     data = {"inputmask_shares": res}
     print(f"s{settings.NODE_ID} response to GET /inputmasks/{mask_idxes}: {res}")
@@ -69,12 +60,12 @@ async def get_inputmasks(mask_idxes: str):
 @app.get("/price/{trade_seq}")
 async def get_price(trade_seq: str):
     print(f"s{settings.NODE_ID} processing request GET /price/{trade_seq}")
-    cur_time = int(time.time())
-    prev_time = await db_get_non_balance(key_trade_time(trade_seq))
-    passed_time = cur_time - prev_time
-    time.sleep(max(0, 10 - passed_time))
-
-    res = await db_get_non_balance(key_trade_price(trade_seq))
+    db = openDB(location_db(settings.NODE_ID))
+    res = ''
+    try:
+        res = hex_to_int(bytes(db.Get(key_individual_price(trade_seq))))
+    except KeyError:
+        pass
     data = {"price": f"{res}"}
     print(f"s{settings.NODE_ID} response to GET /price/{trade_seq}: {res}")
     return data
@@ -84,7 +75,8 @@ async def get_price(trade_seq: str):
 async def get_balance(token_user: str):
     print(f"s{settings.NODE_ID} processing request GET /balance/{token_user}")
     token, user = token_user.split(",")
-    res = await db_get(key_balance(token, user))
+    db = openDB(location_db(settings.NODE_ID))
+    res = hex_to_int(get_value(db, key_balance(token, user)))
     data = {"balance": f"{res}"}
     print(f"s{settings.NODE_ID} response to GET /balance/{token_user}: {res}")
     return data

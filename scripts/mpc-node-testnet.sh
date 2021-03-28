@@ -2,6 +2,7 @@
 set -e
 
 config=${1:-/opt/hbswap/conf/server.toml}
+go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
 setup_data() {
@@ -16,13 +17,14 @@ setup_data() {
 
 
 httpserver() {
-    #python -m honeybadgerswap.server.main
-    hbswap-start-httpserver
+    python -m honeybadgerswap.server.main
+#    hbswap-start-httpserver
     #uvicorn honeybadgerswap.server.main:app --host 0.0.0.0 --port 8080
 }
 
 mpcserver() {
-  ./mpcserver -config $config -id $NODE_ID > /usr/src/hbswap/log/mpc_server_$NODE_ID.log 2>&1
+#  ./mpcserver -config $config -id $NODE_ID > /usr/src/hbswap/log/mpc_server_$NODE_ID.log 2>&1
+  go run $go_code_path/server/server.go -config $config -id $NODE_ID > /usr/src/hbswap/log/mpc_server_$NODE_ID.log 2>&1
 }
 
 setup_data

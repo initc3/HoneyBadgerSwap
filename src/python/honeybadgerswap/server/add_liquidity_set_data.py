@@ -1,14 +1,14 @@
 import sys
 
 from ..utils import (
+    key_balance,
     key_pool,
     key_total_supply,
     location_db,
     location_sharefile,
     openDB,
-    from_float,
-    from_hex,
-    to_hex,
+    get_value,
+    recover_input
 )
 
 if __name__ == "__main__":
@@ -16,18 +16,35 @@ if __name__ == "__main__":
     user = sys.argv[2]
     token_A = sys.argv[3]
     token_B = sys.argv[4]
-    amt_A = to_hex(from_float(sys.argv[5]))
-    amt_B = to_hex(from_float(sys.argv[6]))
+    idx_A = sys.argv[5]
+    masked_amt_A = int(sys.argv[6]) # fix
+    idx_B = sys.argv[7]
+    masked_amt_B = int(sys.argv[8]) # fix
 
     db = openDB(location_db(server_id))
 
-    pool_A = bytes(db.Get(key_pool(token_A, token_B, token_A)))
-    pool_B = bytes(db.Get(key_pool(token_A, token_B, token_B)))
+    balance_A = get_value(db, key_balance(token_A, user)) # hex
+    amt_A = recover_input(db, masked_amt_A, idx_A) # hex
 
-    key = key_total_supply(token_A, token_B)
-    total_supply = bytes(db.Get(key))
-    print(from_hex(total_supply))
+    balance_B = get_value(db, key_balance(token_B, user)) # hex
+    amt_B = recover_input(db, masked_amt_B, idx_B) # hex
+
+    total_supply_LT = get_value(db, key_total_supply(token_A, token_B)) # hex
+
+    pool_A = get_value(db, key_pool(token_A, token_B, token_A)) # hex
+    pool_B = get_value(db, key_pool(token_A, token_B, token_B)) # hex
+
+    balance_LT = get_value(db, key_balance(f'{token_A}+{token_B}', user)) # hex
 
     file = location_sharefile(server_id)
     with open(file, "wb") as f:
-        f.write(pool_A + pool_B + amt_A + amt_B + total_supply)
+        f.write(
+            balance_A +
+            amt_A +
+            balance_B +
+            amt_B +
+            total_supply_LT +
+            pool_A +
+            pool_B +
+            balance_LT
+        )
