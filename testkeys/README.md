@@ -12,6 +12,12 @@ To generate new keys you can use the `genkeys.yml` file,
 docker-compose -f testkeys/genkeys.yml up
 ```
 
+or from the directory where this `README.md` is:
+
+```shell
+docker-compose -f genkeys.yml up
+```
+
 By default it will create keys for 4 players. If you need to generate a different
 number replace `"4"` in the following line in `genkeys.yml`:
 
