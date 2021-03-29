@@ -1,2 +1,7 @@
 # HoneyBadgerSwap
-Coming soon to a blockchain near you ...
+
+
+## Troubleshooting
+
+### Expired TLS/SSL Certificates
+See [./testkeys/README.md](./testkeys/README.md).
