@@ -19,17 +19,17 @@ import (
 )
 
 const (
-	prog      = "./malicious-shamir-party.x"
-	players   = "4"
-	threshold = "1"
-	mpcPort   = "5000"
-	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
-	nshares   = 1000
-	batchSize       = 2
+	prog                = "./malicious-shamir-party.x"
+	players             = "4"
+	threshold           = "1"
+	mpcPort             = "5000"
+	blsPrime            = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
+	nshares             = 1000
+	batchSize           = 2
 	returnPriceInterval = 10
 
 	confirmation = 2
-	blockTime = 5
+	blockTime    = 5
 )
 
 var (
@@ -69,13 +69,13 @@ func watch() {
 	ctx := context.Background()
 
 	blkNum, _ := conn.BlockNumber(ctx)
-	for true{
+	for true {
 		curBlockNum, _ := conn.BlockNumber(ctx)
 		fmt.Println("curBlockNum", curBlockNum)
-		if curBlockNum - blkNum > confirmation {
+		if curBlockNum-blkNum > confirmation {
 			query := ethereum.FilterQuery{
 				FromBlock: big.NewInt(int64(blkNum)),
-				ToBlock: big.NewInt(int64(curBlockNum - confirmation)),
+				ToBlock:   big.NewInt(int64(curBlockNum - confirmation)),
 				Addresses: []common.Address{utils.HbswapAddr[network]},
 			}
 			logs, _ := conn.FilterLogs(ctx, query)
@@ -142,10 +142,11 @@ func watch() {
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_init_pool")
 					utils.ExecCmd(cmd)
+					// TODO detect if MP-SPDZ return properly
 
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.init_pool_org_data", serverID, tokenA, tokenB, user, amtA, amtB)
 					stdout := utils.ExecCmd(cmd)
-					outputs := strings.Split(stdout[:len(stdout) - 1], "\n")
+					outputs := strings.Split(stdout[:len(stdout)-1], "\n")
 					validOrder, _ := strconv.Atoi(outputs[0])
 					if validOrder == 1 {
 						price := outputs[1]
@@ -262,7 +263,7 @@ func watch() {
 
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_set_data", serverID, tokenA, tokenB)
 					stdout = utils.ExecCmd(cmd)
-					cnt, _ := strconv.ParseFloat(strings.Split(stdout[:len(stdout) - 1], " ")[1], 32)
+					cnt, _ := strconv.ParseFloat(strings.Split(stdout[:len(stdout)-1], " ")[1], 32)
 					fmt.Println("cnt", cnt)
 
 					if cnt >= batchSize {
@@ -271,7 +272,7 @@ func watch() {
 
 						cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_org_data", serverID, tokenA, tokenB)
 						stdout = utils.ExecCmd(cmd)
-						batchPrice := stdout[:len(stdout) - 1]
+						batchPrice := stdout[:len(stdout)-1]
 						fmt.Println(batchPrice)
 						seq, _ := strconv.Atoi(tradeSeq)
 						utils.UpdatePrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB), big.NewInt(int64(seq)), batchPrice)
@@ -311,12 +312,12 @@ func main() {
 		wsUrl = utils.GetEthWsURL(ethHostname)
 	} else {
 		wsUrl = utils.TestnetWsEndpoint
+		//wsUrl = config.EthNode.WsEndpoint
 	}
 	conn = utils.GetEthClient(wsUrl)
 
 	//TODO: deleting this after testing
-	if serverID == "0" && network == "testnet"{
-		//utils.ResetPrice(network, conn, server, utils.EthAddr, utils.TokenAddrs[network][0])
+	if serverID == "0" && network == "testnet" {
 		//utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
 		//for _, tokenAddr := range utils.TokenAddrs[network] {
 		//	utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
