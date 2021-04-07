@@ -142,7 +142,7 @@ func watch() {
 
 					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_init_pool")
 					utils.ExecCmd(cmd)
-					// TODO detect if MP-SPDZ return properly
+					// TODO detect if MP-SPDZ returns properly
 
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.init_pool_org_data", serverID, tokenA, tokenB, user, amtA, amtB)
 					stdout := utils.ExecCmd(cmd)

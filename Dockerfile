@@ -76,11 +76,12 @@ COPY --from=sbellem/mpspdz:2cf97686-randomshamirprep\
                 /usr/src/MP-SPDZ/random-shamir.x /usr/src/hbswap/
 COPY --from=sbellem/mpspdz:2cf97686-maliciousshamirparty \
                 /usr/src/MP-SPDZ/malicious-shamir-party.x /usr/src/hbswap/
-RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
+RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR Persistence Player-Data
 COPY testkeys/public /opt/hbswap/public-keys
 #############################################################################
 
 ENV DB_PATH /opt/hbswap/db
+RUN mkdir -p $DB_PATH
 
 # GO (server) dependencies
 ENV PATH /usr/local/go/bin:$PATH

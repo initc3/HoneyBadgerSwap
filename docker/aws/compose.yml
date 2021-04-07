@@ -1,8 +1,28 @@
 version: '3.8'
 
-volumes:
-  mpc-bytecodes:
-  mpc-schedules:
+#volumes:
+#  mpc-bytecodes:
+#  mpc-schedules:
+#  db-p0:
+#  db-p1:
+#  db-p2:
+#  db-p3:
+#  inputmaskshares-p0:
+#  inputmaskshares-p1:
+#  inputmaskshares-p2:
+#  inputmaskshares-p3:
+#  ppdata-p0:
+#  ppdata-p1:
+#  ppdata-p2:
+#  ppdata-p3:
+#  player-data-p0:
+#  player-data-p1:
+#  player-data-p2:
+#  player-data-p3:
+#  persistence-p0:
+#  persistence-p1:
+#  persistence-p2:
+#  persistence-p3:
 
 services:
   #ethnode:
@@ -35,14 +55,15 @@ services:
     ports:
       - target: 8080
         published: 8080
-        #protocol: tcp
         x-aws-protocol: https
     #volumes:
-    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
-        #- inputmaskshares-p0:/opt/hbswap/inputmask-shares
-        #- ppdata-p0:/opt/hbswap/preprocessing-data
-        #- persistence-p0:/usr/src/hbswap/Persistence
+    #  #- mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  #- mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  - db-p0:/opt/hbswap/db
+    #  - inputmaskshares-p0:/opt/hbswap/inputmask-shares
+    #  - ppdata-p0:/opt/hbswap/preprocessing-data
+    #  - persistence-p0:/usr/src/hbswap/Persistence
+    #  - player-data-p0:/usr/src/hbswap/Player-Data
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
@@ -59,11 +80,15 @@ services:
     ports:
       - target: 8081
         published: 8081
-        #protocol: tcp
         x-aws-protocol: https
     #volumes:
-    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  #- mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  #- mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  - db-p1:/opt/hbswap/db
+    #  - inputmaskshares-p1:/opt/hbswap/inputmask-shares
+    #  - ppdata-p1:/opt/hbswap/preprocessing-data
+    #  - persistence-p1:/usr/src/hbswap/Persistence
+    #  - player-data-p1:/usr/src/hbswap/Player-Data
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
@@ -80,11 +105,15 @@ services:
     ports:
       - target: 8082
         published: 8082
-        #protocol: tcp
         x-aws-protocol: https
     #volumes:
-    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  #- mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  #- mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  - db-p2:/opt/hbswap/db
+    #  - inputmaskshares-p2:/opt/hbswap/inputmask-shares
+    #  - ppdata-p2:/opt/hbswap/preprocessing-data
+    #  - persistence-p2:/usr/src/hbswap/Persistence
+    #  - player-data-p2:/usr/src/hbswap/Player-Data
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
@@ -101,11 +130,15 @@ services:
     ports:
       - target: 8083
         published: 8083
-        #protocol: tcp
         x-aws-protocol: https
     #volumes:
-    #  - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
-    #  - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  #- mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+    #  #- mpc-schedules:/usr/src/hbswap/Programs/Schedules
+    #  - db-p3:/opt/hbswap/db
+    #  - inputmaskshares-p3:/opt/hbswap/inputmask-shares
+    #  - ppdata-p3:/opt/hbswap/preprocessing-data
+    #  - persistence-p3:/usr/src/hbswap/Persistence
+    #  - player-data-p3:/usr/src/hbswap/Player-Data
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
@@ -148,34 +181,30 @@ x-aws-cloudformation:
       Properties:
         #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
         Certificates:
-          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
-        #Protocol: TLS
+          # ratelang.org
+          #- CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
+          # honeybadgerswap.com
+          #- CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/a9a750d5-b2f9-4c6c-a85e-23d9dae7e126"
+          #- CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/62cba85a-242e-4215-afd9-7cee9f50b184"
+          # honeybadgerswap.org
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/411c840d-06c1-48c1-8a8c-8bb377f544fc"
         Protocol: HTTPS
       Type: AWS::ElasticLoadBalancingV2::Listener
-    #Mpcnode1TCP8081Listener:
     Mpcnode18081Listener:
       Properties:
-        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
         Certificates:
-          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
-        #Protocol: TLS
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/411c840d-06c1-48c1-8a8c-8bb377f544fc"
         Protocol: HTTPS
       Type: AWS::ElasticLoadBalancingV2::Listener
-    #Mpcnode2TCP8082Listener:
     Mpcnode28082Listener:
       Properties:
-        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
         Certificates:
-          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
-        #Protocol: TLS
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/411c840d-06c1-48c1-8a8c-8bb377f544fc"
         Protocol: HTTPS
       Type: AWS::ElasticLoadBalancingV2::Listener
-    #Mpcnode3TCP8083Listener:
     Mpcnode38083Listener:
       Properties:
-        #LoadBalancerArn: "arn:aws:elasticloadbalancing:eu-west-3:809684608753:loadbalancer/app/myloadbalancer/1e6f0dad53bd4979"
         Certificates:
-          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/389bba7c-26b9-45a7-9da9-fefeae053045"
-        #Protocol: TLS
+          - CertificateArn: "arn:aws:acm:eu-west-3:809684608753:certificate/411c840d-06c1-48c1-8a8c-8bb377f544fc"
         Protocol: HTTPS
       Type: AWS::ElasticLoadBalancingV2::Listener
