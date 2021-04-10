@@ -60,6 +60,13 @@ var (
 
 	TestnetHttpEndpoint = "https://kovan.infura.io/v3/6a82d2519efb4d748c02552e02e369c1"
 	TestnetWsEndpoint   = "wss://kovan.infura.io/ws/v3/6a82d2519efb4d748c02552e02e369c1"
+
+	AddLiquidity = "0xec7d4752dd44bf7fc59045c9d80163de2a1b9dbd9032d11cb1156f7f867c6411"
+	InitPool = "0xfaaebcb30b1b421f4f2ca7f2620e5add6a64532c087ee0646fd665a33d36fdf5"
+	RemoveLiquidity = "0xa8dbaaebbb025c88e9e34c84635cd8238043556e9af43fb161508c898a8e1ef9"
+	SecretDeposit = "0x07c06144435b7d2bdccf9ee7e5a7022c63382ac7c3a0e14ed08b5969dedf0ecf"
+	SecretWithdraw = "0x4ef3cc4825a92c3b6922acc8a45152cc96ef48463e8ed500dacd5df9e29a67f3"
+	Trade = "0x2b4d91cd20cc8800407e3614b8466a6f0729ac3b1fa43d4e2b059ff5593cbae6"
 )
 
 func ExecCmd(cmd *exec.Cmd) string {

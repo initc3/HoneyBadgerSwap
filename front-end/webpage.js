@@ -10,9 +10,12 @@ const token2 = '0x403b0f962566ffb960d0de98875dc09603aa67e9'
 
 const decimals = 1 // TODO: 10**18
 const checkPointInterval = 20 * 1000
-const basePort = 58080
 const feeRate = 0.003
 const displayPrecision = 4
+// const host = 'https://www.ratelang.org'
+// const basePort = 8080
+const host = 'http://localhost'
+const basePort = 58080
 
 // **** Internal functions ****
 
@@ -116,7 +119,7 @@ function reconstruct(n, t, shares, p) {
 async function getSecretBalance(token, user, prefix='') {
     let shares = []
     for (let i = 0; i < n; i++) {
-        url = 'http://localhost:' + (basePort + i) + '/balance/' + token + ',' + user
+        url = host + ':' + (basePort + i) + '/balance/' + token + ',' + user
         console.log(url)
         const share = (await (await fetch(url, {mode: 'cors'})).json()).balance
         $('#' + prefix + i).text(share)
@@ -128,7 +131,7 @@ async function getSecretBalance(token, user, prefix='') {
 async function getTradePrice(tradeSeq) {
     let shares = []
     for (let i = 0; i < n; i++) {
-        url = 'http://localhost:' + (basePort + i) + '/price/' + tradeSeq
+        url = host + ':' + (basePort + i) + '/price/' + tradeSeq
         console.log(url)
         let share = (await (await fetch(url, {mode: 'cors'})).json()).price
         if (share == '') {
@@ -145,7 +148,7 @@ async function getInputmasks(num, idxes) {
     let shares = []
     for (let i = 0; i < num; i++) shares.push([])
     for (let srv = 0; srv < n; srv++) {
-        url = 'http://localhost:' + (basePort + srv) + '/inputmasks/' + idxes
+        url = host + ':' + (basePort + srv) + '/inputmasks/' + idxes
         console.log(url)
         const tmp = (await (await fetch(url, {mode: 'cors'})).json()).inputmask_shares.split(',')
         for (let i = 0; i < num; i++) {
@@ -163,7 +166,7 @@ async function getInputmasks(num, idxes) {
 }
 
 async function getServerLog(srv, lines) {
-    url = 'http://localhost:' + (basePort + srv) + '/log/' + lines
+    url = host + ':' + (basePort + srv) + '/log/' + lines
     const log = (await (await fetch(url, {mode: 'cors'})).json()).log
     $('#log').text(log)
 }
@@ -412,6 +415,8 @@ async function initPool() {
         $('#addInfo').show()
         return
     }
+
+    await hbswapContract.methods.initPool(tokenA, tokenB, floatToFix(amtA), floatToFix(amtB)).send({from: user})
 
     while (true) {
         const price = await hbswapContract.methods.prices(tokenA, tokenB).call()
