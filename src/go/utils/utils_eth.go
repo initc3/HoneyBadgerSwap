@@ -68,7 +68,7 @@ func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.Transact
 	}
 
 	tx := types.NewTransaction(nonce, toAddr, amount, gasLimit, gasPrice, nil)
-	signedTx, err := fromAuth.Signer(types.NewEIP155Signer(stringToBigInt(chainId)), fromAddr, tx)
+	signedTx, err := fromAuth.Signer(fromAddr, tx)
 	if err != nil {
 		log.Fatal(err)
 	}

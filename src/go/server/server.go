@@ -1,16 +1,15 @@
 package main
 
 import (
-	"container/heap"
+	"context"
 	"flag"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/HoneyBadgerSwap/src/go/server/lib"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
-	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
-	"log"
 	"math/big"
 	"os/exec"
 	"strconv"
@@ -26,9 +25,11 @@ const (
 	mpcPort   = "5000"
 	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 	nshares   = 1000
-	//prepDir   = "/opt/hbswap/preprocessing-data"
 	batchSize       = 2
 	returnPriceInterval = 10
+
+	confirmation = 2
+	blockTime = 5
 )
 
 var (
@@ -36,33 +37,9 @@ var (
 	serverID       string
 	conn           *ethclient.Client
 	server         *bind.TransactOpts
-	pq             utils.PriorityQueue
-	mutexPQ        = &sync.Mutex{}
 	mutexTask      = &sync.Mutex{}
-	eventSet       = map[utils.EventID]bool{}
 	leaderHostname string
-	tokenPairs     = map[string]bool{}
 )
-
-func checkBalance(token string, user string, amt string) int {
-	cmd := exec.Command("python3", "-m", "honeybadgerswap.server.check_balance_set_data", serverID, token, user, amt)
-	utils.ExecCmd(cmd)
-
-	cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_check_balance")
-	stdout := utils.ExecCmd(cmd)
-
-	cmd = exec.Command("python3", "-m", "honeybadgerswap.server.check_balance_org_data", serverID)
-	stdout = utils.ExecCmd(cmd)
-	enoughBalance, _ := strconv.Atoi(stdout[:1])
-	fmt.Printf("enoughBalance %v\n", enoughBalance)
-
-	return enoughBalance
-}
-
-func updateBalance(token string, user string, amt string, flag string) {
-	cmd := exec.Command("python3", "-m", "honeybadgerswap.server.update_balance", serverID, token, user, amt, flag)
-	utils.ExecCmd(cmd)
-}
 
 func genInputmask() {
 	tot := utils.GetInputmaskCnt(network, conn)
@@ -89,226 +66,76 @@ func genInputmask() {
 }
 
 func watch() {
-	hbswapInstance, err := hbswap.NewHbSwap(utils.HbswapAddr[network], conn)
+	ctx := context.Background()
 
-	initPoolChannel := make(chan *hbswap.HbSwapInitPool)
-	initPoolSub, err := hbswapInstance.WatchInitPool(nil, initPoolChannel)
-	if err != nil {
-		log.Fatal("watch InitPool err:", err)
-	}
-
-	AddLiquidityChannel := make(chan *hbswap.HbSwapAddLiquidity)
-	AddLiquiditySub, err := hbswapInstance.WatchAddLiquidity(nil, AddLiquidityChannel)
-	if err != nil {
-		log.Fatal("watch AddLiquidity err:", err)
-	}
-
-	RemoveLiquidityChannel := make(chan *hbswap.HbSwapRemoveLiquidity)
-	RemoveLiquiditySub, err := hbswapInstance.WatchRemoveLiquidity(nil, RemoveLiquidityChannel)
-	if err != nil {
-		log.Fatal("watch RemoveLiquidity err:", err)
-	}
-
-	tradeChannel := make(chan *hbswap.HbSwapTrade)
-	tradeSub, err := hbswapInstance.WatchTrade(nil, tradeChannel)
-	if err != nil {
-		log.Fatal("watch Trade err:", err)
-	}
-
-	secretDepositPrepChannel := make(chan *hbswap.HbSwapSecretDeposit)
-	secretDepositPrepSub, err := hbswapInstance.WatchSecretDeposit(nil, secretDepositPrepChannel)
-	if err != nil {
-		log.Fatal("watch LocalDepositPrep err:", err)
-	}
-
-	secretWithdrawChannel := make(chan *hbswap.HbSwapSecretWithdraw)
-	secretWithdrawSub, err := hbswapInstance.WatchSecretWithdraw(nil, secretWithdrawChannel)
-	if err != nil {
-		log.Fatal("watch secretWithdraw err:", err)
-	}
-
-	for {
-		select {
-		case err := <-initPoolSub.Err():
-			log.Fatal(err)
-		case oce := <-initPoolChannel:
-			go func() {
-				fmt.Println("Push InitPool")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "InitPool",
-					Parameters: []string{
-						strings.ToLower(oce.User.String()),
-						strings.ToLower(oce.TokenA.String()),
-						strings.ToLower(oce.TokenB.String()),
-						oce.AmtA.String(),
-						oce.AmtB.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		case err := <-AddLiquiditySub.Err():
-			log.Fatal(err)
-		case oce := <-AddLiquidityChannel:
-			go func() {
-				fmt.Println("Push AddLiquidity")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "AddLiquidity",
-					Parameters: []string{
-						strings.ToLower(oce.User.String()),
-						strings.ToLower(oce.TokenA.String()),
-						strings.ToLower(oce.TokenB.String()),
-						oce.IdxA.String(),
-						oce.IdxB.String(),
-						oce.MaskedAmtA.String(),
-						oce.MaskedAmtB.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		case err := <-RemoveLiquiditySub.Err():
-			log.Fatal(err)
-		case oce := <-RemoveLiquidityChannel:
-			go func() {
-				fmt.Println("Push RemoveLiquidity")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "RemoveLiquidity",
-					Parameters: []string{
-						strings.ToLower(oce.User.String()),
-						strings.ToLower(oce.TokenA.String()),
-						strings.ToLower(oce.TokenB.String()),
-						oce.Idx.String(),
-						oce.MaskedAmt.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		case err := <-tradeSub.Err():
-			log.Fatal(err)
-		case oce := <-tradeChannel:
-			go func() {
-				fmt.Println("Push Trade")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "Trade",
-					Parameters: []string{
-						oce.TradeSeq.String(),
-						strings.ToLower(oce.User.String()),
-						strings.ToLower(oce.TokenA.String()),
-						strings.ToLower(oce.TokenB.String()),
-						oce.IdxA.String(),
-						oce.IdxB.String(),
-						oce.MaskedAmtA.String(),
-						oce.MaskedAmtB.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		case err := <-secretDepositPrepSub.Err():
-			log.Fatal(err)
-		case oce := <-secretDepositPrepChannel:
-			go func() {
-				fmt.Println("Push SecretDeposit")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "SecretDeposit",
-					Parameters: []string{
-						strings.ToLower(oce.Token.String()),
-						strings.ToLower(oce.User.String()),
-						oce.Amt.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		case err := <-secretWithdrawSub.Err():
-			log.Fatal(err)
-		case oce := <-secretWithdrawChannel:
-			go func() {
-				fmt.Println("Push SecretWithdraw")
-				task := utils.Task{
-					EventID: utils.EventID{
-						BlockNumber: oce.Raw.BlockNumber,
-						TxIndex:     oce.Raw.TxIndex,
-						LogIndex:    oce.Raw.Index,
-					},
-					EventName: "SecretWithdraw",
-					Parameters: []string{
-						oce.Seq.String(),
-						strings.ToLower(oce.Token.String()),
-						strings.ToLower(oce.User.String()),
-						oce.Amt.String(),
-					},
-				}
-				mutexPQ.Lock()
-				heap.Push(&pq, &task)
-				mutexPQ.Unlock()
-			}()
-
-		}
-	}
-}
-
-func processTasks() {
-	for true {
-		for pq.Len() > 0 {
-			mutexPQ.Lock()
-			task := heap.Pop(&pq).(*utils.Task)
-			mutexPQ.Unlock()
-
-			if _, ok := eventSet[task.EventID]; ok {
-				continue
+	blkNum, _ := conn.BlockNumber(ctx)
+	for true{
+		curBlockNum, _ := conn.BlockNumber(ctx)
+		fmt.Println("curBlockNum", curBlockNum)
+		if curBlockNum - blkNum > confirmation {
+			query := ethereum.FilterQuery{
+				FromBlock: big.NewInt(int64(blkNum)),
+				ToBlock: big.NewInt(int64(curBlockNum - confirmation)),
+				Addresses: []common.Address{utils.HbswapAddr[network]},
 			}
-			eventSet[task.EventID] = true
+			logs, _ := conn.FilterLogs(ctx, query)
+			for _, log := range logs {
+				switch log.Topics[0].Hex() {
+				case utils.SecretDeposit:
+					oce := utils.ParseSecretDeposit(network, conn, log)
 
-			switch task.EventName {
-			case "InitPool":
-				go func() {
+					mutexTask.Lock()
+
+					fmt.Printf("**** SecretDeposit ****\n")
+
+					token := strings.ToLower(oce.Token.Hex())
+					user := strings.ToLower(oce.User.Hex())
+					amt := oce.Amt.String() // fix
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_deposit", serverID, token, user, amt)
+					utils.ExecCmd(cmd)
+
+					mutexTask.Unlock()
+
+				case utils.SecretWithdraw:
+					oce := utils.ParseSecretWithdraw(network, conn, log)
+
+					mutexTask.Lock()
+
+					fmt.Printf("**** SecretWithdraw ****\n")
+
+					seq := oce.Seq
+					token := strings.ToLower(oce.Token.Hex())
+					user := strings.ToLower(oce.User.Hex())
+					amt := oce.Amt.String() // fix
+
+					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_set_data", serverID, user, token, amt)
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_secret_withdraw")
+					utils.ExecCmd(cmd)
+
+					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_org_data", serverID, token, user, amt)
+					stdout := utils.ExecCmd(cmd)
+					enough, _ := strconv.Atoi(stdout[:1])
+					if enough == 1 {
+						utils.Consent(network, conn, server, seq)
+					}
+
+					mutexTask.Unlock()
+
+				case utils.InitPool:
+					oce := utils.ParseInitPool(network, conn, log)
+
 					mutexTask.Lock()
 
 					fmt.Printf("**** InitPool ****\n")
 
-					user := task.Parameters[0]
-					tokenA := task.Parameters[1]
-					tokenB := task.Parameters[2]
-					amtA := task.Parameters[3] // fix
-					amtB := task.Parameters[4] // fix
+					user := strings.ToLower(oce.User.Hex())
+					tokenA := strings.ToLower(oce.TokenA.Hex())
+					tokenB := strings.ToLower(oce.TokenB.Hex())
+					amtA := oce.AmtA.String() // fix
+					amtB := oce.AmtB.String() // fix
 
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.init_pool_set_data", serverID, user, tokenA, tokenB, amtA, amtB)
 					utils.ExecCmd(cmd)
@@ -326,21 +153,21 @@ func processTasks() {
 					}
 
 					mutexTask.Unlock()
-				}()
 
-			case "AddLiquidity":
-				go func() {
+				case utils.AddLiquidity:
+					oce := utils.ParseAddLiquidity(network, conn, log)
+
 					mutexTask.Lock()
 
 					fmt.Printf("**** AddLiquidity ****\n")
 
-					user := task.Parameters[0]
-					tokenA := task.Parameters[1]
-					tokenB := task.Parameters[2]
-					idxA := task.Parameters[3]
-					idxB := task.Parameters[4]
-					maskedAmtA := task.Parameters[5]
-					maskedAmtB := task.Parameters[6]
+					user := strings.ToLower(oce.User.Hex())
+					tokenA := strings.ToLower(oce.TokenA.Hex())
+					tokenB := strings.ToLower(oce.TokenB.Hex())
+					idxA := oce.IdxA.String()
+					idxB := oce.IdxB.String()
+					maskedAmtA := oce.MaskedAmtA.String()
+					maskedAmtB := oce.MaskedAmtB.String()
 
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_set_data", serverID, user, tokenA, tokenB, idxA, maskedAmtA, idxB, maskedAmtB)
 					utils.ExecCmd(cmd)
@@ -352,19 +179,19 @@ func processTasks() {
 					utils.ExecCmd(cmd)
 
 					mutexTask.Unlock()
-				}()
 
-			case "RemoveLiquidity":
-				go func() {
+				case utils.RemoveLiquidity:
+					oce := utils.ParseRemoveLiquidity(network, conn, log)
+
 					mutexTask.Lock()
 
 					fmt.Printf("**** RemoveLiquidity ****\n")
 
-					user := task.Parameters[0]
-					tokenA := task.Parameters[1]
-					tokenB := task.Parameters[2]
-					idx := task.Parameters[3]
-					maskedAmt := task.Parameters[4]
+					user := strings.ToLower(oce.User.Hex())
+					tokenA := strings.ToLower(oce.TokenA.Hex())
+					tokenB := strings.ToLower(oce.TokenB.Hex())
+					idx := oce.Idx.String()
+					maskedAmt := oce.Idx.String()
 
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_set_data", serverID, user, tokenA, tokenB, idx, maskedAmt)
 					utils.ExecCmd(cmd)
@@ -380,38 +207,22 @@ func processTasks() {
 					}
 
 					mutexTask.Unlock()
-				}()
 
-			case "SecretDeposit":
-				go func() {
-					mutexTask.Lock()
+				case utils.Trade:
+					oce := utils.ParseTrade(network, conn, log)
 
-					fmt.Printf("**** SecretDeposit ****\n")
-
-					token := task.Parameters[0]
-					user := task.Parameters[1]
-					amt := task.Parameters[2] // fix
-
-					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_deposit", serverID, token, user, amt)
-					utils.ExecCmd(cmd)
-
-					mutexTask.Unlock()
-				}()
-
-			case "Trade":
-				go func() {
 					mutexTask.Lock()
 
 					fmt.Printf("**** Trade ****\n")
 
-					tradeSeq := task.Parameters[0]
-					user := task.Parameters[1]
-					tokenA := task.Parameters[2]
-					tokenB := task.Parameters[3]
-					idxA := task.Parameters[4]
-					idxB := task.Parameters[5]
-					maskedAmtA := task.Parameters[6]
-					maskedAmtB := task.Parameters[7]
+					tradeSeq := oce.TradeSeq.String()
+					user := strings.ToLower(oce.User.Hex())
+					tokenA := strings.ToLower(oce.TokenA.Hex())
+					tokenB := strings.ToLower(oce.TokenB.Hex())
+					idxA := oce.IdxA.String()
+					idxB := oce.IdxB.String()
+					maskedAmtA := oce.MaskedAmtA.String()
+					maskedAmtB := oce.MaskedAmtB.String()
 
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.trade_set_data", serverID, user, tokenA, tokenB, idxA, maskedAmtA, idxB, maskedAmtB)
 					utils.ExecCmd(cmd)
@@ -467,38 +278,11 @@ func processTasks() {
 					}
 
 					mutexTask.Unlock()
-				}()
-
-			case "SecretWithdraw":
-				go func() {
-					mutexTask.Lock()
-
-					fmt.Printf("**** SecretWithdraw ****\n")
-
-					seq := task.Parameters[0]
-					token := task.Parameters[1]
-					user := task.Parameters[2]
-					amt := task.Parameters[3]
-
-					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_set_data", serverID, user, token, amt)
-					utils.ExecCmd(cmd)
-
-					cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_secret_withdraw")
-					utils.ExecCmd(cmd)
-
-					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.secret_withdraw_org_data", serverID, token, user, amt)
-					stdout := utils.ExecCmd(cmd)
-					enough, _ := strconv.Atoi(stdout[:1])
-					if enough == 1 {
-						utils.Consent(network, conn, server, utils.StrToBig(seq))
-					}
-
-					mutexTask.Unlock()
-				}()
-
+				}
 			}
+			blkNum = curBlockNum - confirmation + 1
 		}
-		time.Sleep(time.Second)
+		time.Sleep(blockTime * time.Second)
 	}
 }
 
@@ -527,7 +311,6 @@ func main() {
 		wsUrl = utils.GetEthWsURL(ethHostname)
 	} else {
 		wsUrl = utils.TestnetWsEndpoint
-		//wsUrl = config.EthNode.WsEndpoint
 	}
 	conn = utils.GetEthClient(wsUrl)
 
@@ -544,6 +327,5 @@ func main() {
 	wg.Add(1)
 	go genInputmask()
 	go watch()
-	go processTasks()
 	wg.Wait()
 }

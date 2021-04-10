@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
@@ -396,4 +397,65 @@ func GetPrice(network string, conn *ethclient.Client, tokenA common.Address, tok
 	fmt.Printf("price: %v\n", price)
 
 	return price
+}
+
+/******** parse event ********/
+func ParseSecretDeposit(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapSecretDeposit {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseSecretDeposit(eventLog)
+	return event
+}
+
+func ParseSecretWithdraw(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapSecretWithdraw {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseSecretWithdraw(eventLog)
+	return event
+}
+
+func ParseInitPool(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapInitPool {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseInitPool(eventLog)
+	return event
+}
+
+func ParseAddLiquidity(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapAddLiquidity {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseAddLiquidity(eventLog)
+	return event
+}
+
+func ParseRemoveLiquidity(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapRemoveLiquidity {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseRemoveLiquidity(eventLog)
+	return event
+}
+
+func ParseTrade(network string, conn *ethclient.Client, eventLog types.Log) *hbswap.HbSwapTrade {
+	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	event, _ := hbswapInstance.HbSwapFilterer.ParseTrade(eventLog)
+	return event
 }

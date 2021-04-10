@@ -4,8 +4,10 @@ FROM golang:buster as go-deps
 # ethereum
 COPY --from=sbellem/go-ethereum:cfbb969da-buster \
                 /go/src/golang.org/x /go/src/golang.org/x
-COPY --from=sbellem/go-ethereum:cfbb969da-buster \
-                /go/src/github.com/ethereum /go/src/github.com/ethereum
+#COPY --from=sbellem/go-ethereum:cfbb969da-buster \
+#                /go/src/github.com/ethereum /go/src/github.com/ethereum
+WORKDIR /go/src/github.com/ethereum
+RUN git clone https://github.com/ethereum/go-ethereum.git
 
 COPY src /go/src/github.com/initc3/HoneyBadgerSwap/src
 
@@ -82,7 +84,7 @@ ENV DB_PATH /opt/hbswap/db
 
 # GO (server) dependencies
 ENV PATH /usr/local/go/bin:$PATH
-COPY --from=golang:1.15.8-buster /usr/local/go /usr/local/go
+COPY --from=golang:1.13.12 /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"

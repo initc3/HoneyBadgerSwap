@@ -20,7 +20,6 @@ var (
 	_ = big.NewInt
 	_ = strings.NewReader
 	_ = ethereum.NotFound
-	_ = abi.U256
 	_ = bind.Bind
 	_ = common.Big1
 	_ = types.BloomLookup
@@ -155,7 +154,7 @@ func bindHbSwap(address common.Address, caller bind.ContractCaller, transactor b
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_HbSwap *HbSwapRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_HbSwap *HbSwapRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _HbSwap.Contract.HbSwapCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -174,7 +173,7 @@ func (_HbSwap *HbSwapRaw) Transact(opts *bind.TransactOpts, method string, param
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_HbSwap *HbSwapCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_HbSwap *HbSwapCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _HbSwap.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -191,259 +190,314 @@ func (_HbSwap *HbSwapTransactorRaw) Transact(opts *bind.TransactOpts, method str
 
 // Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function Decimals() constant returns(uint256)
+// Solidity: function Decimals() view returns(uint256)
 func (_HbSwap *HbSwapCaller) Decimals(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "Decimals")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "Decimals")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function Decimals() constant returns(uint256)
+// Solidity: function Decimals() view returns(uint256)
 func (_HbSwap *HbSwapSession) Decimals() (*big.Int, error) {
 	return _HbSwap.Contract.Decimals(&_HbSwap.CallOpts)
 }
 
 // Decimals is a free data retrieval call binding the contract method 0xc6ceb50b.
 //
-// Solidity: function Decimals() constant returns(uint256)
+// Solidity: function Decimals() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) Decimals() (*big.Int, error) {
 	return _HbSwap.Contract.Decimals(&_HbSwap.CallOpts)
 }
 
 // Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
 //
-// Solidity: function Fp() constant returns(uint256)
+// Solidity: function Fp() view returns(uint256)
 func (_HbSwap *HbSwapCaller) Fp(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "Fp")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "Fp")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
 //
-// Solidity: function Fp() constant returns(uint256)
+// Solidity: function Fp() view returns(uint256)
 func (_HbSwap *HbSwapSession) Fp() (*big.Int, error) {
 	return _HbSwap.Contract.Fp(&_HbSwap.CallOpts)
 }
 
 // Fp is a free data retrieval call binding the contract method 0xa45b6ce6.
 //
-// Solidity: function Fp() constant returns(uint256)
+// Solidity: function Fp() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) Fp() (*big.Int, error) {
 	return _HbSwap.Contract.Fp(&_HbSwap.CallOpts)
 }
 
 // ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
 //
-// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+// Solidity: function consentRecord(uint256 , address ) view returns(bool)
 func (_HbSwap *HbSwapCaller) ConsentRecord(opts *bind.CallOpts, arg0 *big.Int, arg1 common.Address) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "consentRecord", arg0, arg1)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "consentRecord", arg0, arg1)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
 //
-// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+// Solidity: function consentRecord(uint256 , address ) view returns(bool)
 func (_HbSwap *HbSwapSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (bool, error) {
 	return _HbSwap.Contract.ConsentRecord(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // ConsentRecord is a free data retrieval call binding the contract method 0x1768af96.
 //
-// Solidity: function consentRecord(uint256 , address ) constant returns(bool)
+// Solidity: function consentRecord(uint256 , address ) view returns(bool)
 func (_HbSwap *HbSwapCallerSession) ConsentRecord(arg0 *big.Int, arg1 common.Address) (bool, error) {
 	return _HbSwap.Contract.ConsentRecord(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
 //
-// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+// Solidity: function inputMaskOwner(uint256 ) view returns(address)
 func (_HbSwap *HbSwapCaller) InputMaskOwner(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "inputMaskOwner", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "inputMaskOwner", arg0)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
 //
-// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+// Solidity: function inputMaskOwner(uint256 ) view returns(address)
 func (_HbSwap *HbSwapSession) InputMaskOwner(arg0 *big.Int) (common.Address, error) {
 	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.CallOpts, arg0)
 }
 
 // InputMaskOwner is a free data retrieval call binding the contract method 0xb7deef82.
 //
-// Solidity: function inputMaskOwner(uint256 ) constant returns(address)
+// Solidity: function inputMaskOwner(uint256 ) view returns(address)
 func (_HbSwap *HbSwapCallerSession) InputMaskOwner(arg0 *big.Int) (common.Address, error) {
 	return _HbSwap.Contract.InputMaskOwner(&_HbSwap.CallOpts, arg0)
 }
 
 // InputmaskCnt is a free data retrieval call binding the contract method 0x93910e66.
 //
-// Solidity: function inputmaskCnt() constant returns(uint256)
+// Solidity: function inputmaskCnt() view returns(uint256)
 func (_HbSwap *HbSwapCaller) InputmaskCnt(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "inputmaskCnt")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "inputmaskCnt")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // InputmaskCnt is a free data retrieval call binding the contract method 0x93910e66.
 //
-// Solidity: function inputmaskCnt() constant returns(uint256)
+// Solidity: function inputmaskCnt() view returns(uint256)
 func (_HbSwap *HbSwapSession) InputmaskCnt() (*big.Int, error) {
 	return _HbSwap.Contract.InputmaskCnt(&_HbSwap.CallOpts)
 }
 
 // InputmaskCnt is a free data retrieval call binding the contract method 0x93910e66.
 //
-// Solidity: function inputmaskCnt() constant returns(uint256)
+// Solidity: function inputmaskCnt() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) InputmaskCnt() (*big.Int, error) {
 	return _HbSwap.Contract.InputmaskCnt(&_HbSwap.CallOpts)
 }
 
 // LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
 //
-// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+// Solidity: function lastUpdateSeq(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapCaller) LastUpdateSeq(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "lastUpdateSeq", arg0, arg1)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "lastUpdateSeq", arg0, arg1)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
 //
-// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+// Solidity: function lastUpdateSeq(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
 	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // LastUpdateSeq is a free data retrieval call binding the contract method 0xa4bea6c8.
 //
-// Solidity: function lastUpdateSeq(address , address ) constant returns(uint256)
+// Solidity: function lastUpdateSeq(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) LastUpdateSeq(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
 	return _HbSwap.Contract.LastUpdateSeq(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // Prices is a free data retrieval call binding the contract method 0x1f312404.
 //
-// Solidity: function prices(address , address ) constant returns(string)
+// Solidity: function prices(address , address ) view returns(string)
 func (_HbSwap *HbSwapCaller) Prices(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (string, error) {
-	var (
-		ret0 = new(string)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "prices", arg0, arg1)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "prices", arg0, arg1)
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
 }
 
 // Prices is a free data retrieval call binding the contract method 0x1f312404.
 //
-// Solidity: function prices(address , address ) constant returns(string)
+// Solidity: function prices(address , address ) view returns(string)
 func (_HbSwap *HbSwapSession) Prices(arg0 common.Address, arg1 common.Address) (string, error) {
 	return _HbSwap.Contract.Prices(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // Prices is a free data retrieval call binding the contract method 0x1f312404.
 //
-// Solidity: function prices(address , address ) constant returns(string)
+// Solidity: function prices(address , address ) view returns(string)
 func (_HbSwap *HbSwapCallerSession) Prices(arg0 common.Address, arg1 common.Address) (string, error) {
 	return _HbSwap.Contract.Prices(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function publicBalance(address , address ) constant returns(uint256)
+// Solidity: function publicBalance(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapCaller) PublicBalance(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "publicBalance", arg0, arg1)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "publicBalance", arg0, arg1)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function publicBalance(address , address ) constant returns(uint256)
+// Solidity: function publicBalance(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapSession) PublicBalance(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
 	return _HbSwap.Contract.PublicBalance(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // PublicBalance is a free data retrieval call binding the contract method 0xe7e89276.
 //
-// Solidity: function publicBalance(address , address ) constant returns(uint256)
+// Solidity: function publicBalance(address , address ) view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) PublicBalance(arg0 common.Address, arg1 common.Address) (*big.Int, error) {
 	return _HbSwap.Contract.PublicBalance(&_HbSwap.CallOpts, arg0, arg1)
 }
 
 // SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
 //
-// Solidity: function secretWithdrawCnt() constant returns(uint256)
+// Solidity: function secretWithdrawCnt() view returns(uint256)
 func (_HbSwap *HbSwapCaller) SecretWithdrawCnt(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "secretWithdrawCnt")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "secretWithdrawCnt")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
 //
-// Solidity: function secretWithdrawCnt() constant returns(uint256)
+// Solidity: function secretWithdrawCnt() view returns(uint256)
 func (_HbSwap *HbSwapSession) SecretWithdrawCnt() (*big.Int, error) {
 	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.CallOpts)
 }
 
 // SecretWithdrawCnt is a free data retrieval call binding the contract method 0x3394dc6f.
 //
-// Solidity: function secretWithdrawCnt() constant returns(uint256)
+// Solidity: function secretWithdrawCnt() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) SecretWithdrawCnt() (*big.Int, error) {
 	return _HbSwap.Contract.SecretWithdrawCnt(&_HbSwap.CallOpts)
 }
 
 // SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
 //
-// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+// Solidity: function secretWithdrawMap(uint256 ) view returns(address token, address user, uint256 amt)
 func (_HbSwap *HbSwapCaller) SecretWithdrawMap(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	Token common.Address
 	User  common.Address
 	Amt   *big.Int
 }, error) {
-	ret := new(struct {
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "secretWithdrawMap", arg0)
+
+	outstruct := new(struct {
 		Token common.Address
 		User  common.Address
 		Amt   *big.Int
 	})
-	out := ret
-	err := _HbSwap.contract.Call(opts, out, "secretWithdrawMap", arg0)
-	return *ret, err
+	if err != nil {
+		return *outstruct, err
+	}
+
+	outstruct.Token = *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+	outstruct.User = *abi.ConvertType(out[1], new(common.Address)).(*common.Address)
+	outstruct.Amt = *abi.ConvertType(out[2], new(*big.Int)).(**big.Int)
+
+	return *outstruct, err
+
 }
 
 // SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
 //
-// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+// Solidity: function secretWithdrawMap(uint256 ) view returns(address token, address user, uint256 amt)
 func (_HbSwap *HbSwapSession) SecretWithdrawMap(arg0 *big.Int) (struct {
 	Token common.Address
 	User  common.Address
@@ -454,7 +508,7 @@ func (_HbSwap *HbSwapSession) SecretWithdrawMap(arg0 *big.Int) (struct {
 
 // SecretWithdrawMap is a free data retrieval call binding the contract method 0x7aa6fd65.
 //
-// Solidity: function secretWithdrawMap(uint256 ) constant returns(address token, address user, uint256 amt)
+// Solidity: function secretWithdrawMap(uint256 ) view returns(address token, address user, uint256 amt)
 func (_HbSwap *HbSwapCallerSession) SecretWithdrawMap(arg0 *big.Int) (struct {
 	Token common.Address
 	User  common.Address
@@ -465,78 +519,93 @@ func (_HbSwap *HbSwapCallerSession) SecretWithdrawMap(arg0 *big.Int) (struct {
 
 // Servers is a free data retrieval call binding the contract method 0x12ada8de.
 //
-// Solidity: function servers(address ) constant returns(bool)
+// Solidity: function servers(address ) view returns(bool)
 func (_HbSwap *HbSwapCaller) Servers(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "servers", arg0)
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "servers", arg0)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // Servers is a free data retrieval call binding the contract method 0x12ada8de.
 //
-// Solidity: function servers(address ) constant returns(bool)
+// Solidity: function servers(address ) view returns(bool)
 func (_HbSwap *HbSwapSession) Servers(arg0 common.Address) (bool, error) {
 	return _HbSwap.Contract.Servers(&_HbSwap.CallOpts, arg0)
 }
 
 // Servers is a free data retrieval call binding the contract method 0x12ada8de.
 //
-// Solidity: function servers(address ) constant returns(bool)
+// Solidity: function servers(address ) view returns(bool)
 func (_HbSwap *HbSwapCallerSession) Servers(arg0 common.Address) (bool, error) {
 	return _HbSwap.Contract.Servers(&_HbSwap.CallOpts, arg0)
 }
 
 // Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
 //
-// Solidity: function threshold() constant returns(uint256)
+// Solidity: function threshold() view returns(uint256)
 func (_HbSwap *HbSwapCaller) Threshold(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "threshold")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "threshold")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
 //
-// Solidity: function threshold() constant returns(uint256)
+// Solidity: function threshold() view returns(uint256)
 func (_HbSwap *HbSwapSession) Threshold() (*big.Int, error) {
 	return _HbSwap.Contract.Threshold(&_HbSwap.CallOpts)
 }
 
 // Threshold is a free data retrieval call binding the contract method 0x42cde4e8.
 //
-// Solidity: function threshold() constant returns(uint256)
+// Solidity: function threshold() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) Threshold() (*big.Int, error) {
 	return _HbSwap.Contract.Threshold(&_HbSwap.CallOpts)
 }
 
 // TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
 //
-// Solidity: function tradeCnt() constant returns(uint256)
+// Solidity: function tradeCnt() view returns(uint256)
 func (_HbSwap *HbSwapCaller) TradeCnt(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _HbSwap.contract.Call(opts, out, "tradeCnt")
-	return *ret0, err
+	var out []interface{}
+	err := _HbSwap.contract.Call(opts, &out, "tradeCnt")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
 //
-// Solidity: function tradeCnt() constant returns(uint256)
+// Solidity: function tradeCnt() view returns(uint256)
 func (_HbSwap *HbSwapSession) TradeCnt() (*big.Int, error) {
 	return _HbSwap.Contract.TradeCnt(&_HbSwap.CallOpts)
 }
 
 // TradeCnt is a free data retrieval call binding the contract method 0xaf4170c4.
 //
-// Solidity: function tradeCnt() constant returns(uint256)
+// Solidity: function tradeCnt() view returns(uint256)
 func (_HbSwap *HbSwapCallerSession) TradeCnt() (*big.Int, error) {
 	return _HbSwap.Contract.TradeCnt(&_HbSwap.CallOpts)
 }
@@ -606,21 +675,21 @@ func (_HbSwap *HbSwapTransactorSession) InitPool(_tokenA common.Address, _tokenB
 
 // PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+// Solidity: function publicDeposit(address _token, uint256 _amt) payable returns()
 func (_HbSwap *HbSwapTransactor) PublicDeposit(opts *bind.TransactOpts, _token common.Address, _amt *big.Int) (*types.Transaction, error) {
 	return _HbSwap.contract.Transact(opts, "publicDeposit", _token, _amt)
 }
 
 // PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+// Solidity: function publicDeposit(address _token, uint256 _amt) payable returns()
 func (_HbSwap *HbSwapSession) PublicDeposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
 	return _HbSwap.Contract.PublicDeposit(&_HbSwap.TransactOpts, _token, _amt)
 }
 
 // PublicDeposit is a paid mutator transaction binding the contract method 0x93f54644.
 //
-// Solidity: function publicDeposit(address _token, uint256 _amt) returns()
+// Solidity: function publicDeposit(address _token, uint256 _amt) payable returns()
 func (_HbSwap *HbSwapTransactorSession) PublicDeposit(_token common.Address, _amt *big.Int) (*types.Transaction, error) {
 	return _HbSwap.Contract.PublicDeposit(&_HbSwap.TransactOpts, _token, _amt)
 }
@@ -950,6 +1019,7 @@ func (_HbSwap *HbSwapFilterer) ParseAddLiquidity(log types.Log) (*HbSwapAddLiqui
 	if err := _HbSwap.contract.UnpackLog(event, "AddLiquidity", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1087,6 +1157,7 @@ func (_HbSwap *HbSwapFilterer) ParseInitPool(log types.Log) (*HbSwapInitPool, er
 	if err := _HbSwap.contract.UnpackLog(event, "InitPool", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1220,6 +1291,7 @@ func (_HbSwap *HbSwapFilterer) ParseInputMask(log types.Log) (*HbSwapInputMask, 
 	if err := _HbSwap.contract.UnpackLog(event, "InputMask", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1357,6 +1429,7 @@ func (_HbSwap *HbSwapFilterer) ParseRemoveLiquidity(log types.Log) (*HbSwapRemov
 	if err := _HbSwap.contract.UnpackLog(event, "RemoveLiquidity", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1492,6 +1565,7 @@ func (_HbSwap *HbSwapFilterer) ParseSecretDeposit(log types.Log) (*HbSwapSecretD
 	if err := _HbSwap.contract.UnpackLog(event, "SecretDeposit", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1628,6 +1702,7 @@ func (_HbSwap *HbSwapFilterer) ParseSecretWithdraw(log types.Log) (*HbSwapSecret
 	if err := _HbSwap.contract.UnpackLog(event, "SecretWithdraw", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
 
@@ -1768,5 +1843,6 @@ func (_HbSwap *HbSwapFilterer) ParseTrade(log types.Log) (*HbSwapTrade, error) {
 	if err := _HbSwap.contract.UnpackLog(event, "Trade", log); err != nil {
 		return nil, err
 	}
+	event.Raw = log
 	return event, nil
 }
