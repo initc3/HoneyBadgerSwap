@@ -53,9 +53,10 @@
                                     <input id="amtTradeFrom" class="form-control" type="text" value="" onchange="updateAmtTradeFrom()" onfocus="updateAmtTradeFrom()"/>
                                 </div>
                                 <select id='tradeFromToken' class="form-control col-sm-3" onchange="updateTradePair()" onfocus="updateTradePair()">
-                                    <option>eth</option>
-                                    <option>token1</option>
-                                    <option>token2</option>
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
                                 </select>
                             </div>
                         </div>
@@ -85,9 +86,10 @@
                                     <input id="amtTradeTo" class="form-control" type="text" value="" onchange="updateAmtTradeTo()" onfocus="updateAmtTradeTo()"/>
                                 </div>
                                 <select id='tradeToToken' class="form-control col-sm-3" onchange="updateTradePair()" onfocus="updateTradePair()">
-                                    <option>eth</option>
-                                    <option>token1</option>
-                                    <option>token2</option>
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
                                 </select>
                             </div>
                         </div>
@@ -154,9 +156,9 @@
                             <input id="depositAmt" class="form-control" type="text" value="" />
                         </div>
                         <select id='depositToken' class="form-control col-sm-3" onchange="updateDepositToken()" onfocus="updateDepositToken()">
-                            <option>eth</option>
-                            <option>token1</option>
-                            <option>token2</option>
+                            <option>ETH</option>
+                            <option>DAI</option>
+                            <option>HBS</option>
                         </select>
                     </div>
 
@@ -228,9 +230,9 @@
                                     <input id="amtPoolTokenA" class="form-control" type="text" value="" />
                                 </div>
                                 <select id='poolTokenA' class="form-control col-sm-3" onchange="updatePoolPair()" onfocus="updatePoolPair()">
-                                    <option>eth</option>
-                                    <option>token1</option>
-                                    <option>token2</option>
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
                                 </select>
                             </div>
                         </div>
@@ -260,9 +262,9 @@
                                     <input id="amtPoolTokenB" class="form-control" type="text" value="" />
                                 </div>
                                 <select id='poolTokenB' class="form-control col-sm-3" onchange="updatePoolPair()" onfocus="updatePoolPair()">
-                                    <option>eth</option>
-                                    <option>token1</option>
-                                    <option>token2</option>
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
                                 </select>
                             </div>
                         </div>
@@ -316,6 +318,8 @@
                 </div>
 
                 <hr>
+
+                Status: <span id="poolStatus"></span><br />
 
                 Inputmask Indexes: <span id="poolIdxes"></span><br />
 

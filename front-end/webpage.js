@@ -3,10 +3,12 @@ const n = 4
 const t = 1
 const fp = 1 << 16
 
-const eth = '0x0000000000000000000000000000000000000000'
 const hbswapAddr = '0x82ac888f567365362ea290f89368b7885227fc7e'
-const token1 = '0x63e7f20503256ddcfec64872aadb785d5a290cbb'
-const token2 = '0x403b0f962566ffb960d0de98875dc09603aa67e9'
+// const token1 = '0x63e7f20503256ddcfec64872aadb785d5a290cbb'
+// const token2 = '0x403b0f962566ffb960d0de98875dc09603aa67e9'
+const ethAddr = '0x0000000000000000000000000000000000000000'
+const hbsAddr = "0x78160ee9e55fd81626f98d059c84d21d8b71bfda"
+const daiAddr = "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"
 
 const decimals = 1 // TODO: 10**18
 const checkPointInterval = 20 * 1000
@@ -286,7 +288,6 @@ async function deposit() {
     const prevPublicBalance = await getPublicBalance(token, user)
     const prevSecretBalance = await getSecretBalance(token, user, 'depositUpdate')
     $('#depositBalance').text(prevSecretBalance.toFixed(displayPrecision))
-    $('#depositStatus').text('public depositing...')
     $('#personalBalance').text(prevPersonalBalance.toFixed(displayPrecision))
     $('#contractBalance').text(prevPublicBalance.toFixed(displayPrecision))
     $('#secretBalance').text(prevSecretBalance.toFixed(displayPrecision))
@@ -295,11 +296,14 @@ async function deposit() {
     const fixAmt = floatToFix(amt)
     const transferAmt = transferValue(amt)
     if (isETH(token)) {
+        $('#depositStatus').text('public depositing...')
         await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user, value: transferAmt})
     } else {
         // Approve before token transfer
+        $('#depositStatus').text('approving tokens...')
         await contractList.get(token).methods.approve(hbswapAddr, transferAmt).send({from: user})
 
+        $('#depositStatus').text('public depositing...')
         await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user})
     }
 
@@ -416,6 +420,8 @@ async function initPool() {
         return
     }
 
+    $('#poolStatus').text("Sending transaction...")
+
     await hbswapContract.methods.initPool(tokenA, tokenB, floatToFix(amtA), floatToFix(amtB)).send({from: user})
 
     while (true) {
@@ -428,6 +434,7 @@ async function initPool() {
     }
 
     updatePoolPair()
+    $('#poolStatus').text("Done")
 }
 
 async function addLiquidity() {
@@ -459,6 +466,8 @@ async function addLiquidity() {
         return
     }
 
+    $('#poolStatus').text("Getting input masks...")
+
     const prevSecretLiquidityTokenBalance = await getSecretBalance(tokenA + '+' + tokenB, user)
 
     const idxes = await getInputMaskIndexes(2)
@@ -467,6 +476,7 @@ async function addLiquidity() {
     const masks = await getInputmasks(2, idxes)
     $('#poolMasks').text(masks)
 
+    $('#poolStatus').text("Sending transaction...")
     const maskedAmtA = floatToFix(amtA) + masks[0]
     const maskedAmtB = floatToFix(amtB) + masks[1]
     await hbswapContract.methods.addLiquidity(tokenA, tokenB, idxes[0], idxes[1], maskedAmtA, maskedAmtB).send({from: user})
@@ -480,8 +490,8 @@ async function addLiquidity() {
         await sleep(5000)
     }
 
-    await sleep(5000)
     updatePoolPair()
+    $('#poolStatus').text("Done")
 }
 
 async function removeLiquidity() {
@@ -505,11 +515,15 @@ async function removeLiquidity() {
         return
     }
 
+    $('#poolStatus').text("Getting input masks...")
+
     const idxes = await getInputMaskIndexes(1)
     $('#poolIdxes').text(idxes)
 
     const masks = await getInputmasks(1, idxes)
     $('#poolMasks').text(masks)
+
+    $('#poolStatus').text("Sending transaction...")
 
     const maskedAmt = floatToFix(amt) + masks[0]
     await hbswapContract.methods.removeLiquidity(tokenA, tokenB, idxes[0], maskedAmt).send({from: user})
@@ -523,8 +537,8 @@ async function removeLiquidity() {
         await sleep(5000)
     }
 
-    await sleep(5000)
     updatePoolPair()
+    $('#poolStatus').text("Done")
 }
 
 async function updateTradePair() {
@@ -654,6 +668,7 @@ async function updatePoolPair() {
     $('#removeInfo').empty()
     $('#removeInfo').hide()
     $('#balancePoolLiquidityToken').empty()
+    $('#poolStatus').empty()
     $('#poolIdxes').empty()
     $('#poolMasks').empty()
 
@@ -709,9 +724,11 @@ async function init() {
 
     const tokenABI = JSON.parse($('#tokenABI').text())
     window.tokenList = new Map()
-    tokenList.set('eth', eth)
-    tokenList.set('token1', token1)
-    tokenList.set('token2', token2)
+    tokenList.set('ETH', ethAddr)
+    tokenList.set('HBS', hbsAddr)
+    tokenList.set('DAI', daiAddr)
+    // tokenList.set('token1', token1)
+    // tokenList.set('token2', token2)
     window.contractList = new Map()
     for (let [k, v] of tokenList) {
         contractList.set(v, new web3.eth.Contract(tokenABI, v))
