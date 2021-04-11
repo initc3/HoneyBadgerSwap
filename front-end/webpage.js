@@ -22,7 +22,7 @@ const basePort = 58080
 // **** Internal functions ****
 
 function isETH(token) {
-    return token == tokenList.get('eth')
+    return token == tokenList.get('ETH')
 }
 
 function sleep(ms) {
@@ -56,7 +56,7 @@ async function getInputMaskIndexes(num) {
     for (let i = 0; i < num; i++) {
         indexes.push(getInt(data, i + 2))
     }
-    return indexes
+    return [indexes, tx]
 }
 
 function extended_gcd(a, b) {
@@ -218,7 +218,11 @@ async function trade() {
 
     $('#tradeStatus').text('Getting inputmasks...')
     $('#tradeStatusNeutral').show()
-    const idxes = await getInputMaskIndexes(2)
+    let tx, htmlContent
+    let idxes
+    [idxes, tx] = await getInputMaskIndexes(2)
+    htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'reserveInputMasks' + '</a>'
+    $('#tradeTxLink').html(htmlContent)
     $('#tradeIdxes').text(idxes)
 
     const masks = await getInputmasks(2, idxes)
@@ -244,6 +248,8 @@ async function trade() {
     const maskedValueB = valueB + masks[1]
     $('#tradeStatus').text('Submitting trade order...')
     tx = await hbswapContract.methods.trade(tokenA, tokenB, idxes[0], idxes[1], maskedValueA, maskedValueB).send({from: user})
+    htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'trade' + '</a>'
+    $('#tradeTxLink').html(htmlContent)
 
     // Step 5: Get price of current trade
     data = tx['events']['Trade']['raw']['data']
@@ -286,7 +292,7 @@ async function deposit() {
 
     // Display balances before public deposit
     const prevPublicBalance = await getPublicBalance(token, user)
-    const prevSecretBalance = await getSecretBalance(token, user, 'depositUpdate')
+    const prevSecretBalance = await getSecretBalance(token, user)
     $('#depositBalance').text(prevSecretBalance.toFixed(displayPrecision))
     $('#personalBalance').text(prevPersonalBalance.toFixed(displayPrecision))
     $('#contractBalance').text(prevPublicBalance.toFixed(displayPrecision))
@@ -295,16 +301,23 @@ async function deposit() {
     // Public deposit
     const fixAmt = floatToFix(amt)
     const transferAmt = transferValue(amt)
+    let tx, htmlContent
     if (isETH(token)) {
         $('#depositStatus').text('public depositing...')
-        await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user, value: transferAmt})
+        tx = await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user, value: transferAmt})
+        htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'publicDeposit' + '</a>'
+        $('#depositTxLink').html(htmlContent)
     } else {
         // Approve before token transfer
         $('#depositStatus').text('approving tokens...')
-        await contractList.get(token).methods.approve(hbswapAddr, transferAmt).send({from: user})
+        tx = await contractList.get(token).methods.approve(hbswapAddr, transferAmt).send({from: user})
+        htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'approveToken' + '</a>'
+        $('#depositTxLink').html(htmlContent)
 
         $('#depositStatus').text('public depositing...')
-        await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user})
+        tx = await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user})
+        htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'publicDeposit' + '</a>'
+        $('#depositTxLink').html(htmlContent)
     }
 
     // Display balances after public deposit
@@ -313,7 +326,9 @@ async function deposit() {
     $('#contractBalance').text((await getPublicBalance(token, user)).toFixed(displayPrecision))
 
     // Secret deposit
-    await hbswapContract.methods.secretDeposit(token, fixAmt).send({from: user})
+    tx = await hbswapContract.methods.secretDeposit(token, fixAmt).send({from: user})
+    htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'secretDeposit' + '</a>'
+    $('#depositTxLink').html(htmlContent)
 
     let curSecretBalance
     while (true) {
@@ -348,7 +363,7 @@ async function withdraw() {
     // Display balances before secret withdraw
     const prevPersonalBalance = await getPersonalBalance(token, user)
     const prevContractBalance = await getPublicBalance(token, user)
-    prevSecretBalance = await getSecretBalance(token, user, 'depositUpdate')
+    prevSecretBalance = await getSecretBalance(token, user)
     $('#depositBalance').text(prevSecretBalance.toFixed(displayPrecision))
     $('#depositStatus').text('secret withdrawing...')
     $('#personalBalance').text(prevPersonalBalance.toFixed(displayPrecision))
@@ -357,7 +372,10 @@ async function withdraw() {
 
     // Secret withdraw
     const fixAmt = floatToFix(amt)
-    await hbswapContract.methods.secretWithdraw(token, fixAmt).send({from: user})
+    let tx, htmlContent
+    tx = await hbswapContract.methods.secretWithdraw(token, fixAmt).send({from: user})
+    htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'secretWithdraw' + '</a>'
+    $('#depositTxLink').html(htmlContent)
     // Wait for secret balance change
     let curSecretBalance
     while (true) {
@@ -383,7 +401,9 @@ async function withdraw() {
     $('#contractBalance').text(curContractBalance.toFixed(displayPrecision))
 
     // Public withdraw
-    await hbswapContract.methods.publicWithdraw(token, fixAmt).send({from: user})
+    tx = await hbswapContract.methods.publicWithdraw(token, fixAmt).send({from: user})
+    htmlContent += ' <a href=" https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'publicWithdraw' + '</a>'
+    $('#depositTxLink').html(htmlContent)
 
     // Display balances after public withdraw
     $('#depositStatus').text('done')
@@ -422,7 +442,10 @@ async function initPool() {
 
     $('#poolStatus').text("Sending transaction...")
 
-    await hbswapContract.methods.initPool(tokenA, tokenB, floatToFix(amtA), floatToFix(amtB)).send({from: user})
+    let tx, htmlContent
+    tx = await hbswapContract.methods.initPool(tokenA, tokenB, floatToFix(amtA), floatToFix(amtB)).send({from: user})
+    htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'initPool' + '</a>'
+    $('#poolTxLink').html(htmlContent)
 
     while (true) {
         const price = await hbswapContract.methods.prices(tokenA, tokenB).call()
@@ -434,6 +457,7 @@ async function initPool() {
     }
 
     updatePoolPair()
+    $('#poolTxLink').html(htmlContent)
     $('#poolStatus').text("Done")
 }
 
@@ -470,7 +494,11 @@ async function addLiquidity() {
 
     const prevSecretLiquidityTokenBalance = await getSecretBalance(tokenA + '+' + tokenB, user)
 
-    const idxes = await getInputMaskIndexes(2)
+    let tx, htmlContent
+    let idxes
+    [idxes, tx] = await getInputMaskIndexes(2)
+    htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'reserveInputMasks' + '</a>'
+    $('#poolTxLink').html(htmlContent)
     $('#poolIdxes').text(idxes)
 
     const masks = await getInputmasks(2, idxes)
@@ -479,7 +507,9 @@ async function addLiquidity() {
     $('#poolStatus').text("Sending transaction...")
     const maskedAmtA = floatToFix(amtA) + masks[0]
     const maskedAmtB = floatToFix(amtB) + masks[1]
-    await hbswapContract.methods.addLiquidity(tokenA, tokenB, idxes[0], idxes[1], maskedAmtA, maskedAmtB).send({from: user})
+    tx = await hbswapContract.methods.addLiquidity(tokenA, tokenB, idxes[0], idxes[1], maskedAmtA, maskedAmtB).send({from: user})
+    htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'addLiquidity' + '</a>'
+    $('#poolTxLink').html(htmlContent)
 
     let curSecretLiquidityTokenBalance
     while (true) {
@@ -491,6 +521,7 @@ async function addLiquidity() {
     }
 
     updatePoolPair()
+    $('#poolTxLink').html(htmlContent)
     $('#poolStatus').text("Done")
 }
 
@@ -517,7 +548,11 @@ async function removeLiquidity() {
 
     $('#poolStatus').text("Getting input masks...")
 
-    const idxes = await getInputMaskIndexes(1)
+    let tx, htmlContent
+    let idxes
+    [idxes, tx] = await getInputMaskIndexes(1)
+    htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'reserveInputMasks' + '</a>'
+    $('#poolTxLink').html(htmlContent)
     $('#poolIdxes').text(idxes)
 
     const masks = await getInputmasks(1, idxes)
@@ -526,7 +561,9 @@ async function removeLiquidity() {
     $('#poolStatus').text("Sending transaction...")
 
     const maskedAmt = floatToFix(amt) + masks[0]
-    await hbswapContract.methods.removeLiquidity(tokenA, tokenB, idxes[0], maskedAmt).send({from: user})
+    tx = await hbswapContract.methods.removeLiquidity(tokenA, tokenB, idxes[0], maskedAmt).send({from: user})
+    htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'removeLiquidity' + '</a>'
+    $('#poolTxLink').html(htmlContent)
 
     let curSecretLiquidityTokenBalance
     while (true) {
@@ -538,6 +575,7 @@ async function removeLiquidity() {
     }
 
     updatePoolPair()
+    $('#poolTxLink').html(htmlContent)
     $('#poolStatus').text("Done")
 }
 
@@ -561,6 +599,7 @@ async function updateTradePair() {
     $('#tradeStatusNeutral').hide()
     $('#tradeStatusFail').hide()
     $('#tradeStatusSucceed').hide()
+    $('#tradeTxLink').empty()
 
     const fromToken = tokenList.get($( '#tradeFromToken option:selected' ).text())
     const toToken = tokenList.get($( '#tradeToToken option:selected' ).text())
@@ -671,6 +710,7 @@ async function updatePoolPair() {
     $('#poolStatus').empty()
     $('#poolIdxes').empty()
     $('#poolMasks').empty()
+    $('#poolTxLink').empty()
 
     if (tokenA >= tokenB) {
         $('#addInfo').text('Error: invalid token pair!')
@@ -709,6 +749,7 @@ async function updateDepositToken() {
     $('#depositUpdate1').empty()
     $('#depositUpdate2').empty()
     $('#depositUpdate3').empty()
+    $('#depositTxLink').empty()
 }
 
 // **** Initialization ****
