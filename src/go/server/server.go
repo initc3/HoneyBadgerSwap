@@ -191,7 +191,7 @@ func watch() {
 					tokenA := strings.ToLower(oce.TokenA.Hex())
 					tokenB := strings.ToLower(oce.TokenB.Hex())
 					idx := oce.Idx.String()
-					maskedAmt := oce.Idx.String()
+					maskedAmt := oce.MaskedAmt.String()
 
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.remove_liquidity_set_data", serverID, user, tokenA, tokenB, idx, maskedAmt)
 					utils.ExecCmd(cmd)
