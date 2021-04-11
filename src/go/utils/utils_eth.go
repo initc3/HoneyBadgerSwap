@@ -61,7 +61,7 @@ func transferETH(conn *ethclient.Client, chainId string, fromAuth *bind.Transact
 		log.Fatal(err)
 	}
 
-	gasLimit := uint64(21000) // in units
+	gasLimit := uint64(300000) // in units
 	gasPrice, err := conn.SuggestGasPrice(ctx)
 	if err != nil {
 		log.Fatal(err)

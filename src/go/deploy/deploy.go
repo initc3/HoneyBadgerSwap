@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
-	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/token"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbSwapToken"
 	"log"
 	"math/big"
 )
@@ -45,7 +45,7 @@ func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) common.Addres
 func DeployToken(conn *ethclient.Client, auth *bind.TransactOpts) common.Address {
 	fmt.Println("Deploying Token contract...")
 
-	tokenAddr, tx, _, err := token.DeployToken(auth, conn)
+	tokenAddr, tx, _, err := hbSwapToken.DeployHbSwapToken(auth, conn)
 	if err != nil {
 		log.Fatalf("Failed to deploy Token: %v", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 
 	owner := utils.GetAccount("server_0")
 
-	DeployHbSwap(conn, owner)
-	//DeployToken(conn, owner)
+	//DeployHbSwap(conn, owner)
+	DeployToken(conn, owner)
 	//DeployToken(conn, owner)
 }
