@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/token"
+	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbSwapToken"
 	"log"
 	"math/big"
 )
@@ -26,7 +26,7 @@ func FundToken(conn *ethclient.Client, tokenAddr common.Address, toAddr common.A
 }
 
 func Approve(network string, conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, receiver common.Address, amt *big.Int) {
-	tokenInstance, err := token.NewToken(tokenAddr, conn)
+	tokenInstance, err := hbSwapToken.NewHbSwapToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func Approve(network string, conn *ethclient.Client, auth *bind.TransactOpts, to
 }
 
 func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr common.Address) *big.Int {
-	tokenInstance, err := token.NewToken(tokenAddr, conn)
+	tokenInstance, err := hbSwapToken.NewHbSwapToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func GetBalanceToken(conn *ethclient.Client, addr common.Address, tokenAddr comm
 func transferToken(conn *ethclient.Client, tokenAddr common.Address, fromAuth *bind.TransactOpts, toAddr common.Address, value *big.Int) {
 	//fmt.Printf("Trasfering %v token from %s to %s\n", value, fromAuth.From.Hex(), toAddr.Hex())
 
-	tokenInstance, err := token.NewToken(tokenAddr, conn)
+	tokenInstance, err := hbSwapToken.NewHbSwapToken(tokenAddr, conn)
 	if err != nil {
 		log.Fatal(err)
 	}

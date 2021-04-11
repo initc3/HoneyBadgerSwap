@@ -40,18 +40,24 @@ var (
 	EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	HbswapAddr = map[string]common.Address{
 		"testnet":    common.HexToAddress("0x82ac888f567365362ea290f89368b7885227fc7e"),
-		"privatenet": common.HexToAddress("0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2"),
+		"privatenet": common.HexToAddress("0xf74eb25ab1785d24306ca6b3cbff0d0b0817c5e2"),
 	}
-	TokenAddrs = map[string][]common.Address{
-		"testnet": {
-			common.HexToAddress("0x63e7f20503256ddcfec64872aadb785d5a290cbb"),
-			common.HexToAddress("0x403b0f962566ffb960d0de98875dc09603aa67e9"),
-		},
-		"privatenet": {
-			common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
-			common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
-		},
+	HbSwapTokenAddr = map[string]common.Address{
+		"testnet":    common.HexToAddress("0x78160ee9e55fd81626f98d059c84d21d8b71bfda"),
 	}
+	DAIAddr = map[string]common.Address{
+		"testnet":    common.HexToAddress("0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"),
+	}
+	//TokenAddrs = map[string][]common.Address{
+	//	"testnet": {
+	//		common.HexToAddress("0x63e7f20503256ddcfec64872aadb785d5a290cbb"),
+	//		common.HexToAddress("0x403b0f962566ffb960d0de98875dc09603aa67e9"),
+	//	},
+	//	"privatenet": {
+	//		common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
+	//		common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
+	//	},
+	//}
 	//TODO: delete it after testing
 	UserAddr = common.HexToAddress("0xc33a4b5b609fcc294dca060347761226e78c0b7a")
 

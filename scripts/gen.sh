@@ -28,6 +28,6 @@ sync_go_binding() {
 cd src
 truffle_complie
 sync_go_binding HbSwap hbswap
-sync_go_binding Token token
+sync_go_binding HbSwapToken hbSwapToken
 
 #truffle-flattener contracts/HbSwap.sol --output contracts/FlattenedHbSwap.sol

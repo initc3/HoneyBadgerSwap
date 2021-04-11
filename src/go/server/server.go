@@ -316,11 +316,14 @@ func main() {
 
 	//TODO: deleting this after testing
 	if serverID == "0" && network == "testnet"{
-		utils.ResetPrice(network, conn, server, utils.EthAddr, utils.TokenAddrs[network][0])
+		//utils.ResetPrice(network, conn, server, utils.EthAddr, utils.TokenAddrs[network][0])
+		//utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
+		//for _, tokenAddr := range utils.TokenAddrs[network] {
+		//	utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
+		//}
+		utils.ResetPrice(network, conn, server, utils.EthAddr, utils.HbSwapTokenAddr[network])
 		utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
-		for _, tokenAddr := range utils.TokenAddrs[network] {
-			utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
-		}
+		utils.ResetBalance(network, conn, server, utils.HbSwapTokenAddr[network], utils.UserAddr)
 	}
 
 	var wg sync.WaitGroup
