@@ -3,14 +3,14 @@ const n = 4
 const t = 1
 const fp = 1 << 16
 
-const hbswapAddr = '0x82ac888f567365362ea290f89368b7885227fc7e'
+const hbswapAddr = '0x9ed1a58ff0479e36a4ead46647741f72ec9c15fe'
 // const token1 = '0x63e7f20503256ddcfec64872aadb785d5a290cbb'
 // const token2 = '0x403b0f962566ffb960d0de98875dc09603aa67e9'
 const ethAddr = '0x0000000000000000000000000000000000000000'
 const hbsAddr = "0x78160ee9e55fd81626f98d059c84d21d8b71bfda"
 const daiAddr = "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"
 
-const decimals = 1 // TODO: 10**18
+const decimals = 10**15 // TODO: 10**18
 const checkPointInterval = 20 * 1000
 const feeRate = 0.003
 const displayPrecision = 4
