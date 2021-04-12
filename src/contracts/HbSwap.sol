@@ -23,7 +23,7 @@ contract HbSwap {
     }
 
     // TODO: support for tokens with different decimals
-    uint constant public Decimals = 1; //TODO: 10**18;
+    uint constant public Decimals = 10**15; //TODO: 10**18;
     uint constant public Fp = 2**16;
 
     uint public threshold;
