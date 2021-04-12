@@ -72,7 +72,7 @@ func main() {
 
 	owner := utils.GetAccount("server_0")
 
-	//DeployHbSwap(conn, owner)
-	DeployToken(conn, owner)
+	DeployHbSwap(conn, owner)
+	//DeployToken(conn, owner)
 	//DeployToken(conn, owner)
 }
