@@ -20,7 +20,11 @@ httpserver() {
 }
 
 mpcserver() {
-  ./mpcserver -config $config -id $NODE_ID
+    if [ $NODE_ID -eq 0 ]; then
+        ./mpcserver -config $config -id $NODE_ID > /usr/src/hbswap/log/mpc_server_$NODE_ID.log 2>&1
+    else
+        ./mpcserver -config $config -id $NODE_ID
+    fi
 }
 
 setup_data

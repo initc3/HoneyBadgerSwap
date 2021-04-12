@@ -317,15 +317,15 @@ func main() {
 	conn = utils.GetEthClient(wsUrl)
 
 	//TODO: deleting this after testing
-	if serverID == "0" && network == "testnet" {
-		//utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
-		//for _, tokenAddr := range utils.TokenAddrs[network] {
-		//	utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
-		//}
-		utils.ResetPrice(network, conn, server, utils.EthAddr, utils.HbSwapTokenAddr[network])
-		utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
-		utils.ResetBalance(network, conn, server, utils.HbSwapTokenAddr[network], utils.UserAddr)
-	}
+	//if serverID == "0" && network == "testnet" {
+	//	//utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
+	//	//for _, tokenAddr := range utils.TokenAddrs[network] {
+	//	//	utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
+	//	//}
+	//	utils.ResetPrice(network, conn, server, utils.EthAddr, utils.HbSwapTokenAddr[network])
+	//	utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
+	//	utils.ResetBalance(network, conn, server, utils.HbSwapTokenAddr[network], utils.UserAddr)
+	//}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
