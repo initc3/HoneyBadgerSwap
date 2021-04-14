@@ -47,18 +47,18 @@ func genInputmask() {
 		cnt := utils.GetInputmaskCnt(network, conn)
 
 		if cnt+100 > tot {
-			go func() {
-				fmt.Printf("Generating new inputmasks...\n")
+			//go func() {
+			fmt.Printf("Generating new inputmasks...\n")
 
-				cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
-				utils.ExecCmd(cmd)
+			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
+			utils.ExecCmd(cmd)
 
-				cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
-				utils.ExecCmd(cmd)
+			cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
+			utils.ExecCmd(cmd)
 
-				tot += nshares
-				fmt.Printf("Total inputmask number: %v\n", tot)
-			}()
+			tot += nshares
+			fmt.Printf("Total inputmask number: %v\n", tot)
+			//}()
 		}
 
 		time.Sleep(30 * time.Second)
