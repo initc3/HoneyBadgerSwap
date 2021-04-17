@@ -39,7 +39,7 @@ var (
 
 	EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	HbswapAddr = map[string]common.Address{
-		"testnet":    common.HexToAddress("0x9ed1a58ff0479e36a4ead46647741f72ec9c15fe"),
+		"testnet":    common.HexToAddress("0xfef9601461e3bb72d99eca3a197f4be42798429a"),
 		"privatenet": common.HexToAddress("0xf74eb25ab1785d24306ca6b3cbff0d0b0817c5e2"),
 	}
 	HbSwapTokenAddr = map[string]common.Address{
@@ -48,16 +48,6 @@ var (
 	DAIAddr = map[string]common.Address{
 		"testnet":    common.HexToAddress("0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"),
 	}
-	//TokenAddrs = map[string][]common.Address{
-	//	"testnet": {
-	//		common.HexToAddress("0x63e7f20503256ddcfec64872aadb785d5a290cbb"),
-	//		common.HexToAddress("0x403b0f962566ffb960d0de98875dc09603aa67e9"),
-	//	},
-	//	"privatenet": {
-	//		common.HexToAddress("0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385"),
-	//		common.HexToAddress("0x8C89e5D2bCc0e4C26E3295d48d052E11bd03C06A"),
-	//	},
-	//}
 	//TODO: delete it after testing
 	UserAddr = common.HexToAddress("0xc33a4b5b609fcc294dca060347761226e78c0b7a")
 
@@ -76,19 +66,19 @@ var (
 )
 
 func ExecCmd(cmd *exec.Cmd) string {
-	fmt.Printf("Cmd:\n====================\n%v\n====================\n", cmd)
+	log.Printf("Cmd:\n====================\n%v\n====================\n", cmd)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	start := time.Now()
 	err := cmd.Run()
 	duration := time.Since(start)
-	fmt.Printf("Execution time: %s\n", duration)
+	log.Printf("Execution time: %s\n", duration)
 	if err != nil {
-		fmt.Printf("err:\n%s\n", stderr.String())
+		log.Printf("err:\n%s\n", stderr.String())
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 	}
-	fmt.Printf("Output:\n====================\n%s====================\n", stdout.String())
+	log.Printf("Output:\n====================\n%s====================\n", stdout.String())
 	return stdout.String()
 }
 
@@ -177,7 +167,6 @@ func WaitMined(ctx context.Context, ec *ethclient.Client,
 		if err == nil && ddl.Cmp(latestBlockHeader.Number) < 0 {
 			receipt, rerr := ec.TransactionReceipt(ctx, txHashBytes)
 			if rerr == nil {
-				//fmt.Println("tx confirmed!")
 				return receipt, rerr
 			} else if rerr == ethereum.NotFound || rerr.Error() == missingFieldErr {
 				return nil, errors.New("tx is dropped due to chain re-org")

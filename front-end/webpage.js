@@ -3,18 +3,17 @@ const n = 4
 const t = 1
 const fp = 1 << 16
 
-const hbswapAddr = '0x9ed1a58ff0479e36a4ead46647741f72ec9c15fe'
-// const token1 = '0x63e7f20503256ddcfec64872aadb785d5a290cbb'
-// const token2 = '0x403b0f962566ffb960d0de98875dc09603aa67e9'
+const hbswapAddr = '0xfef9601461e3bb72d99eca3a197f4be42798429a'
 const ethAddr = '0x0000000000000000000000000000000000000000'
 const hbsAddr = "0x78160ee9e55fd81626f98d059c84d21d8b71bfda"
 const daiAddr = "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"
 
-const decimals = 10**15 // TODO: 10**18
+const decimals = 10**15
 const checkPointInterval = 20 * 1000
 const feeRate = 0.003
 const displayPrecision = 4
-// const host = 'https://www.ratelang.org'
+
+// const host = 'https://www.honeybadgerswap.org'
 // const basePort = 8080
 const host = 'http://localhost'
 const basePort = 58080
@@ -38,7 +37,7 @@ function fixToFloat(i) {
 }
 
 function transferValue(x) {
-    return x * decimals
+    return BigInt(x) * BigInt(decimals)
 }
 
 function getElement(st, idx) {
@@ -304,7 +303,7 @@ async function deposit() {
     let tx, htmlContent
     if (isETH(token)) {
         $('#depositStatus').text('public depositing...')
-        tx = await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user, value: transferAmt})
+        tx = await hbswapContract.methods.publicDeposit(token, fixAmt).send({from: user, value: Number(transferAmt)})
         htmlContent = '<a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'publicDeposit' + '</a>'
         $('#depositTxLink').html(htmlContent)
     } else {
