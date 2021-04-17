@@ -1,4 +1,4 @@
-// go run /go/src/github.com/initc3/HoneyBadgerSwap/src/go/deploy/deploy.go
+// go run src/go/deploy/deploy.go
 
 package main
 
@@ -20,7 +20,7 @@ func DeployHbSwap(conn *ethclient.Client, auth *bind.TransactOpts) common.Addres
 
 	var servers []common.Address
 	for i := 0; i < utils.N; i++ {
-		transactOpt := utils.GetAccount(fmt.Sprintf("server_%v", i))
+		transactOpt := utils.GetAccount(fmt.Sprintf("poa/keystore/server_%v", i))
 		servers = append(servers, transactOpt.From)
 	}
 
@@ -69,8 +69,7 @@ func main() {
 	//conn := utils.GetEthClient(ethUrl)
 
 	conn := utils.GetEthClient(utils.TestnetWsEndpoint)
-
-	owner := utils.GetAccount("server_0")
+	owner := utils.GetAccount("poa/keystore/server_0")
 
 	DeployHbSwap(conn, owner)
 	//DeployToken(conn, owner)

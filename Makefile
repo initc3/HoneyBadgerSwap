@@ -14,6 +14,9 @@ endef
 
 export PRINT_HELP_PYSCRIPT
 
+reset:
+	go run src/go/reset/reset.go
+
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
@@ -169,7 +172,7 @@ testnet-build: down build-mpcnode0 mpc-compile
 		mpcnode2 \
 		mpcnode3
 
-testnet: down
+testnet: reset down
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \

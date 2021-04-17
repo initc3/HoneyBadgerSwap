@@ -219,7 +219,7 @@ import (
 //}
 
 func Consent(network string, conn *ethclient.Client, auth *bind.TransactOpts, seq *big.Int) {
-	fmt.Printf("Consent seq %v\n", seq)
+	log.Printf("Consent seq %v\n", seq)
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
 	if err != nil {
 		log.Fatal(err)
@@ -240,7 +240,7 @@ func Consent(network string, conn *ethclient.Client, auth *bind.TransactOpts, se
 		log.Fatalf("Transaction status: %v", receipt.Status)
 	}
 
-	fmt.Printf("Consent seq %v done\n", seq)
+	log.Printf("Consent seq %v done\n", seq)
 }
 
 //func Trade(network string, conn *ethclient.Client, auth *bind.TransactOpts, tokenA common.Address, tokenB common.Address, idxA *big.Int, idxB *big.Int, maskedAmtA *big.Int, maskedAmtB *big.Int) {
@@ -315,7 +315,7 @@ func ResetPrice(network string, conn *ethclient.Client, auth *bind.TransactOpts,
 		servers = append(servers, transactOpt.From)
 	}
 
-	fmt.Println("ResetPrice")
+	log.Println("ResetPrice")
 	tx, err := hbswapInstance.ResetPrice(auth, tokenA, tokenB, servers)
 	if err != nil {
 		log.Fatal(err)
@@ -342,7 +342,7 @@ func ResetBalance(network string, conn *ethclient.Client, auth *bind.TransactOpt
 		return
 	}
 
-	fmt.Printf("ResetBalance token %s user %s\n", token.Hex(), user.Hex())
+	log.Printf("ResetBalance token %s user %s\n", token.Hex(), user.Hex())
 	tx, err := hbswapInstance.ResetBalance(auth, token, user)
 	if err != nil {
 		log.Fatal(err)
@@ -365,12 +365,11 @@ func ResetBalance(network string, conn *ethclient.Client, auth *bind.TransactOpt
 func GetBalance(network string, conn *ethclient.Client, token common.Address, user common.Address) *big.Int {
 	hbswapInstance, err := hbswap.NewHbSwap(HbswapAddr[network], conn)
 	if err != nil {
-		fmt.Printf("here")
 		log.Fatal(err)
 	}
 
 	balance, _ := hbswapInstance.PublicBalance(nil, token, user)
-	fmt.Printf("GetBalance token %s user %s balance %v\n", token.Hex(), user.Hex(), balance)
+	log.Printf("GetBalance token %s user %s balance %v\n", token.Hex(), user.Hex(), balance)
 
 	return balance
 }
@@ -382,7 +381,7 @@ func GetInputmaskCnt(network string, conn *ethclient.Client) int64 {
 	}
 
 	cnt, _ := hbswapInstance.InputmaskCnt(nil)
-	fmt.Printf("Inputmaks shares used: %v\n", cnt)
+	log.Printf("Inputmask shares used: %v\n", cnt)
 
 	return cnt.Int64()
 }
@@ -394,7 +393,7 @@ func GetPrice(network string, conn *ethclient.Client, tokenA common.Address, tok
 	}
 
 	price, _ := hbswapInstance.Prices(nil, tokenA, tokenB)
-	fmt.Printf("price: %v\n", price)
+	log.Printf("price: %v\n", price)
 
 	return price
 }

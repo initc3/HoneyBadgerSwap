@@ -1,8 +1,7 @@
-package lib
+it add package lib
 
 import (
-	"fmt"
-	toml "github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml"
 	"io/ioutil"
 	"log"
 )
@@ -32,7 +31,7 @@ type ServerConfig struct {
 }
 
 func ParseServerConfig(configfile string) ServerConfig {
-	fmt.Println("Parsing config file: ", configfile)
+	log.Println("Parsing config file: ", configfile)
 	data, err := ioutil.ReadFile(configfile)
 	if err != nil {
 		log.Fatal(err)

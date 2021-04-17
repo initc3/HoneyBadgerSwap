@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/initc3/HoneyBadgerSwap/src/go/server/lib"
 	"github.com/initc3/HoneyBadgerSwap/src/go/utils"
+	"log"
 	"math/big"
 	"os/exec"
 	"strconv"
@@ -25,7 +26,8 @@ const (
 	mpcPort   = "5000"
 	blsPrime  = "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 	nshares   = 1000
-	batchSize       = 2
+	spareShares = 100
+	batchSize       = 3
 	returnPriceInterval = 10
 
 	confirmation = 2
@@ -37,7 +39,7 @@ var (
 	serverID       string
 	conn           *ethclient.Client
 	server         *bind.TransactOpts
-	mutexTask      = &sync.Mutex{}
+	mutex          = &sync.Mutex{}
 	leaderHostname string
 )
 
@@ -46,22 +48,24 @@ func genInputmask() {
 	for true {
 		cnt := utils.GetInputmaskCnt(network, conn)
 
-		if cnt+100 > tot {
-			go func() {
-				fmt.Printf("Generating new inputmasks...\n")
+		if cnt+spareShares >= tot {
+			mutex.Lock()
 
-				cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
-				utils.ExecCmd(cmd)
+			log.Printf("Generating new inputmasks...\n")
 
-				cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
-				utils.ExecCmd(cmd)
+			cmd := exec.Command("./random-shamir.x", "-i", serverID, "-N", players, "-T", threshold, "--nshares", strconv.Itoa(nshares), "--host", leaderHostname)
+			utils.ExecCmd(cmd)
 
-				tot += nshares
-				fmt.Printf("Total inputmask number: %v\n", tot)
-			}()
+			cmd = exec.Command("python3", "-m", "honeybadgerswap.server.proc_inputmask", serverID, strconv.Itoa(int(tot)))
+			utils.ExecCmd(cmd)
+
+			tot += nshares
+			log.Printf("Total inputmask number: %v\n", tot)
+
+			mutex.Unlock()
 		}
 
-		time.Sleep(30 * time.Second)
+		time.Sleep(60 * time.Second)
 	}
 }
 
@@ -71,7 +75,7 @@ func watch() {
 	blkNum, _ := conn.BlockNumber(ctx)
 	for true{
 		curBlockNum, _ := conn.BlockNumber(ctx)
-		fmt.Println("curBlockNum", curBlockNum)
+		//log.Println("curBlockNum", curBlockNum)
 		if curBlockNum - blkNum > confirmation {
 			query := ethereum.FilterQuery{
 				FromBlock: big.NewInt(int64(blkNum)),
@@ -79,14 +83,14 @@ func watch() {
 				Addresses: []common.Address{utils.HbswapAddr[network]},
 			}
 			logs, _ := conn.FilterLogs(ctx, query)
-			for _, log := range logs {
-				switch log.Topics[0].Hex() {
+			for _, eventLog := range logs {
+				switch eventLog.Topics[0].Hex() {
 				case utils.SecretDeposit:
-					oce := utils.ParseSecretDeposit(network, conn, log)
+					oce := utils.ParseSecretDeposit(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** SecretDeposit ****\n")
+					log.Printf("**** SecretDeposit ****\n")
 
 					token := strings.ToLower(oce.Token.Hex())
 					user := strings.ToLower(oce.User.Hex())
@@ -95,14 +99,14 @@ func watch() {
 					cmd := exec.Command("python3", "-m", "honeybadgerswap.server.secret_deposit", serverID, token, user, amt)
 					utils.ExecCmd(cmd)
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 
 				case utils.SecretWithdraw:
-					oce := utils.ParseSecretWithdraw(network, conn, log)
+					oce := utils.ParseSecretWithdraw(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** SecretWithdraw ****\n")
+					log.Printf("**** SecretWithdraw ****\n")
 
 					seq := oce.Seq
 					token := strings.ToLower(oce.Token.Hex())
@@ -122,14 +126,14 @@ func watch() {
 						utils.Consent(network, conn, server, seq)
 					}
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 
 				case utils.InitPool:
-					oce := utils.ParseInitPool(network, conn, log)
+					oce := utils.ParseInitPool(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** InitPool ****\n")
+					log.Printf("**** InitPool ****\n")
 
 					user := strings.ToLower(oce.User.Hex())
 					tokenA := strings.ToLower(oce.TokenA.Hex())
@@ -152,14 +156,14 @@ func watch() {
 						utils.UpdatePrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB), big.NewInt(0), price)
 					}
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 
 				case utils.AddLiquidity:
-					oce := utils.ParseAddLiquidity(network, conn, log)
+					oce := utils.ParseAddLiquidity(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** AddLiquidity ****\n")
+					log.Printf("**** AddLiquidity ****\n")
 
 					user := strings.ToLower(oce.User.Hex())
 					tokenA := strings.ToLower(oce.TokenA.Hex())
@@ -178,14 +182,14 @@ func watch() {
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.add_liquidity_org_data", serverID, user, tokenA, tokenB, user)
 					utils.ExecCmd(cmd)
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 
 				case utils.RemoveLiquidity:
-					oce := utils.ParseRemoveLiquidity(network, conn, log)
+					oce := utils.ParseRemoveLiquidity(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** RemoveLiquidity ****\n")
+					log.Printf("**** RemoveLiquidity ****\n")
 
 					user := strings.ToLower(oce.User.Hex())
 					tokenA := strings.ToLower(oce.TokenA.Hex())
@@ -206,14 +210,14 @@ func watch() {
 						utils.ResetPrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB))
 					}
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 
 				case utils.Trade:
-					oce := utils.ParseTrade(network, conn, log)
+					oce := utils.ParseTrade(network, conn, eventLog)
 
-					mutexTask.Lock()
+					mutex.Lock()
 
-					fmt.Printf("**** Trade ****\n")
+					log.Printf("**** Trade ****\n")
 
 					tradeSeq := oce.TradeSeq.String()
 					user := strings.ToLower(oce.User.Hex())
@@ -263,7 +267,7 @@ func watch() {
 					cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_set_data", serverID, tokenA, tokenB)
 					stdout = utils.ExecCmd(cmd)
 					cnt, _ := strconv.ParseFloat(strings.Split(stdout[:len(stdout) - 1], " ")[1], 32)
-					fmt.Println("cnt", cnt)
+					log.Println("cnt", cnt)
 
 					if cnt >= batchSize {
 						cmd = exec.Command(prog, "-N", players, "-T", threshold, "-p", serverID, "-pn", mpcPort, "-P", blsPrime, "--hostname", leaderHostname, "hbswap_calc_batch_price")
@@ -272,12 +276,12 @@ func watch() {
 						cmd = exec.Command("python3", "-m", "honeybadgerswap.server.calc_batch_price_org_data", serverID, tokenA, tokenB)
 						stdout = utils.ExecCmd(cmd)
 						batchPrice := stdout[:len(stdout) - 1]
-						fmt.Println(batchPrice)
+						log.Println(batchPrice)
 						seq, _ := strconv.Atoi(tradeSeq)
 						utils.UpdatePrice(network, conn, server, common.HexToAddress(tokenA), common.HexToAddress(tokenB), big.NewInt(int64(seq)), batchPrice)
 					}
 
-					mutexTask.Unlock()
+					mutex.Unlock()
 				}
 			}
 			blkNum = curBlockNum - confirmation + 1
@@ -299,11 +303,11 @@ func main() {
 	network = config.EthNode.Network
 	ethHostname := config.EthNode.Hostname
 	leaderHostname = config.LeaderHostname
-	fmt.Println("Eth network: ", network)
-	fmt.Println("Eth hostname: ", ethHostname)
-	fmt.Println("Leader hostname: ", leaderHostname)
+	log.Println("Eth network: ", network)
+	log.Println("Eth hostname: ", ethHostname)
+	log.Println("Leader hostname: ", leaderHostname)
 
-	fmt.Printf("Starting mpc server %v\n", serverID)
+	log.Printf("Starting mpc server %v\n", serverID)
 	server = utils.GetAccount(fmt.Sprintf("server_%s", serverID))
 
 	var wsUrl string
@@ -313,18 +317,6 @@ func main() {
 		wsUrl = utils.TestnetWsEndpoint
 	}
 	conn = utils.GetEthClient(wsUrl)
-
-	//TODO: deleting this after testing
-	if serverID == "0" && network == "testnet"{
-		//utils.ResetPrice(network, conn, server, utils.EthAddr, utils.TokenAddrs[network][0])
-		//utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
-		//for _, tokenAddr := range utils.TokenAddrs[network] {
-		//	utils.ResetBalance(network, conn, server, tokenAddr, utils.UserAddr)
-		//}
-		utils.ResetPrice(network, conn, server, utils.EthAddr, utils.HbSwapTokenAddr[network])
-		utils.ResetBalance(network, conn, server, utils.EthAddr, utils.UserAddr)
-		utils.ResetBalance(network, conn, server, utils.HbSwapTokenAddr[network], utils.UserAddr)
-	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
