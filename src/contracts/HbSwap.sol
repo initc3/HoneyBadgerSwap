@@ -22,9 +22,10 @@ contract HbSwap {
         uint amt;
     }
 
-    // TODO: support for tokens with different decimals
-    uint constant public Decimals = 10**15; //TODO: 10**18;
+    uint constant public Decimals = 10**15;
     uint constant public Fp = 2**16;
+
+    address owner;
 
     uint public threshold;
     mapping (address => bool) public servers;
@@ -48,6 +49,7 @@ contract HbSwap {
     mapping (address => mapping (address => mapping (uint => mapping (address => bool)))) propose;
 
     constructor(address[] memory _servers, uint _threshold) public {
+        owner = msg.sender;
         for (uint i = 0; i < _servers.length; i++) {
             servers[_servers[i]] = true;
         }
@@ -181,8 +183,9 @@ contract HbSwap {
         }
     }
 
-    //TODO: for test only, remove before deployment
     function resetPrice(address _tokenA, address _tokenB, address[] memory _servers) public {
+        require(msg.sender == owner);
+
         prices[_tokenA][_tokenB] = "";
         lastUpdateSeq[_tokenA][_tokenB] = 0;
         for (uint i = 0; i < _servers.length; i++) {
@@ -191,8 +194,9 @@ contract HbSwap {
         proposalCnt[_tokenA][_tokenB][0]["0.0"] = 0;
     }
 
-    //TODO: for test only, remove before deployment
     function resetBalance(address _token, address _user) public {
+        require(msg.sender == owner);
+
         publicBalance[_token][_user] = 0;
     }
 }
