@@ -7,3 +7,5 @@
 
 
 See the blog post [HoneyBadgerSwap: Making MPC as A Sidechain](https://medium.com/@lilione/honeybadgerswap-making-mpc-as-a-sidechain-364bebdb10a5).
+
+Try the live demo at http://fiddle.honeybadgerswap.org.
