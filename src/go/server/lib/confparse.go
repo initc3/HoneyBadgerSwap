@@ -1,4 +1,4 @@
-it add package lib
+package lib
 
 import (
 	"github.com/pelletier/go-toml"

@@ -6,9 +6,10 @@ go_code_path=/go/src/github.com/initc3/HoneyBadgerSwap/src/go
 
 # Place the data where MP-SPDZ expects it
 setup_data() {
-    rm -rf /opt/hbswap/db
+#    rm -rf /opt/hbswap/db
+    mkdir -p /opt/hbswap/db
     mkdir -p Persistence Player-Data
-    mkdir -p /opt/hbswap/db /opt/hbswap/inputmask-shares /opt/hbswap/preprocessing-data
+    mkdir -p /opt/hbswap/inputmask-shares /opt/hbswap/preprocessing-data
     # Copy the public keys of all players
     cp /opt/hbswap/public-keys/* Player-Data/
     # Symlink to the private key, to where MP-SPDZ expects it to be (under Player-Data/).

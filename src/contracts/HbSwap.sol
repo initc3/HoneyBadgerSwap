@@ -133,8 +133,6 @@ contract HbSwap {
         require(_tokenA < _tokenB, "invalid trading pair");
         require(_amtA > 0 && _amtB > 0, "invalid amount");
 
-        address user = msg.sender;
-
         emit InitPool(msg.sender, _tokenA, _tokenB, _amtA, _amtB);
     }
 

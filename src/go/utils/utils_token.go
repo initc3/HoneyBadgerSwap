@@ -18,7 +18,7 @@ func FundToken(conn *ethclient.Client, tokenAddr common.Address, toAddr common.A
 	}
 	amount.Sub(amount, balance)
 
-	adminAuth := GetAccount("server_0")
+	adminAuth := GetAccount("poa/keystore/server_0")
 	transferToken(conn, tokenAddr, adminAuth, toAddr, amount)
 
 	balance = GetBalanceToken(conn, toAddr, tokenAddr)

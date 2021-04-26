@@ -14,7 +14,7 @@ import (
 
 func FundETH(network string, conn *ethclient.Client, toAddr common.Address, amount *big.Int) {
 	log.Println("FundEth ...")
-	adminAuth := GetAccount("server_0")
+	adminAuth := GetAccount("poa/keystore/server_0")
 	transferETH(conn, chainID[network], adminAuth, toAddr, amount)
 
 	//balance := GetBalanceETH(conn, toAddr)

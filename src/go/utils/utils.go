@@ -39,7 +39,7 @@ var (
 
 	EthAddr    = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	HbswapAddr = map[string]common.Address{
-		"testnet":    common.HexToAddress("0xfef9601461e3bb72d99eca3a197f4be42798429a"),
+		"testnet":    common.HexToAddress("0xbc003e9dffe7306e6e414197267581fd732fe8b4"),
 		"privatenet": common.HexToAddress("0xf74eb25ab1785d24306ca6b3cbff0d0b0817c5e2"),
 	}
 	HbSwapTokenAddr = map[string]common.Address{

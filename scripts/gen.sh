@@ -30,4 +30,5 @@ truffle_complie
 sync_go_binding HbSwap hbswap
 sync_go_binding HbSwapToken hbSwapToken
 
-#truffle-flattener contracts/HbSwap.sol --output contracts/FlattenedHbSwap.sol
+# truffle-flattener contracts/HbSwap.sol --output contracts/FlattenedHbSwap.sol
+# truffle-flattener contracts/HbSwapToken.sol --output contracts/FlattenedHbSwapToken.sol

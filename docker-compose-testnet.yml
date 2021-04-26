@@ -52,6 +52,7 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p0:/opt/hbswap/db
     secrets:
       - P0.key
     working_dir: /usr/src/hbswap
@@ -79,6 +80,7 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p1:/opt/hbswap/db
     secrets:
       - P1.key
     working_dir: /usr/src/hbswap
@@ -106,6 +108,7 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p2:/opt/hbswap/db
     secrets:
       - P2.key
     working_dir: /usr/src/hbswap
@@ -133,6 +136,7 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p3:/opt/hbswap/db
     secrets:
       - P3.key
     working_dir: /usr/src/hbswap
