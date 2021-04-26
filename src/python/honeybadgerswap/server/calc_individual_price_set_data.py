@@ -6,8 +6,8 @@ from ..utils import (
     location_sharefile,
     openDB,
     get_value,
-    int_to_hex
-)
+    int_to_hex,
+    hex_to_int, key_cnt_succeed_trade)
 
 if __name__=='__main__':
     server_id = sys.argv[1]
@@ -27,3 +27,7 @@ if __name__=='__main__':
             change_A +
             total_price
         )
+
+    cnt_succeed_trade = hex_to_int(get_value(db, key_cnt_succeed_trade())) + 1
+    print('cnt_succeed_trade', cnt_succeed_trade)
+    db.Put(key_cnt_succeed_trade(), int_to_hex(cnt_succeed_trade))

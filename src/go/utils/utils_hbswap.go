@@ -10,6 +10,7 @@ import (
 	"github.com/initc3/HoneyBadgerSwap/src/go_bindings/hbswap"
 	"log"
 	"math/big"
+	"time"
 )
 
 //func Deposit(network string, conn *ethclient.Client, auth *bind.TransactOpts, tokenAddr common.Address, amt *big.Int) {
@@ -311,7 +312,7 @@ func ResetPrice(network string, conn *ethclient.Client, auth *bind.TransactOpts,
 
 	var servers []common.Address
 	for i := 0; i < N; i++ {
-		transactOpt := GetAccount(fmt.Sprintf("server_%v", i))
+		transactOpt := GetAccount(fmt.Sprintf("poa/keystore/server_%v", i))
 		servers = append(servers, transactOpt.From)
 	}
 
@@ -380,7 +381,12 @@ func GetInputmaskCnt(network string, conn *ethclient.Client) int64 {
 		log.Fatal(err)
 	}
 
-	cnt, _ := hbswapInstance.InputmaskCnt(nil)
+	cnt, err := hbswapInstance.InputmaskCnt(nil)
+	for err != nil {
+		log.Println(err)
+		time.Sleep(time.Second)
+		cnt, err = hbswapInstance.InputmaskCnt(nil)
+	}
 	log.Printf("Inputmask shares used: %v\n", cnt)
 
 	return cnt.Int64()

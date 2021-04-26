@@ -172,7 +172,10 @@ testnet-build: down build-mpcnode0 mpc-compile
 		mpcnode2 \
 		mpcnode3
 
-testnet: reset down
+down-testnet:
+	docker-compose -f docker-compose-testnet.yml down --remove-orphans
+
+testnet: down-testnet
 	docker-compose -f docker-compose-testnet.yml up --detach \
 		mpcnode0 \
 		mpcnode1 \

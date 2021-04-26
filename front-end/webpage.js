@@ -3,7 +3,7 @@ const n = 4
 const t = 1
 const fp = 1 << 16
 
-const hbswapAddr = '0xfef9601461e3bb72d99eca3a197f4be42798429a'
+const hbswapAddr = '0xbc003e9dffe7306e6e414197267581fd732fe8b4'
 const ethAddr = '0x0000000000000000000000000000000000000000'
 const hbsAddr = "0x78160ee9e55fd81626f98d059c84d21d8b71bfda"
 const daiAddr = "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"
@@ -227,7 +227,6 @@ async function trade() {
     const masks = await getInputmasks(2, idxes)
     $('#tradeMasks').text(masks)
 
-    // Step 4: Publish masked inputs
     const slippage = $( '#slippage' ).val()
     const minReceived = amtTradeTo * (1 - slippage)
 
@@ -250,7 +249,6 @@ async function trade() {
     htmlContent += ' <a href="https://kovan.etherscan.io/tx/' + tx["transactionHash"] + '">' + 'trade' + '</a>'
     $('#tradeTxLink').html(htmlContent)
 
-    // Step 5: Get price of current trade
     data = tx['events']['Trade']['raw']['data']
     const tradeSeq = getInt(data, 0)
     $('#seq').text(tradeSeq)
@@ -767,8 +765,6 @@ async function init() {
     tokenList.set('ETH', ethAddr)
     tokenList.set('HBS', hbsAddr)
     tokenList.set('DAI', daiAddr)
-    // tokenList.set('token1', token1)
-    // tokenList.set('token2', token2)
     window.contractList = new Map()
     for (let [k, v] of tokenList) {
         contractList.set(v, new web3.eth.Contract(tokenABI, v))

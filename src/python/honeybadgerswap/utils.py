@@ -12,35 +12,40 @@ from gmpy2 import mpz_from_old_binary
 
 
 def key_balance(token, user):
-    return f"balance_{token}_{user}".encode()
+    return f'balance_{token}_{user}'.encode()
 
 
 def key_inputmask(idx):
-    return f"inputmask_{idx}".encode()
+    return f'inputmask_{idx}'.encode()
 
+def key_cnt_failed_trade():
+    return f'cnt_failed_trade'.encode()
+
+def key_cnt_succeed_trade():
+    return f'cnt_succeed_trade'.encode()
 
 def key_pool(token_A, token_B, token):
-    return f"pool_{token_A}_{token_B}_{token}".encode()
+    return f'pool_{token_A}_{token_B}_{token}'.encode()
 
 
 def key_individual_price(trade_seq):
-    return f"trade_price_{trade_seq}".encode()
+    return f'trade_price_{trade_seq}'.encode()
 
 
 # def key_trade_time(trade_seq):
-#     return f"trade_time_{trade_seq}".encode()
+#     return f'trade_time_{trade_seq}'.encode()
 
 
 def key_total_price(token_A, token_B):
-    return f"trade_price_{token_A}_{token_B}".encode()
+    return f'trade_price_{token_A}_{token_B}'.encode()
 
 
 def key_total_cnt(token_A, token_B):
-    return f"total_cnt_{token_A}-{token_B}".encode()
+    return f'total_cnt_{token_A}-{token_B}'.encode()
 
 
 def key_total_supply(token_A, token_B):
-    return f"total_supply_{token_A}_{token_B}".encode()
+    return f'total_supply_{token_A}_{token_B}'.encode()
 
 
 ##############################################################################
@@ -49,24 +54,24 @@ def key_total_supply(token_A, token_B):
 
 
 def location_db(server_id):
-    db_path = os.getenv("DB_PATH", "/opt/hbswap/db")
-    return f"{db_path}/server-{server_id}"
+    db_path = os.getenv('DB_PATH', '/opt/hbswap/db')
+    return f'{db_path}/server-{server_id}'
 
 
 def location_inputmask(server_id):
     inputmask_shares_dir = os.getenv(
-        "INPUTMASK_SHARES", "/opt/hbswap/inputmask-shares",
+        'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
     )
-    return f"{inputmask_shares_dir}/4-MSp-255/Randoms-MSp-P{server_id}"
+    return f'{inputmask_shares_dir}/4-MSp-255/Randoms-MSp-P{server_id}'
 
 
 def location_private_output(server_id):
-    prep_dir = os.getenv("PREP_DIR", "/opt/hbswap/preprocessing-data")
-    return f"{prep_dir}/Private-Output-{server_id}"
+    prep_dir = os.getenv('PREP_DIR', '/opt/hbswap/preprocessing-data')
+    return f'{prep_dir}/Private-Output-{server_id}'
 
 
 def location_sharefile(server_id):
-    return f"Persistence/Transactions-P{server_id}.data"
+    return f'Persistence/Transactions-P{server_id}.data'
 
 
 ##############################################################################
@@ -79,7 +84,7 @@ def openDB(location):
         try:
             return leveldb.LevelDB(location)
         except leveldb.LevelDBError:
-            print("db not ready")
+            print('db not ready')
             time.sleep(10)
 
 
@@ -117,7 +122,7 @@ def int_to_hex(x):
     x = mpz(x)
     x = (x * R) % p
     x = binary(int(x))
-    x += b"\x00" * (32 - len(x))
+    x += b'\x00' * (32 - len(x))
     return x
 
 
@@ -125,7 +130,7 @@ def check_consistency(shares):
     value = reconstruct(shares, t + 1)
     for i in range(t + 2, n + 1):
         if reconstruct(shares, i) != value:
-            print("inconsistent")
+            print('inconsistent')
 
 
 def reconstruct(shares, n):
