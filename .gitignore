@@ -3,3 +3,5 @@ poa/data
 *log/
 *build/
 *__pycache__
+*ratel/genfiles
+!ratel/genfiles/truffle-config.js
