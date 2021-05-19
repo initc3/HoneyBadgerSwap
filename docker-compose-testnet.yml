@@ -52,7 +52,7 @@ services:
       - ./poa/keystore:/opt/poa/keystore
       - ./log:/usr/src/hbswap/log
       - ./src/python:/usr/src/honeybadgerswap-python
-      - db-p0:/opt/hbswap/dbv
+      - db-p0:/opt/hbswap/db
       - ./testkeys/public:/opt/hbswap/public-keys
     secrets:
       - P0.key

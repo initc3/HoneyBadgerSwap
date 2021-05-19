@@ -1,329 +1,345 @@
+%option noyywrap
+
 %{
 #include <set>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 using namespace std;
 
-const string TAB = "    ";
-
-enum Phase {READDB, MPCINPUT, MPC, MPCOUTPUT, WRITEDB};
+enum Phase {MONITOR, READDB, MPCINPUT, MPC, MPCOUTPUT, WRITEDB};
 int phase;
 
-bool isFuncName, isFuncDec;
-string funcName;
+bool isFuncDec, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isEmptyLine = true;
+
 int braces;
-
-bool isReadDB, isWriteDB;
-bool isKey, isValue;
-string key, value;
-
-string textPython, textMpc;
-string textLine, textBlock;
-bool isEmptyLine = true;
-
-bool isParam;
-string param;
-
 int numInput;
-bool isMpcInput, isMpcOutput;
-vector<string> mpcParams;
+int cntValueDB;
 
-set<string> params;
+string fileName;
+string funcName;
+string mpcFile;
+FILE *mpcFp, *pythonFp;;
+int cntMPC;
+string textLine;
+string textPython, textMpc;
 
-void setData() {
-    textPython += "def " + funcName + "SetData" + "(serverID";
-    for (set<string>::iterator it = params.begin(); it != params.end(); ++it) {
-        textPython += ", " + *it;
+bool isArg;
+string arg;
+vector<string> args;
+
+string tab(int repetition) {
+    string ret = "";
+    for (int i = 0; i < repetition; i++) {
+        ret += "    ";
     }
-    textPython += "):\n";
-    textPython += TAB + "db = openDB(location_db(serverID))\n\n";
-    textPython += textBlock + "\n";
-
-    textBlock = "";
-    params.clear();
+    return ret;
 }
 
-void orgData() {
-    textPython += "def " + funcName + "OrgData" + "(serverID";
-    for (set<string>::iterator it = params.begin(); it != params.end(); ++it) {
-        textPython += ", " + *it;
-    }
-    textPython += "):\n";
-    textPython += TAB + "db = openDB(location_db(serverID))\n\n";
-    textPython += textBlock + "\n";
+void initPython() {
+    textPython += "import os\n";
+    textPython += "import subprocess\n";
+    textPython += "from ratel.src.python.utils import locationSharefile, prog, players, threshold, mpcPort, blsPrime, leaderHostname, sz, int_to_hex, hex_to_int\n";
+    textPython += "\n";
 
-    textBlock = "";
-    params.clear();
+    string pythonFile = "python/" + fileName + ".py";
+    pythonFp = fopen(pythonFile.c_str(), "w");
 }
 
-void mpc() {
+void finalizePython() {
+    fprintf(pythonFp, "%s", textPython.c_str());
+    fclose(pythonFp);
+}
+
+void initMPC() {
+    mpcFile = "mpc/" + fileName + funcName + to_string(++cntMPC) + ".mpc";
+    mpcFp = fopen(mpcFile.c_str(), "w");
+
+
+    textMpc += "def read_sint(idx):\n";
+    textMpc += "    start = regint(idx * 32)\n";
+    textMpc += "    end = regint()\n";
+    textMpc += "    share = sint()\n";
+    textMpc += "    readsharesfromfile(start, end, share)\n";
+    textMpc += "    return share\n";
+    textMpc += "\n";
+
     textMpc += "def main():\n";
-    textMpc += textBlock;
-    textMpc += "\nmain()\n";
+}
 
-    textBlock = "";
+void finalizeMPC() {
+    textMpc += "main()";
+
+    fprintf(mpcFp, "%s", textMpc.c_str());
+    fclose(mpcFp);
+
+    textMpc = "";
+}
+
+void monitorEvent() {
+    string eventName = args[0];
+    textPython += "def monitor" + eventName + "(web3, db, serverID, contract, confirmation):\n";
+    textPython += "    blkNum = web3.eth.get_block_number()\n";
+    textPython += "    while True:\n";
+    textPython += "        curBlkNum = web3.eth.get_block_number()\n";
+    textPython += "        if curBlkNum - blkNum > confirmation:\n";
+    textPython += "            eventFilter = contract.events." + eventName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - confirmation)\n";
+    textPython += "            logs = eventFilter.get_all_entries()\n";
+    textPython += "            blkNum = curBlkNum - confirmation + 1\n";
+    textPython += "            for log in logs:\n";
+    textPython += "\n";
+
+    int num = args.size();
+    for (int i = 1; i < num; i++) {
+        string arg = args[i];
+        textPython += tab(4) + arg + " = log['args']['" + arg + "']\n";
+    }
+    textPython += "\n";
+}
+
+void mpcInput() {
+    //python
+    textPython += tab(4) + "file = locationSharefile(serverID)\n";
+    textPython += tab(4) + "with open(file, \"wb\") as f:\n";
+    textPython += tab(4) + "    f.write(\n";
+    numInput = args.size();
+    for (int i = 0; i < numInput; i++) {
+        textPython += tab(6) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + args[i] + ")\n";
+    }
+    textPython += tab(4) + "    )\n";
+    textPython += "\n";
+
+    //mpc
+    initMPC();
+    for (int i = 0; i < numInput; i++) {
+        textMpc += tab(1) + args[i] + " = read_sint(" + to_string(i) + ")\n";
+    }
+    textMpc += "\n";
+
+    //python
+    textPython += tab(4) + "env = os.environ.copy()\n";
+    textPython += tab(4) + "cmd = [prog, \'-N\', f\'\{players\}\', \'-T\', f\'\{threshold\}\', \'-p\', f\'\{serverID\}\', \'-pn\', f\'\{mpcPort()\}\', \'-P\', f\'\{blsPrime\}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
+    textPython += tab(4) + "task = subprocess.Popen(cmd, env=env)\n";
+    textPython += tab(4) + "task.wait()\n";
+    textPython += "\n";
+}
+
+void mpcOutput() {
+    //mpc
+    textMpc += "\n";
+    int num = args.size();
+    for (int i = 0; i < num; i++) {
+        textMpc += tab(1) + "writesharestofile(" + args[i] + ")\n";
+    }
+    textMpc += "\n";
+
+    finalizeMPC();
+
+    //python
+    textPython += tab(4) + "input_argeter_num = " + to_string(numInput) + "\n";
+    textPython += tab(4) + "with open(file, \"rb\") as f:\n";
+    textPython += tab(4) + "    f.seek(input_argeter_num * sz)\n";
+    for (int i = 0; i < num; i++) {
+        textPython += tab(5) + args[i] + " = hex_to_int(f.read(sz))\n";
+    }
+    textPython += "\n";
+}
+
+void addText(char *yytext) {
+    string text = string(yytext);
+
+    for (int i = 0; i < text.length(); i++) {
+        char ch = text[i];
+        if (ch != ' ' && ch != '\r' && ch != '\t') {
+            isEmptyLine = false;
+        }
+    }
+
+    if (isArg) {
+        arg += text;
+    } else {
+        textLine += text;
+    }
 }
 
 %}
 
-SPACE [ \t\r]+
+SPACES [ \t\r]+
 
 %%
 
-^func{SPACE} {
-    isFuncName = true;
+^func{SPACES} {
     isFuncDec = true;
-    funcName = "";
+    isArg = true;
+}
+
+^.*monitorEvent\( {
+    isEvent = true;
+    isArg = true;
 }
 
 ^.*readDB\( {
     string text = string(yytext);
 
     isReadDB = true;
-    isKey = true;
+    isArg = true;
 
-    textLine += text.substr(0, text.length() - 7);
+    textLine += tab(3) + text.substr(0, text.length() - 7);
 }
 
 ^.*writeDB\( {
     string text = string(yytext);
 
     isWriteDB = true;
-    isKey = true;
+    isArg = true;
 
     textLine += text.substr(0, text.length() - 8);
 }
 
 ^.*mpcInput\( {
     isMpcInput = true;
-    isParam = true;
+    isArg = true;
 }
 
 ^.*mpcOutput\( {
     isMpcOutput = true;
-    isParam = true;
+    isArg = true;
 }
 
 \( {
-    if (isFuncName) {
-        isFuncName = false;
-        isParam = true;
+    if (isFuncDec) {
+        funcName = arg;
+        funcName[0] = toupper(funcName[0]);
+        arg = "";
+        isArg = false;
+    } else {
+        addText(yytext);
     }
 }
 
 \) {
-    if (isReadDB) {
-        textLine += "db.Get(" + key + ".encode())";
+    if (isArg) {
+        args.push_back(arg);
+        arg = "";
 
-        isKey = false;
-        key = "";
-    } else if (isWriteDB) {
-        textLine += "db.Put(" + key + ".encode(), " + value + ")";
+        if (isReadDB) {
+            assert(args.size() == 1);
+            
+            string textTmp = textLine;
 
-        isValue = false;
-        key = "";
-        value = "";
-    } else if (isMpcInput) {
-        mpcParams.push_back(param);
-        isParam = false;
-        param = "";
-    } else if (isMpcOutput) {
-        mpcParams.push_back(param);
-        isParam = false;
-        param = "";
-    } else if (isFuncDec && isParam) {
-        for (int i = 0; i < param.length(); i++) {
-            if (param[i] == ' ') {
-                param = param.substr(i + 1);
-                break;
-            }
+            string value = "value" + to_string(++cntValueDB);
+            
+            textLine = tab(4) + "try:\n";
+            textLine += tab(4) + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
+            textLine += tab(4) + "except KeyError:\n";
+            textLine += tab(4) + "    " + value + " = bytes(0)\n";
+            textLine += textTmp + value;
+        } else if (isWriteDB) {
+            assert(args.size() == 2);
+            textLine += "db.Put(" + args[0] + ".encode(), " + args[1] + ")";
         }
-        params.insert(param);
-        param = "";
-        isParam = false;
+
+        isArg = false;
+    } else {
+        addText(yytext);
     }
 }
 
-,{SPACE}* {
-    if (isKey) {
-        isKey = false;
-        isValue = true;
-    } else if (isMpcInput || isMpcOutput) {
-        mpcParams.push_back(param);
-        param = "";
-    } else if (isFuncDec && isParam) {
-        for (int i = 0; i < param.length(); i++) {
-            if (param[i] == ' ') {
-                param = param.substr(i + 1);
-                break;
-            }
-        }
-        params.insert(param);
-        param = "";
+,{SPACES}* {
+    if (isArg) {
+        args.push_back(arg);
+        arg = "";
+    } else {
+        addText(yytext);
     }
 }
 
 \{ {
     braces++;
-    if (isKey) {
-        key += "{";
-        isParam = true;
-    }
+    addText(yytext);
 }
 
 \} {
     braces--;
     if (braces == 0) {
-        assert(phase == 4);
-
-        orgData();
-    }
-    if (isKey) {
-        key += "}";
-        if (isParam) {
-            params.insert(param);
-            isParam = false;
-            param = "";
-        }
-    }
-}
-
-. {
-    string text = string(yytext);
-
-    if (yytext[0] != ' ' && yytext[0] != '\r' && yytext[0] != '\t') {
-        isEmptyLine = false;
-    }
-
-    bool flag = true;
-    if (isFuncName) {
-        funcName += text;
-        flag = false;
-    }
-    if (isKey) {
-        key += text;
-        flag = false;
-    }
-    if (isValue) {
-        value += text;
-        flag = false;
-    }
-    if (isParam) {
-        param += text;
-        flag = false;
-    }
-
-    if (flag) {
-        textLine += text;
+    } else {
+        addText(yytext);
     }
 }
 
 \n {
     textLine += "\n";
 
-    if (isReadDB) {
-        assert(phase == 0);
+//    printf("textLine:%sphase:%d\n", textLine.c_str(), phase);
 
-        textBlock += textLine;
+    if (isEvent) {
+        assert(phase == MONITOR);
+        phase++;
+
+        monitorEvent();
+
+        isEvent = false;
+    } else if (isReadDB) {
+        assert(phase == READDB);
+
+        textPython += textLine;
 
         isReadDB = false;
     } else if (isMpcInput) {
-        assert(phase == 0);
+        assert(phase == READDB);
         phase++;
 
-        textLine += TAB + "file = location_sharefile(serverID)\n";
-        textLine += TAB + "with open(file, \"wb\") as f:\n";
-        textLine += TAB + TAB + "f.write(\n";
-        int num = mpcParams.size();
-        numInput = num;
-        for (int i = 0; i < num; i++) {
-            textLine += TAB + TAB + TAB + ((i == 0) ? "" : "+ ") + mpcParams[i] + "\n";
-        }
-        textLine += TAB + TAB + ")\n";
-        textBlock += textLine;
+        mpcInput();
 
-        setData();
-
-        for (int i = 0; i < num; i++) {
-            textBlock += TAB + mpcParams[i] + " = read_sint(" + to_string(i) + ")\n";
-        }
-        textBlock += "\n";
-
-        mpcParams.clear();
         isMpcInput = false;
     } else if (isMpcOutput) {
-        assert(phase == 2);
+        assert(phase == MPC);
         phase++;
 
-        int num = mpcParams.size();
-        for (int i = 0; i < num; i++) {
-            textLine += TAB + "writesharestofile(" + mpcParams[i] + ")\n";
-        }
-        textBlock += textLine;
+        mpcOutput();
 
-        mpc();
-
-        textBlock += TAB + "file = location_sharefile(serverID)\n";
-        textBlock += TAB + "input_parameter_num = " + to_string(numInput) + "\n";
-        textBlock += TAB + "with open(file, \"rb\") as f:\n";
-        textBlock += TAB + TAB + "f.seek(input_parameter_num * sz)\n";
-        for (int i = 0; i < num; i++) {
-            textBlock += TAB + TAB + mpcParams[i] + " = f.read(sz)\n";
-        }
-        textBlock += "\n";
-
-        mpcParams.clear();
         isMpcOutput = false;
     } else if (isWriteDB) {
-        assert(phase == 3 || phase == 4);
-        if (phase == 3) phase++;
+        assert(phase == MPCOUTPUT || phase == WRITEDB);
+        if (phase == MPCOUTPUT) phase++;
 
-        textBlock += textLine;
+        textPython += tab(3) + textLine;
 
         isWriteDB = false;
     } else if (!isEmptyLine && !isFuncDec) {
-        assert(phase == 1 || phase == 2);
-        if (phase == 1) phase++;
-
-        textBlock += textLine;
+        if (phase == MPCINPUT) {
+            phase++;
+            textMpc += textLine;
+        } else if (phase == MPC) {
+            textMpc += textLine;
+        } else {
+            textPython += tab(3) + textLine;
+        }
     }
+
+    args.clear();
     isEmptyLine = true;
     isFuncDec = false;
 
-//    printf("textLine:%sphase:%d\n", textLine.c_str(), phase);
-
     textLine = "";
 }
+
+. {
+    addText(yytext);
+}
+
 %%
 
 int main(int argc, char **argv) {
     char *_fileName = argv[1];
-    string fileName = string(_fileName);
+    fileName = string(_fileName);
 
-    textPython += "from .utils import openDB, location_db, location_sharefile, sz\n\n";
-
-    textMpc += "def read_sint(idx):\n" +
-               TAB + "start = regint(idx * 32)\n" +
-               TAB + "end = regint()\n" +
-               TAB + "share = sint()\n" +
-               TAB + "readsharesfromfile(start, end, share)\n" +
-               TAB + "return share\n\n";
+    initPython();
 
     yylex();
 
-    FILE *pythonFp;
-    string pythonFile = "python/" + fileName + ".py";
-    pythonFp = fopen(pythonFile.c_str(), "w");
-//    printf("%s", textPython.c_str());
-    fprintf(pythonFp, "%s", textPython.c_str());
-    fclose(pythonFp);
-
-    FILE *mpcFp;
-    mpcFp = fopen("mpc/tmp.mpc", "w");
-//    printf("%s", textMpc.c_str());
-    fprintf(mpcFp, "%s", textMpc.c_str());
-    fclose(mpcFp);
+    finalizePython();
 
 	return 0;
 }
