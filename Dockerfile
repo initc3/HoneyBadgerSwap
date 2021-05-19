@@ -114,3 +114,18 @@ WORKDIR $HBSWAP_HOME
 RUN mkdir -p Programs
 COPY --from=mpc-bytecodes /usr/src/Programs/Bytecode /usr/src/hbswap/Programs/Bytecode
 COPY --from=mpc-bytecodes /usr/src/Programs/Schedules /usr/src/hbswap/Programs/Schedules
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nodejs npm
+RUN npm install -g truffle
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    flex
+
+WORKDIR /go/src/github.com/ethereum/go-ethereum
+RUN make geth
+
+RUN pip3 install web3
+
+RUN mkdir -p /opt/hbswap/db
+RUN mkdir -p /usr/src/hbswap/Persistence

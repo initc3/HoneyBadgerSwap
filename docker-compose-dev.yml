@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+
+  dev:
+    image: hbswap:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./ratel:/usr/src/hbswap/ratel
+      - ./MP-SPDZ/compile.py:/usr/src/hbswap/compile.py
+      - ./MP-SPDZ/Compiler:/usr/src/hbswap/Compiler
+      - ./scripts/chain-latest.sh:/usr/src/hbswap/chain-latest.sh
+      - ./poa:/opt/poa
+      - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/hbswap/setup-ssl.sh
+    working_dir: /usr/src/hbswap
+    command: tail -F anything

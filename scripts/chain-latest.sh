@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 POADIR=${POADIR:-/opt/poa}
-DATADIR=${POA_DATADIR:-/opt/poa/data}
 KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/server_0}
+DATADIR=${POA_DATADIR:-/opt/poa/data}
 
 rm -rf $DATADIR
 mkdir $DATADIR
 
-geth --datadir $DATADIR init $POADIR/genesis.json
+/go/src/github.com/ethereum/go-ethereum/build/bin/geth --datadir $DATADIR init $POADIR/genesis.json
 
-geth \
+/go/src/github.com/ethereum/go-ethereum/build/bin/geth \
     --datadir $DATADIR \
     --keystore $KEYSTORE \
     --mine --allow-insecure-unlock --unlock 0 \
@@ -23,4 +23,5 @@ geth \
     --ws.origins '*' \
     --ws.api admin,debug,eth,miner,net,personal,shh,txpool,web3 \
     --syncmode full \
-    --ipcpath "$DATADIR/geth.ipc"
+    --ipcpath "$DATADIR/geth.ipc" \
+    2>> $DATADIR/geth.log &
