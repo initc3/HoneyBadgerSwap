@@ -1,56 +1,92 @@
+import asyncio
 import json
+import os
+import subprocess
 
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-url = 'ws://0.0.0.0:8546'
-web3 = Web3(Web3.WebsocketProvider(url))
+from ratel.src.python.utils import threshold, spareShares, players, batchShares, blsPrime, \
+    location_inputmask, key_inputmask
 
-def deploy_contract():
+url = 'ws://0.0.0.0:8546'
+ETH = '0x0000000000000000000000000000000000000000'
+tokenAddress = '0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2'
+appAddress = '0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385'
+confirmation = 5
+
+def parse_contract(name):
+    contract = json.load(open(f'ratel/genfiles/build/contracts/{name}.json'))
+    return contract['abi'], contract['bytecode']
+
+def getAccount(web3, keystoreDir):
+    for filename in os.listdir(keystoreDir):
+        with open(keystoreDir + filename) as keyfile:
+            encryptedKey = keyfile.read()
+            privateKey = web3.eth.account.decrypt(encryptedKey, '')
+            return web3.eth.account.privateKeyToAccount(privateKey)
+
+def reserveInput(web3, appContract, num):
+    tx_hash = appContract.functions.reserveInput(num).transact()
+    web3.eth.wait_for_transaction_receipt(tx_hash)
+    receipt = web3.eth.get_transaction_receipt(tx_hash)
+    log = appContract.events.InputMask().processReceipt(receipt)
+    return log[0]['args']['inpusMaskIndexes']
+
+async def preprocessing(db, contract, serverID):
+    tot = contract.functions.inputmaskCnt().call()
+    while True:
+        cnt = contract.functions.inputmaskCnt().call()
+        if cnt + spareShares >= tot:
+            print('Generating new inputmasks...')
+
+            env = os.environ.copy()
+            cmd = ['./random-shamir.x', '-i', f'{serverID}', '-N', f'{players}', '-T', f'{threshold}', '--nshares', f'{batchShares}']
+            task = subprocess.Popen(cmd, env=env)
+            task.wait()
+
+            file = location_inputmask(serverID)
+            with open(file, 'r') as f:
+                idx = tot
+                for line in f.readlines():
+                    key = key_inputmask(idx)
+                    share = int(line) % blsPrime
+                    db.Put(key, share.to_bytes((share.bit_length() + 7) // 8, 'big'))
+                    idx += 1
+
+            tot += batchShares
+            print(f'Total inputmask number: {tot}\n')
+
+        await asyncio.sleep(60)
+
+if __name__=='__main__':
+    web3 = Web3(Web3.WebsocketProvider(url))
+
+    web3.eth.defaultAccount = web3.eth.accounts[0]
+    web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+    abi, bytecode = parse_contract('HbSwapToken')
     tx_hash = web3.eth.contract(
         abi=abi,
         bytecode=bytecode).constructor().transact()
+    web3.eth.wait_for_transaction_receipt(tx_hash)
+    tokenAddress = web3.eth.waitForTransactionReceipt(tx_hash)['contractAddress']
+    print(f'Deployed to: {tokenAddress}\n')
+    tokenContract = web3.eth.contract(address=tokenAddress, abi=abi)
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    print(tx_receipt)
-    address = web3.eth.waitForTransactionReceipt(tx_hash)['contractAddress']
-    return address
+    abi, bytecode = parse_contract('Test')
+    servers = []
+    for serverID in range(4):
+        account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
+        servers.append(account.address)
+    tx_hash = web3.eth.contract(
+        abi=abi,
+        bytecode=bytecode).constructor(servers, threshold).transact()
+    web3.eth.wait_for_transaction_receipt(tx_hash)
+    appAddress = web3.eth.waitForTransactionReceipt(tx_hash)['contractAddress']
+    print(f'Deployed to: {appAddress}\n')
+    appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-def deposit():
-    pass
 
-f = open('ratel/genfiles/build/contracts/Test.json')
-data = json.load(f)
-
-web3.eth.defaultAccount = web3.eth.accounts[0]
-
-web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-abi = data['abi']
-bytecode = data['bytecode']
-address = deploy_contract()
-print(f'Deployed to: {address}\n')
-# address = '0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2'
-
-myContract = web3.eth.contract(address=address, abi=abi)
-
-print(myContract.functions.publicBalance('0x0000000000000000000000000000000000000000', web3.eth.defaultAccount).call())
-tx_hash = myContract.functions.publicDeposit('0x0000000000000000000000000000000000000000',2**16).transact({'from':web3.eth.defaultAccount, 'value':10**15})
-tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-print(tx_receipt)
-
-print(myContract.functions.publicBalance('0x0000000000000000000000000000000000000000', web3.eth.defaultAccount).call())
-tx_hash = myContract.functions.secretDeposit('0x0000000000000000000000000000000000000000',2**16).transact()
-tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-print(tx_receipt)
-
-print(myContract.functions.publicBalance('0x0000000000000000000000000000000000000000', web3.eth.defaultAccount).call())
-tx_hash = myContract.functions.publicDeposit('0x0000000000000000000000000000000000000000',2**16).transact({'from':web3.eth.defaultAccount, 'value':10**15})
-tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-print(tx_receipt)
-
-print(myContract.functions.publicBalance('0x0000000000000000000000000000000000000000', web3.eth.defaultAccount).call())
-tx_hash = myContract.functions.secretDeposit('0x0000000000000000000000000000000000000000',2**16).transact()
-tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-print(tx_receipt)
 
 

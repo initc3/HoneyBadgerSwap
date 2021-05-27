@@ -4,6 +4,8 @@ POADIR=${POADIR:-/opt/poa}
 KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/server_0}
 DATADIR=${POA_DATADIR:-/opt/poa/data}
 
+pkill -f geth
+
 rm -rf $DATADIR
 mkdir $DATADIR
 

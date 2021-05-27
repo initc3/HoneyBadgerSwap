@@ -8,7 +8,7 @@ compile_flex() {
 
 compile_flexes() {
   compile_flex split_public_private
-  compile_flex org_sol
+  compile_flex split_public
   compile_flex split_private
 }
 
@@ -34,8 +34,8 @@ parse() {
   # split public and private code
   run_scanner split_public_private $1 ../src/rl/$1.rl
 
-  # org public code
-  run_scanner org_sol $1 contracts/$1.sol
+  # reorg sol code
+  run_scanner split_public $1 contracts/$1.sol
   mv contracts/tmp.sol contracts/$1.sol
 
   # split python and MP-SPDZ code
@@ -43,9 +43,11 @@ parse() {
   rm mpc/$1.mpc
 }
 
-mkdir -p ratel/genfiles/contracts
-mkdir -p ratel/genfiles/python
-mkdir -p ratel/genfiles/mpc
+#bash setup-ssl.sh 4
+#mkdir -p ratel/genfiles/contracts
+#mkdir -p ratel/genfiles/python
+#mkdir -p ratel/genfiles/mpc
+
 cd ratel/genfiles
 
 compile_flexes
@@ -57,18 +59,20 @@ compile_mpc
 
 cd ../..
 
-pkill -f geth || true
-pkill -f python3 || true
-rm -rf /opt/hbswap/db/*
-
 bash chain-latest.sh &
 sleep 3
 
-bash setup-ssl.sh 4
+pkill -f python3 || true
+
+rm -rf /opt/hbswap/db/*
+python3 -m ratel.src.python.deploy
 
 python3 -m ratel.src.python.run 0 &
 python3 -m ratel.src.python.run 1 &
 python3 -m ratel.src.python.run 2 &
 python3 -m ratel.src.python.run 3 &
 
-python3 ratel/src/python/deploy.py
+# bash ratel/src/compile.sh
+# python3 -m ratel.src.python.hbswap.deposit
+# python3 -m ratel.src.python.hbswap.initPool
+# python3 -m ratel.src.python.hbswap.addLiquidity

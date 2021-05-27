@@ -1,7 +1,6 @@
 %option noyywrap
 
 %{
-#include <set>
 #include <string>
 #include <vector>
 #include <assert.h>
@@ -11,7 +10,7 @@ using namespace std;
 enum Phase {MONITOR, READDB, MPCINPUT, MPC, MPCOUTPUT, WRITEDB};
 int phase;
 
-bool isFuncDec, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isEmptyLine = true;
+bool isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isEmptyLine = true;
 
 int braces;
 int numInput;
@@ -20,7 +19,7 @@ int cntValueDB;
 string fileName;
 string funcName;
 string mpcFile;
-FILE *mpcFp, *pythonFp;;
+FILE *mpcFp, *pythonFp;
 int cntMPC;
 string textLine;
 string textPython, textMpc;
@@ -38,9 +37,10 @@ string tab(int repetition) {
 }
 
 void initPython() {
+    textPython += "import asyncio\n";
     textPython += "import os\n";
     textPython += "import subprocess\n";
-    textPython += "from ratel.src.python.utils import locationSharefile, prog, players, threshold, mpcPort, blsPrime, leaderHostname, sz, int_to_hex, hex_to_int\n";
+    textPython += "from ratel.src.python.utils import location_sharefile, prog, players, threshold, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input\n";
     textPython += "\n";
 
     string pythonFile = "python/" + fileName + ".py";
@@ -78,20 +78,21 @@ void finalizeMPC() {
 }
 
 void monitorEvent() {
-    string eventName = args[0];
-    textPython += "def monitor" + eventName + "(web3, db, serverID, contract, confirmation):\n";
+    textPython += "\n";
+    textPython += "async def monitor" + funcName + "(web3, db, serverID, contract, confirmation, account):\n";
     textPython += "    blkNum = web3.eth.get_block_number()\n";
     textPython += "    while True:\n";
+    textPython += "        await asyncio.sleep(5)\n";
     textPython += "        curBlkNum = web3.eth.get_block_number()\n";
     textPython += "        if curBlkNum - blkNum > confirmation:\n";
-    textPython += "            eventFilter = contract.events." + eventName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - confirmation)\n";
+    textPython += "            eventFilter = contract.events." + funcName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - confirmation)\n";
     textPython += "            logs = eventFilter.get_all_entries()\n";
     textPython += "            blkNum = curBlkNum - confirmation + 1\n";
     textPython += "            for log in logs:\n";
     textPython += "\n";
 
     int num = args.size();
-    for (int i = 1; i < num; i++) {
+    for (int i = 0; i < num; i++) {
         string arg = args[i];
         textPython += tab(4) + arg + " = log['args']['" + arg + "']\n";
     }
@@ -100,7 +101,8 @@ void monitorEvent() {
 
 void mpcInput() {
     //python
-    textPython += tab(4) + "file = locationSharefile(serverID)\n";
+    textPython += "\n";
+    textPython += tab(4) + "file = location_sharefile(serverID)\n";
     textPython += tab(4) + "with open(file, \"wb\") as f:\n";
     textPython += tab(4) + "    f.write(\n";
     numInput = args.size();
@@ -119,7 +121,7 @@ void mpcInput() {
 
     //python
     textPython += tab(4) + "env = os.environ.copy()\n";
-    textPython += tab(4) + "cmd = [prog, \'-N\', f\'\{players\}\', \'-T\', f\'\{threshold\}\', \'-p\', f\'\{serverID\}\', \'-pn\', f\'\{mpcPort()\}\', \'-P\', f\'\{blsPrime\}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
+    textPython += tab(4) + "cmd = [prog, \'-N\', f\'{players}\', \'-T\', f\'{threshold}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
     textPython += tab(4) + "task = subprocess.Popen(cmd, env=env)\n";
     textPython += tab(4) + "task.wait()\n";
     textPython += "\n";
@@ -165,13 +167,26 @@ void addText(char *yytext) {
 
 %}
 
-SPACES [ \t\r]+
+SPACE [ \t\r]+
 
 %%
 
-^func{SPACES} {
-    isFuncDec = true;
+.*import.*\n {
+    string text = string(yytext);
+    for (int i = 0; i < text.length(); i++) {
+        if (text[i] == 'i') {
+            fprintf(pythonFp, "%s", text.substr(i).c_str());
+            break;
+        }
+    }
+}
+
+^mpc{SPACE} {
+    isEvent = true;
     isArg = true;
+    phase = 0;
+    cntMPC = 0;
+    cntValueDB = 0;
 }
 
 ^.*monitorEvent\( {
@@ -208,11 +223,9 @@ SPACES [ \t\r]+
 }
 
 \( {
-    if (isFuncDec) {
+    if (isEvent) {
         funcName = arg;
-        funcName[0] = toupper(funcName[0]);
         arg = "";
-        isArg = false;
     } else {
         addText(yytext);
     }
@@ -220,7 +233,14 @@ SPACES [ \t\r]+
 
 \) {
     if (isArg) {
-        args.push_back(arg);
+        int pos = 0;
+        for (int i = 0; i < arg.length(); i++) {
+            if (arg[i] == ' ') {
+                pos = i + 1;
+                break;
+            }
+        }
+        args.push_back(arg.substr(pos));
         arg = "";
 
         if (isReadDB) {
@@ -246,9 +266,16 @@ SPACES [ \t\r]+
     }
 }
 
-,{SPACES}* {
+,{SPACE}* {
     if (isArg) {
-        args.push_back(arg);
+        int pos = 0;
+        for (int i = 0; i < arg.length(); i++) {
+            if (arg[i] == ' ') {
+                pos = i + 1;
+                break;
+            }
+        }
+        args.push_back(arg.substr(pos));
         arg = "";
     } else {
         addText(yytext);
@@ -263,6 +290,7 @@ SPACES [ \t\r]+
 \} {
     braces--;
     if (braces == 0) {
+//        addText("\n");
     } else {
         addText(yytext);
     }
@@ -307,20 +335,23 @@ SPACES [ \t\r]+
         textPython += tab(3) + textLine;
 
         isWriteDB = false;
-    } else if (!isEmptyLine && !isFuncDec) {
+    } else if (!isEmptyLine) {
         if (phase == MPCINPUT) {
             phase++;
             textMpc += textLine;
         } else if (phase == MPC) {
             textMpc += textLine;
         } else {
+            if (phase == WRITEDB) {
+                phase++;
+                textPython += "\n";
+            }
             textPython += tab(3) + textLine;
         }
     }
 
     args.clear();
     isEmptyLine = true;
-    isFuncDec = false;
 
     textLine = "";
 }
