@@ -1,25 +1,34 @@
-import json
+import asyncio
 import sys
 
 from web3 import Web3
 
-from ratel.src.python.utils import openDB, location_db
-from ratel.genfiles.python.test import monitorSecretDeposit
+from ratel.src.python.Server import Server
+from ratel.src.python.deploy import parse_contract, getAccount, preprocessing, appAddress, confirmation, url
+from ratel.src.python.utils import openDB, location_db, http_port, http_host
+from ratel.genfiles.python.test import monitorSecretDeposit, monitorInitPool, monitorAddLiquidity
 
-if __name__ == "__main__":
-    server_id = sys.argv[1]
+if __name__ == '__main__':
+    serverID = sys.argv[1]
 
-    url = 'ws://0.0.0.0:8546'
     web3 = Web3(Web3.WebsocketProvider(url))
 
-    db = openDB(location_db(server_id))
+    account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
 
-    address = '0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2'
-    f = open('ratel/genfiles/build/contracts/Test.json')
-    data = json.load(f)
-    abi = data['abi']
-    myContract = web3.eth.contract(address=address, abi=abi)
-    confirmation = 1
+    db = openDB(location_db(serverID))
 
-    monitorSecretDeposit(web3, db, server_id, myContract, confirmation)
+    abi, bytecode = parse_contract('Test')
+    appContract = web3.eth.contract(address=appAddress, abi=abi)
 
+    server = Server(
+        serverID, db, http_host, http_port + int(serverID)
+    )
+
+    loop = asyncio.get_event_loop()
+    tasks = [monitorSecretDeposit(web3, db, serverID, appContract, confirmation, account),
+             monitorInitPool(web3, db, serverID, appContract, confirmation, account),
+             monitorAddLiquidity(web3, db, serverID, appContract, confirmation, account),
+             preprocessing(db, appContract, serverID),
+             server.http_server()]
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
