@@ -13,7 +13,7 @@ url = 'ws://0.0.0.0:8546'
 ETH = '0x0000000000000000000000000000000000000000'
 tokenAddress = '0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2'
 appAddress = '0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385'
-confirmation = 5
+confirmation = 2
 
 def parse_contract(name):
     contract = json.load(open(f'ratel/genfiles/build/contracts/{name}.json'))

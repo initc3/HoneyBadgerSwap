@@ -73,12 +73,11 @@ func trade(address tokenA, address tokenB, sfix amtA, sfix amtB) {
   sfix changeA = flagBuyA * actualAmtA + flagBuyB * totalA
   sfix changeB = flagBuyA * totalB + flagBuyB * actualAmtB
 
-  poolSize[tokenA][tokenB] = poolA - changeA, poolB - changeB
-
   int orderSucceed = (flagBuyA + flagBuyB).reveal()
 
   wait(returnPriceInterval) // "wait" is a special key word of local mpc code
 
+  poolSize[tokenA][tokenB] = poolA - changeA, poolB - changeB
   secretBalance[tokenA][user] += changeA
   secretBalance[tokenB][user] += changeB
 
@@ -170,8 +169,8 @@ func removeLiquidity(address tokenA, address tokenB, sfix amt) {
   poolSize[tokenA][tokenB] -= changeA, changeB
   secretBalance[tokenA][user] += changeA
   secretBalance[tokenB][user] += changeB
-  secretBalanceLT[tokenA][tokenB][user] -= amt
-  totalSupplyLT[tokenA][tokenB] -= amt
+  secretBalanceLT[tokenA][tokenB][user] -= changeLT
+  totalSupplyLT[tokenA][tokenB] -= changeLT
 
   int zeroTotalLT = (totalSupplyLT[tokenA][tokenB] == 0).reveal()
   if zeroTotalLT == 1 {

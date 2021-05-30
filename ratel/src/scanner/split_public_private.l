@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <assert.h>
+#include <set>
 
 using namespace std;
 
@@ -24,7 +25,13 @@ bool isMpc;
 int pos;
 bool isMpcHead;
 
+string prefix;
+
 bool isSetData;
+set<string> setData;
+
+bool isAddData;
+set<string> addData;
 
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
@@ -61,6 +68,25 @@ SPACE [ \t\r]+
 ^.*set\( {
     isSetData = true;
     isArg = true;
+
+    for (int i = 0; i < strlen(yytext); i++) {
+        if (yytext[i] != ' ') {
+            prefix = string(yytext).substr(0, i - 12);
+            break;
+        }
+    }
+}
+
+^.*add\( {
+    isAddData = true;
+    isArg = true;
+
+    for (int i = 0; i < strlen(yytext); i++) {
+        if (yytext[i] != ' ') {
+            prefix = string(yytext).substr(0, i - 12);
+            break;
+        }
+    }
 }
 
 ,{SPACE}* {
@@ -92,7 +118,7 @@ SPACE [ \t\r]+
         isArg = false;
 
         if (isMpc) {
-            if (!isSetData) {
+            if (!isSetData && !isAddData) {
                 textPublic += "    event " + funcName + "(";
                 textPublicFunc += "        emit " + funcName + "(";
                 for (int i = 0; i < args.size(); i++) {
@@ -197,42 +223,47 @@ SPACE [ \t\r]+
 
                 string tmp = varName;
                 tmp[0] = toupper(tmp[0]);
-                string valueVarName = "value" + tmp;
-                string countVarName = "count" + tmp;
 
-                string value = removeType(args[1]);
-                string parameter = "";
-                for (int i = 2; i < args.size(); i++) {
-                    parameter += "[" + removeType(args[i]) + "]";
-                }
+                if (setData.find(tmp) == setData.end()) {
+                    setData.insert(tmp);
 
-                string textTmp;
-                textTmp += "\n";
-                textTmp += "    function set" + tmp + "(";
-                for (int i = 1; i < args.size(); i++) {
-                    if (i > 1) {
-                        textTmp += ", ";
+                    string valueVarName = "value" + tmp;
+                    string countVarName = "count" + tmp;
+
+                    string value = removeType(args[1]);
+                    string parameter = "";
+                    for (int i = 2; i < args.size(); i++) {
+                        parameter += "[" + removeType(args[i]) + "]";
                     }
-                    textTmp += args[i];
-                }
-                textTmp += ") public {\n";
 
-                textTmp += "        address server = msg.sender;\n";
-                textTmp += "        require(isServer[server]);\n";
-                textTmp += "        if (bytes(" + valueVarName + "[server]).length > 0) {\n";
-                textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
-                textTmp += "        }\n";
-                textTmp += "        " + valueVarName + "[server] = " + value + ";\n";
-                textTmp += "        " + countVarName + "[" + valueVarName + "[server]]++;\n";
-                textTmp += "        if (" + countVarName + "[" + value + "] > T) {\n";
-                textTmp += "            " + varName + parameter + " = " + value + ";\n";
-                textTmp += "        }\n";
-                textTmp += "    }\n";
-                textTmp += textPublicFunc;
-                textPublicFunc = textTmp;
+                    string textTmp;
+                    textTmp += "\n";
+                    textTmp += "    function set" + tmp + "(";
+                    for (int i = 1; i < args.size(); i++) {
+                        if (i > 1) {
+                            textTmp += ", ";
+                        }
+                        textTmp += args[i];
+                    }
+                    textTmp += ") public {\n";
+
+                    textTmp += "        address server = msg.sender;\n";
+                    textTmp += "        require(isServer[server]);\n";
+                    textTmp += "        if (bytes(" + valueVarName + "[server]).length > 0) {\n";
+                    textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
+                    textTmp += "        }\n";
+                    textTmp += "        " + valueVarName + "[server] = " + value + ";\n";
+                    textTmp += "        " + countVarName + "[" + valueVarName + "[server]]++;\n";
+                    textTmp += "        if (" + countVarName + "[" + value + "] > T) {\n";
+                    textTmp += "            " + varName + parameter + " = " + value + ";\n";
+                    textTmp += "        }\n";
+                    textTmp += "    }\n";
+                    textTmp += textPublicFunc;
+                    textPublicFunc = textTmp;
+                }
 
                 textPrivate += "\n";
-                textPrivate += "    tx = contract.functions.set" + tmp + "(";
+                textPrivate += prefix + "    tx = contract.functions.set" + tmp + "(";
                 for (int i = 1; i < args.size(); i++) {
                     if (i > 1) {
                         textPrivate += ", ";
@@ -240,10 +271,10 @@ SPACE [ \t\r]+
                     textPrivate += removeType(args[i]);
                 }
                 textPrivate += ").buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})\n";
-                textPrivate += "    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)\n";
-                textPrivate += "    web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
-                textPrivate += "    web3.eth.wait_for_transaction_receipt(signedTx.hash)\n";
-                textPrivate += "    print(contract.functions." + varName + "(";
+                textPrivate += prefix + "    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)\n";
+                textPrivate += prefix + "    web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
+                textPrivate += prefix + "    web3.eth.wait_for_transaction_receipt(signedTx.hash)\n";
+                textPrivate += prefix + "    print(contract.functions." + varName + "(";
 
                 for (int i = 2; i < args.size(); i++) {
                     if (i > 2) {
@@ -252,10 +283,78 @@ SPACE [ \t\r]+
                     textPrivate += removeType(args[i]);
                 }
                 textPrivate += ").call())\n";
+                textPrivate += "\n";
 
                 isSetData = false;
                 args.clear();
-            } else textPrivate += (textLine.length() > 8 ? textLine.substr(8): textLine);
+            } else if (isAddData) {
+                string varName = args[0];
+                string opName = removeType(args[1]);
+                opName = opName.substr(0, opName.length() - 3);
+
+                if (addData.find(opName) == addData.end()) {
+                  addData.insert(opName);
+
+                  string value = removeType(args[2]);
+                  string parameter = "";
+                  for (int i = 3; i < args.size(); i++) {
+                      parameter += "[" + removeType(args[i]) + "]";
+                  }
+
+                  string textTmp;
+                  textTmp += "\n";
+                  textTmp += "    function " + opName + "Add(";
+                  for (int i = 1; i < args.size(); i++) {
+                      if (i > 1) {
+                          textTmp += ", ";
+                      }
+                      textTmp += args[i];
+                  }
+                  textTmp += ") public {\n";
+
+                  textTmp += "        address server = msg.sender;\n";
+                  textTmp += "        require(isServer[server]);\n";
+                  textTmp += "        require(" + opName + "Value[server][" + opName + "Seq] == 0);\n";
+                  textTmp += "        require(" + opName + "Finish[" + opName + "Seq] == false);\n";
+                  textTmp += "        " + opName + "Value[server][" + opName + "Seq] = " + value + ";\n";
+                  textTmp += "        " + opName + "Count[" + opName + "Seq][" + value + "]++;\n";
+                  textTmp += "        if (" + opName + "Count[" + opName + "Seq][" + value + "] > T) {\n";
+                  textTmp += "            " + opName + "Finish[" + opName + "Seq] = true;\n";
+                  textTmp += "            " + varName + parameter + " += " + value + ";\n";
+                  textTmp += "        }\n";
+                  textTmp += "    }\n";
+                  textTmp += textPublicFunc;
+                  textPublicFunc = textTmp;
+                }
+
+                textPrivate += "\n";
+                textPrivate += prefix + "    tx = contract.functions." + opName + "Add(";
+                for (int i = 1; i < args.size(); i++) {
+                  if (i > 1) {
+                      textPrivate += ", ";
+                  }
+                  textPrivate += removeType(args[i]);
+                }
+                textPrivate += prefix + ").buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})\n";
+                textPrivate += prefix + "    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)\n";
+                textPrivate += prefix + "    web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
+                textPrivate += prefix + "    web3.eth.wait_for_transaction_receipt(signedTx.hash)\n";
+                textPrivate += prefix + "    print(contract.functions." + varName + "(";
+
+                for (int i = 2; i < args.size(); i++) {
+                  if (i > 2) {
+                      textPrivate += ", ";
+                  }
+                  textPrivate += removeType(args[i]);
+                }
+                textPrivate += ").call())\n";
+                textPrivate += "\n";
+
+                isAddData = false;
+                args.clear();
+            } else {
+                textPrivate += (textLine.length() > 8 ? textLine.substr(8): textLine);
+            }
             if (braces == pos) {
                 isMpc = false;
             }
