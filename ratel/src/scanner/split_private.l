@@ -40,7 +40,7 @@ void initPython() {
     textPython += "import asyncio\n";
     textPython += "import os\n";
     textPython += "import subprocess\n";
-    textPython += "from ratel.src.python.utils import location_sharefile, prog, players, threshold, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input\n";
+    textPython += "from ratel.src.python.utils import location_sharefile, prog, players, threshold, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
     textPython += "\n";
 
     string pythonFile = "python/" + fileName + ".py";
@@ -299,7 +299,7 @@ SPACE [ \t\r]+
 \n {
     textLine += "\n";
 
-//    printf("textLine:%sphase:%d\n", textLine.c_str(), phase);
+//    printf("phase:%d-textLine:%s", phase, textLine.c_str());
 
     if (isEvent) {
         assert(phase == MONITOR);
@@ -342,10 +342,6 @@ SPACE [ \t\r]+
         } else if (phase == MPC) {
             textMpc += textLine;
         } else {
-            if (phase == WRITEDB) {
-                phase++;
-                textPython += "\n";
-            }
             textPython += tab(3) + textLine;
         }
     }

@@ -5,16 +5,16 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
 from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
-from ratel.src.python.utils import fp
+from ratel.src.python.utils import fp, blsPrime
 
 
-def addLiquidity(appContract, tokenA, tokenB, amtA, amtB):
+def trade(appContract, tokenA, tokenB, amtA, amtB):
     amtA = int(amtA * fp)
     amtB = int(amtB * fp)
     idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
-    maskedAmtA, maskedAmtB = amtA + maskA, amtB + maskB
-    tx_hash = appContract.functions.addLiquidity(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
+    maskedAmtA, maskedAmtB = (amtA + maskA) % blsPrime, (amtB + maskB) % blsPrime
+    tx_hash = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
 if __name__=='__main__':
@@ -26,4 +26,4 @@ if __name__=='__main__':
     abi, bytecode = parse_contract('Test')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    addLiquidity(appContract, ETH, tokenAddress, 1, 1)
+    trade(appContract, ETH, tokenAddress, 0.01, -0.1)

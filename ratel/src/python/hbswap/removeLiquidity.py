@@ -8,13 +8,13 @@ from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddres
 from ratel.src.python.utils import fp
 
 
-def addLiquidity(appContract, tokenA, tokenB, amtA, amtB):
-    amtA = int(amtA * fp)
-    amtB = int(amtB * fp)
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
-    maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
-    maskedAmtA, maskedAmtB = amtA + maskA, amtB + maskB
-    tx_hash = appContract.functions.addLiquidity(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
+def removeLiquidity(appContract, tokenA, tokenB, amt):
+    amt = int(amt * fp)
+    idx = reserveInput(web3, appContract, 1)[0]
+    print(idx)
+    mask = asyncio.run(get_inputmasks(f'{idx}'))[0]
+    maskedAmt = amt + mask
+    tx_hash = appContract.functions.removeLiquidity(tokenA, tokenB, idx, maskedAmt).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
 if __name__=='__main__':
@@ -26,4 +26,4 @@ if __name__=='__main__':
     abi, bytecode = parse_contract('Test')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    addLiquidity(appContract, ETH, tokenAddress, 1, 1)
+    removeLiquidity(appContract, ETH, tokenAddress, 0.2)

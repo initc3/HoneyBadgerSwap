@@ -51,7 +51,6 @@ parse() {
 cd ratel/genfiles
 
 compile_flexes
-
 parse test
 
 compile_sol
@@ -74,5 +73,8 @@ python3 -m ratel.src.python.run 3 &
 
 # bash ratel/src/compile.sh
 # python3 -m ratel.src.python.hbswap.deposit
+# python3 -m ratel.src.python.hbswap.withdraw
 # python3 -m ratel.src.python.hbswap.initPool
 # python3 -m ratel.src.python.hbswap.addLiquidity
+# python3 -m ratel.src.python.hbswap.removeLiquidity
+# python3 -m ratel.src.python.hbswap.trade
