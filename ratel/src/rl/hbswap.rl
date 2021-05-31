@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract Test {
+contract Hbswap {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 

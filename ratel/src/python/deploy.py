@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import subprocess
+import sys
 
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
@@ -60,12 +61,14 @@ async def preprocessing(db, contract, serverID):
         await asyncio.sleep(60)
 
 if __name__=='__main__':
+    appName = sys.argv[1]
+
     web3 = Web3(Web3.WebsocketProvider(url))
 
     web3.eth.defaultAccount = web3.eth.accounts[0]
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-    abi, bytecode = parse_contract('HbSwapToken')
+    abi, bytecode = parse_contract('Token')
     tx_hash = web3.eth.contract(
         abi=abi,
         bytecode=bytecode).constructor().transact()
@@ -74,7 +77,7 @@ if __name__=='__main__':
     print(f'Deployed to: {tokenAddress}\n')
     tokenContract = web3.eth.contract(address=tokenAddress, abi=abi)
 
-    abi, bytecode = parse_contract('Test')
+    abi, bytecode = parse_contract(appName)
     servers = []
     for serverID in range(4):
         account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')

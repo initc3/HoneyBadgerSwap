@@ -23,7 +23,7 @@ if __name__=='__main__':
     web3.eth.defaultAccount = web3.eth.accounts[0]
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-    abi, bytecode = parse_contract('Test')
+    abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
     trade(appContract, ETH, tokenAddress, 0.01, -0.1)

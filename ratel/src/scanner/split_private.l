@@ -7,9 +7,6 @@
 
 using namespace std;
 
-enum Phase {MONITOR, READDB, MPCINPUT, MPC, MPCOUTPUT, WRITEDB};
-int phase;
-
 bool isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isEmptyLine = true;
 
 int braces;
@@ -20,7 +17,10 @@ string fileName;
 string funcName;
 string mpcFile;
 FILE *mpcFp, *pythonFp;
+
 int cntMPC;
+bool isMPC;
+
 string textLine;
 string textPython, textMpc;
 
@@ -28,12 +28,30 @@ bool isArg;
 string arg;
 vector<string> args;
 
+string prefix;
+
 string tab(int repetition) {
     string ret = "";
     for (int i = 0; i < repetition; i++) {
         ret += "    ";
     }
     return ret;
+}
+
+string removeSpace(string text) {
+    for (int i = 0; i < text.length(); i++) {
+        if (text[i] != ' ') {
+            return text.substr(i);
+        }
+    }
+}
+
+string getPrefix(string text) {
+    for (int i = 0; i < text.length(); i++) {
+        if (text[i] != ' ') {
+            return text.substr(0, i - 4);
+        }
+    }
 }
 
 void initPython() {
@@ -102,14 +120,14 @@ void monitorEvent() {
 void mpcInput() {
     //python
     textPython += "\n";
-    textPython += tab(4) + "file = location_sharefile(serverID)\n";
-    textPython += tab(4) + "with open(file, \"wb\") as f:\n";
-    textPython += tab(4) + "    f.write(\n";
+    textPython += prefix + "file = location_sharefile(serverID)\n";
+    textPython += prefix + "with open(file, \"wb\") as f:\n";
+    textPython += prefix + "    f.write(\n";
     numInput = args.size();
     for (int i = 0; i < numInput; i++) {
-        textPython += tab(6) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + args[i] + ")\n";
+        textPython += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + args[i] + ")\n";
     }
-    textPython += tab(4) + "    )\n";
+    textPython += prefix + "    )\n";
     textPython += "\n";
 
     //mpc
@@ -120,10 +138,10 @@ void mpcInput() {
     textMpc += "\n";
 
     //python
-    textPython += tab(4) + "env = os.environ.copy()\n";
-    textPython += tab(4) + "cmd = [prog, \'-N\', f\'{players}\', \'-T\', f\'{threshold}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
-    textPython += tab(4) + "task = subprocess.Popen(cmd, env=env)\n";
-    textPython += tab(4) + "task.wait()\n";
+    textPython += prefix + "env = os.environ.copy()\n";
+    textPython += prefix + "cmd = [prog, \'-N\', f\'{players}\', \'-T\', f\'{threshold}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
+    textPython += prefix + "task = subprocess.Popen(cmd, env=env)\n";
+    textPython += prefix + "task.wait()\n";
     textPython += "\n";
 }
 
@@ -139,11 +157,11 @@ void mpcOutput() {
     finalizeMPC();
 
     //python
-    textPython += tab(4) + "input_argeter_num = " + to_string(numInput) + "\n";
-    textPython += tab(4) + "with open(file, \"rb\") as f:\n";
-    textPython += tab(4) + "    f.seek(input_argeter_num * sz)\n";
+    textPython += prefix + "input_argeter_num = " + to_string(numInput) + "\n";
+    textPython += prefix + "with open(file, \"rb\") as f:\n";
+    textPython += prefix + "    f.seek(input_argeter_num * sz)\n";
     for (int i = 0; i < num; i++) {
-        textPython += tab(5) + args[i] + " = hex_to_int(f.read(sz))\n";
+        textPython += prefix + tab(1) + args[i] + " = hex_to_int(f.read(sz))\n";
     }
     textPython += "\n";
 }
@@ -184,7 +202,6 @@ SPACE [ \t\r]+
 ^mpc{SPACE} {
     isEvent = true;
     isArg = true;
-    phase = 0;
     cntMPC = 0;
     cntValueDB = 0;
 }
@@ -200,6 +217,7 @@ SPACE [ \t\r]+
     isReadDB = true;
     isArg = true;
 
+    prefix = getPrefix(text);
     textLine += tab(3) + text.substr(0, text.length() - 7);
 }
 
@@ -209,12 +227,14 @@ SPACE [ \t\r]+
     isWriteDB = true;
     isArg = true;
 
+    prefix = getPrefix(text);
     textLine += text.substr(0, text.length() - 8);
 }
 
 ^.*mpcInput\( {
     isMpcInput = true;
     isArg = true;
+    prefix = getPrefix(string(yytext)) + tab(4);
 }
 
 ^.*mpcOutput\( {
@@ -248,12 +268,14 @@ SPACE [ \t\r]+
             
             string textTmp = textLine;
 
+            prefix += tab(4);
+
             string value = "value" + to_string(++cntValueDB);
             
-            textLine = tab(4) + "try:\n";
-            textLine += tab(4) + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
-            textLine += tab(4) + "except KeyError:\n";
-            textLine += tab(4) + "    " + value + " = bytes(0)\n";
+            textLine = prefix + "try:\n";
+            textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
+            textLine += prefix + "except KeyError:\n";
+            textLine += prefix + "    " + value + " = bytes(0)\n";
             textLine += textTmp + value;
         } else if (isWriteDB) {
             assert(args.size() == 2);
@@ -299,48 +321,33 @@ SPACE [ \t\r]+
 \n {
     textLine += "\n";
 
-//    printf("phase:%d-textLine:%s", phase, textLine.c_str());
+//    printf("textLine:%s", textLine.c_str());
 
     if (isEvent) {
-        assert(phase == MONITOR);
-        phase++;
-
         monitorEvent();
 
         isEvent = false;
     } else if (isReadDB) {
-        assert(phase == READDB);
-
         textPython += textLine;
 
         isReadDB = false;
     } else if (isMpcInput) {
-        assert(phase == READDB);
-        phase++;
-
+        isMPC = true;
         mpcInput();
 
         isMpcInput = false;
     } else if (isMpcOutput) {
-        assert(phase == MPC);
-        phase++;
-
         mpcOutput();
+        isMPC = false;
 
         isMpcOutput = false;
     } else if (isWriteDB) {
-        assert(phase == MPCOUTPUT || phase == WRITEDB);
-        if (phase == MPCOUTPUT) phase++;
-
         textPython += tab(3) + textLine;
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
-        if (phase == MPCINPUT) {
-            phase++;
-            textMpc += textLine;
-        } else if (phase == MPC) {
-            textMpc += textLine;
+        if (isMPC) {
+            textMpc += tab(1) + removeSpace(textLine);
         } else {
             textPython += tab(3) + textLine;
         }
