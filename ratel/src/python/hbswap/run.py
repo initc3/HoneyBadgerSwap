@@ -6,7 +6,7 @@ from web3 import Web3
 from ratel.src.python.Server import Server
 from ratel.src.python.deploy import parse_contract, getAccount, preprocessing, appAddress, confirmation, url
 from ratel.src.python.utils import openDB, location_db, http_port, http_host
-from ratel.genfiles.python.test import monitorSecretDeposit, monitorInitPool, monitorAddLiquidity, monitorTrade, \
+from ratel.genfiles.python.hbswap import monitorSecretDeposit, monitorInitPool, monitorAddLiquidity, monitorTrade, \
     monitorRemoveLiquidity, monitorSecretWithdraw
 
 if __name__ == '__main__':
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     db = openDB(location_db(serverID))
 
-    abi, bytecode = parse_contract('Test')
+    abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
     server = Server(
