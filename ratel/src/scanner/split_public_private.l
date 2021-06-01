@@ -113,7 +113,7 @@ SPACE [ \t\r]+
 
 \) {
     if (isArg) {
-        args.push_back(arg);
+        if (arg.length()) args.push_back(arg);
         arg = "";
         isArg = false;
 
@@ -201,7 +201,7 @@ SPACE [ \t\r]+
 \n {
     textLine += string(yytext);
 
-//    printf("textLine:%s\n", textLine.c_str());
+//    printf("textLine:%s", textLine.c_str());
 
     if (isFunc) {
         if (isMpc) {
@@ -231,6 +231,7 @@ SPACE [ \t\r]+
                     string countVarName = "count" + tmp;
 
                     string value = removeType(args[1]);
+                    string type = args[1].substr(0, args[1].length() - value.length() - 1);
                     string parameter = "";
                     for (int i = 2; i < args.size(); i++) {
                         parameter += "[" + removeType(args[i]) + "]";
@@ -249,9 +250,19 @@ SPACE [ \t\r]+
 
                     textTmp += "        address server = msg.sender;\n";
                     textTmp += "        require(isServer[server]);\n";
-                    textTmp += "        if (bytes(" + valueVarName + "[server]).length > 0) {\n";
-                    textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
-                    textTmp += "        }\n";
+                    if (type == "string memory") {
+                        textTmp += "        if (bytes(" + valueVarName + "[server]).length > 0) {\n";
+                        textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
+                        textTmp += "        }\n";
+                    } else if (type == "uint") {
+                        textTmp += "        if (" + valueVarName + "[server] != 0) {\n";
+                        textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
+                        textTmp += "        }\n";
+                    } else if (type == "address") {
+                        textTmp += "        if (" + valueVarName + "[server] != address(0)) {\n";
+                        textTmp += "            " + countVarName + "[" + valueVarName + "[server]]--;\n";
+                        textTmp += "        }\n";
+                    }
                     textTmp += "        " + valueVarName + "[server] = " + value + ";\n";
                     textTmp += "        " + countVarName + "[" + valueVarName + "[server]]++;\n";
                     textTmp += "        if (" + countVarName + "[" + value + "] > T) {\n";
@@ -381,6 +392,7 @@ SPACE [ \t\r]+
         textPublic += textLine;
     }
 
+//    printf("-\n");
     textLine = "";
 }
 %%
