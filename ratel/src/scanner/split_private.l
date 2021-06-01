@@ -157,9 +157,9 @@ void mpcOutput() {
     finalizeMPC();
 
     //python
-    textPython += prefix + "input_argeter_num = " + to_string(numInput) + "\n";
+    textPython += prefix + "input_arg_num = " + to_string(numInput) + "\n";
     textPython += prefix + "with open(file, \"rb\") as f:\n";
-    textPython += prefix + "    f.seek(input_argeter_num * sz)\n";
+    textPython += prefix + "    f.seek(input_arg_num * sz)\n";
     for (int i = 0; i < num; i++) {
         textPython += prefix + tab(1) + args[i] + " = hex_to_int(f.read(sz))\n";
     }

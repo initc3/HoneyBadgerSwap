@@ -27,10 +27,14 @@ def getAccount(web3, keystoreDir):
             privateKey = web3.eth.account.decrypt(encryptedKey, '')
             return web3.eth.account.privateKeyToAccount(privateKey)
 
-def reserveInput(web3, appContract, num):
-    tx_hash = appContract.functions.reserveInput(num).transact()
-    web3.eth.wait_for_transaction_receipt(tx_hash)
-    receipt = web3.eth.get_transaction_receipt(tx_hash)
+def reserveInput(web3, appContract, num, account):
+    # tx_hash = appContract.functions.reserveInput(num).transact()
+    # web3.eth.wait_for_transaction_receipt(tx_hash)
+    tx = appContract.functions.reserveInput(num).buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})
+    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
+    web3.eth.send_raw_transaction(signedTx.rawTransaction)
+    web3.eth.wait_for_transaction_receipt(signedTx.hash)
+    receipt = web3.eth.get_transaction_receipt(signedTx.hash)
     log = appContract.events.InputMask().processReceipt(receipt)
     return log[0]['args']['inpusMaskIndexes']
 

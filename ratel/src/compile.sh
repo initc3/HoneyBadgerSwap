@@ -48,11 +48,19 @@ parse() {
 #mkdir -p ratel/genfiles/python
 #mkdir -p ratel/genfiles/mpc
 
+rm ratel/genfiles/mpc/* || true
+rm Programs/Source/* || true
+rm ratel/genfiles/contracts/* || true
+
 cd ratel/genfiles
 
 compile_flexes
-#parse hbswap
+
+parse hbswap
 parse volumeMatching
+parse rockPaperScissors
+parse fabcar
+parse review
 
 compile_sol
 compile_mpc
