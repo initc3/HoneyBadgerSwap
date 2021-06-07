@@ -3,7 +3,7 @@ import time
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-from ratel.src.python.deploy import parse_contract, tokenAddress, appAddress, url
+from ratel.src.python.deploy import parse_contract, tokenAddress, appAddress, url, ETH
 from ratel.src.python.utils import fp
 
 
@@ -16,13 +16,10 @@ def withdraw(appContract, token, amt):
 
     tx_hash = appContract.functions.secretWithdraw(token, amt).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
-    # receipt = web3.eth.get_transaction_receipt(tx_hash)
-    # log = appContract.events.SecretWithdraw().processReceipt(receipt)
-    # print(log)
 
     while True:
         balance = appContract.functions.publicBalance(token, web3.eth.defaultAccount).call()
-        print('balance', balance)
+        print('!!!! balance', balance)
         if balance >= amt:
             break
         time.sleep(2)
@@ -30,7 +27,7 @@ def withdraw(appContract, token, amt):
     tx_hash = appContract.functions.publicWithdraw(token, amt).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
     balance = appContract.functions.publicBalance(token, web3.eth.defaultAccount).call()
-    print('after balance', balance)
+    print('!!!! after balance', balance)
 
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
@@ -41,5 +38,5 @@ if __name__=='__main__':
     abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    # withdraw(appContract, ETH, 1)
+    withdraw(appContract, ETH, 1)
     withdraw(appContract, tokenAddress, 1)

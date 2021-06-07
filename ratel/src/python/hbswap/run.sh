@@ -6,7 +6,7 @@ sleep 3
 pkill -f python3 || true
 
 rm -rf /opt/hbswap/db/*
-python3 -m ratel.src.python.hbswap.deploy
+python3 -m ratel.src.python.deploy hbswap
 
 python3 -m ratel.src.python.hbswap.run 0 &
 python3 -m ratel.src.python.hbswap.run 1 &

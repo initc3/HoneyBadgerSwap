@@ -4,7 +4,6 @@ from web3.middleware import geth_poa_middleware
 from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH
 from ratel.src.python.utils import fp
 
-
 def initPool(appContract, tokenA, tokenB, amtA, amtB):
     tx_hash = appContract.functions.initPool(tokenA, tokenB, int(amtA * fp), int(amtB * fp)).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)

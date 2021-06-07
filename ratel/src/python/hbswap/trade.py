@@ -4,14 +4,13 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
+from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput, getAccount
 from ratel.src.python.utils import fp, blsPrime
 
-
-def trade(appContract, tokenA, tokenB, amtA, amtB):
+def trade(appContract, tokenA, tokenB, amtA, amtB, account):
     amtA = int(amtA * fp)
     amtB = int(amtB * fp)
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
+    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = (amtA + maskA) % blsPrime, (amtB + maskB) % blsPrime
     tx_hash = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
@@ -26,4 +25,5 @@ if __name__=='__main__':
     abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    trade(appContract, ETH, tokenAddress, 0.01, -0.1)
+    account = getAccount(web3, f'/opt/poa/keystore/server_0/')
+    trade(appContract, ETH, tokenAddress, 0.01, -0.1, account)

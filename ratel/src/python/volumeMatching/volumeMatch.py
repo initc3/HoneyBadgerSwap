@@ -1,9 +1,7 @@
-import asyncio
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
+from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH
 from ratel.src.python.utils import fp, blsPrime
 
 contract_name = 'VolumeMatching'
