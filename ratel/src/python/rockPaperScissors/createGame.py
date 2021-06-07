@@ -5,13 +5,12 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
-from ratel.src.python.utils import fp, blsPrime
+from ratel.src.python.deploy import url, parse_contract, appAddress, reserveInput, getAccount
 
 contract_name = 'rockPaperScissors'
 
-def createGame(appContract, value):
-    idx = reserveInput(web3, appContract, 1)[0]
+def createGame(appContract, value, account):
+    idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(f'{idx}'))[0]
     maskedValue = value + mask
     tx_hash = appContract.functions.createGame(idx, maskedValue).transact()
@@ -26,8 +25,8 @@ def createGame(appContract, value):
         if status == 1:
             return gameId
 
-def joinGame(appContract, gameId, value):
-    idx = reserveInput(web3, appContract, 1)[0]
+def joinGame(appContract, gameId, value, account):
+    idx = reserveInput(web3, appContract, 1, account)[0]
     print(idx)
     mask = asyncio.run(get_inputmasks(f'{idx}'))[0]
     maskedValue = value + mask
@@ -43,6 +42,13 @@ def startRecon(appContract, gameId):
     tx_hash = appContract.functions.startRecon(gameId).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
+    while True:
+        winner = appContract.functions.winners(gameId).call()
+        print('!!!! winner', winner)
+        if winner != '':
+            break
+        time.sleep(1)
+
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
 
@@ -52,6 +58,40 @@ if __name__=='__main__':
     abi, bytecode = parse_contract(contract_name)
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    gameId = createGame(appContract, 1)
-    joinGame(appContract, gameId, 1)
+    account = getAccount(web3, f'/opt/poa/keystore/server_0/')
+
+    gameId = createGame(appContract, 1, account)
+    joinGame(appContract, gameId, 1, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 1, account)
+    joinGame(appContract, gameId, 2, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 1, account)
+    joinGame(appContract, gameId, 3, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 2, account)
+    joinGame(appContract, gameId, 1, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 2, account)
+    joinGame(appContract, gameId, 2, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 2, account)
+    joinGame(appContract, gameId, 3, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 3, account)
+    joinGame(appContract, gameId, 1, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 3, account)
+    joinGame(appContract, gameId, 2, account)
+    startRecon(appContract, gameId)
+
+    gameId = createGame(appContract, 3, account)
+    joinGame(appContract, gameId, 3, account)
     startRecon(appContract, gameId)

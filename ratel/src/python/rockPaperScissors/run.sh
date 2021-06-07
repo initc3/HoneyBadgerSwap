@@ -15,5 +15,3 @@ python3 -m ratel.src.python.rockPaperScissors.run 3 &
 
 # bash ratel/src/python/rockPaperScissors/run.sh
 # python3 -m ratel.src.python.rockPaperScissors.createGame
-# python3 -m ratel.src.python.rockPaperScissors.joinGame
-# python3 -m ratel.src.python.rockPaperScissors.startRecon

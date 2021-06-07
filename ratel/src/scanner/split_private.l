@@ -30,6 +30,22 @@ vector<string> args;
 
 string prefix;
 
+string removeType(string st) {
+    for (int i = st.length() - 1; i >= 0; i--) {
+        if (st[i] == ' ') {
+            return st.substr(i + 1);
+        }
+    }
+}
+
+string getType(string st) {
+    for (int i = st.length() - 1; i >= 0; i--) {
+        if (st[i] == ' ') {
+            return st.substr(0, i);
+        }
+    }
+}
+
 string tab(int repetition) {
     string ret = "";
     for (int i = 0; i < repetition; i++) {
@@ -49,12 +65,13 @@ string removeSpace(string text) {
 string getPrefix(string text) {
     for (int i = 0; i < text.length(); i++) {
         if (text[i] != ' ') {
-            return text.substr(0, i - 4);
+            return text.substr(0, i);
         }
     }
 }
 
 void initPython() {
+    textPython += "import ast\n";
     textPython += "import asyncio\n";
     textPython += "import os\n";
     textPython += "import subprocess\n";
@@ -74,6 +91,8 @@ void initMPC() {
     mpcFile = "mpc/" + fileName + funcName + to_string(++cntMPC) + ".mpc";
     mpcFp = fopen(mpcFile.c_str(), "w");
 
+    textMpc += "bit_length = 212\n";
+    textMpc += "\n";
 
     textMpc += "def read_sint(idx):\n";
     textMpc += "    start = regint(idx * 32)\n";
@@ -117,6 +136,54 @@ void monitorEvent() {
     textPython += "\n";
 }
 
+void readDB() {
+    string textTmp = textLine;
+
+    string value = "value" + to_string(++cntValueDB);
+
+    textLine = prefix + "try:\n";
+    textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
+    textLine += prefix + "except KeyError:\n";
+    textLine += prefix + "    " + value + " = bytes(0)\n";
+    if (args[1] == "int") {
+        textLine += prefix + value + " = int.from_bytes(" + value + ", 'big')\n";
+    } else if (args[1] == "list") {
+        textLine += prefix + "try:\n";
+        textLine += prefix + "    " + value + " = " + value + ".decode(encoding='utf-8')\n";
+        textLine += prefix + "    " + value + " = list(ast.literal_eval(" + value + "))\n";
+        textLine += prefix + "except:\n";
+        textLine += prefix + "    " + value + " = []\n";
+    } else if (args[1] == "dict") {
+        textLine += prefix + "try:\n";
+        textLine += prefix + "    " + value + " = " + value + ".decode(encoding='utf-8')\n";
+        textLine += prefix + "    " + value + " = dict(ast.literal_eval(" + value + "))\n";
+        textLine += prefix + "except:\n";
+        textLine += prefix + "    " + value + " = []\n";
+    } else {
+        assert(0);
+    }
+    textLine += textTmp + value;
+}
+
+void writeDB() {
+    if (args[2] == "int") {
+        string key = args[0];
+        string value = args[1];
+        textLine += tab(3) + "db.Put(" + key + ".encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
+    } else if (args[2] == "list" || args[2] == "dict") {
+        string key = args[0];
+        string value = args[1];
+        string textTmp;
+
+        textTmp = prefix + value + " = str(" + value + ")\n";
+        textTmp += prefix + value + " = bytes(" + value + ", encoding='utf-8')\n";
+        textLine += tab(3) + "db.Put(" + key + ".encode(), " + value + ")";
+        textLine = textTmp + textLine;
+    } else {
+        assert(0);
+    }
+}
+
 void mpcInput() {
     //python
     textPython += "\n";
@@ -125,7 +192,7 @@ void mpcInput() {
     textPython += prefix + "    f.write(\n";
     numInput = args.size();
     for (int i = 0; i < numInput; i++) {
-        textPython += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + args[i] + ")\n";
+        textPython += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
     }
     textPython += prefix + "    )\n";
     textPython += "\n";
@@ -133,7 +200,14 @@ void mpcInput() {
     //mpc
     initMPC();
     for (int i = 0; i < numInput; i++) {
-        textMpc += tab(1) + args[i] + " = read_sint(" + to_string(i) + ")\n";
+        string varType = getType(args[i]);
+        string varName = removeType(args[i]);
+        if (varType == "sint") {
+            textMpc += tab(1) + varName + " = read_sint(" + to_string(i) + ")\n";
+        } else {
+            assert(varType == "sfix");
+            textMpc += tab(1) + varName + " = sfix._new(read_sint(" + to_string(i) + "))\n";
+        }
     }
     textMpc += "\n";
 
@@ -150,7 +224,18 @@ void mpcOutput() {
     textMpc += "\n";
     int num = args.size();
     for (int i = 0; i < num; i++) {
-        textMpc += tab(1) + "writesharestofile(" + args[i] + ")\n";
+        string varType = getType(args[i]);
+        string varName = removeType(args[i]);
+        if (varType == "sfix") {
+            textMpc += tab(1) + varName + " = " + varName + ".v\n";
+        } else if (varType == "cint") {
+            textMpc += tab(1) + varName + " = sint(" + varName + ")\n";
+        } else if (varType == "cfix") {
+            textMpc += tab(1) + varName + " = sint(" + varName + ".v)\n";
+        } else {
+            assert(varType == "sint");
+        }
+        textMpc += tab(1) + "writesharestofile(" + varName + ")\n";
     }
     textMpc += "\n";
 
@@ -161,7 +246,7 @@ void mpcOutput() {
     textPython += prefix + "with open(file, \"rb\") as f:\n";
     textPython += prefix + "    f.seek(input_arg_num * sz)\n";
     for (int i = 0; i < num; i++) {
-        textPython += prefix + tab(1) + args[i] + " = hex_to_int(f.read(sz))\n";
+        textPython += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
     textPython += "\n";
 }
@@ -212,29 +297,28 @@ SPACE [ \t\r]+
 }
 
 ^.*readDB\( {
-    string text = string(yytext);
-
     isReadDB = true;
     isArg = true;
 
-    prefix = getPrefix(text);
+    string text = string(yytext);
+    prefix = getPrefix(text) + tab(3);
     textLine += tab(3) + text.substr(0, text.length() - 7);
 }
 
 ^.*writeDB\( {
-    string text = string(yytext);
-
     isWriteDB = true;
     isArg = true;
 
-    prefix = getPrefix(text);
+    string text = string(yytext);
+    prefix = getPrefix(text) + tab(3);
     textLine += text.substr(0, text.length() - 8);
 }
 
 ^.*mpcInput\( {
     isMpcInput = true;
     isArg = true;
-    prefix = getPrefix(string(yytext)) + tab(4);
+
+    prefix = getPrefix(string(yytext)) + tab(3);
 }
 
 ^.*mpcOutput\( {
@@ -253,33 +337,15 @@ SPACE [ \t\r]+
 
 \) {
     if (isArg) {
-        int pos = 0;
-        for (int i = 0; i < arg.length(); i++) {
-            if (arg[i] == ' ') {
-                pos = i + 1;
-                break;
-            }
-        }
-        args.push_back(arg.substr(pos));
+        args.push_back(arg);
         arg = "";
 
         if (isReadDB) {
-            assert(args.size() == 1);
-            
-            string textTmp = textLine;
-
-            prefix += tab(4);
-
-            string value = "value" + to_string(++cntValueDB);
-            
-            textLine = prefix + "try:\n";
-            textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
-            textLine += prefix + "except KeyError:\n";
-            textLine += prefix + "    " + value + " = bytes(0)\n";
-            textLine += textTmp + value;
-        } else if (isWriteDB) {
             assert(args.size() == 2);
-            textLine += "db.Put(" + args[0] + ".encode(), " + args[1] + ")";
+            readDB();
+        } else if (isWriteDB) {
+            assert(args.size() == 3);
+            writeDB();
         }
 
         isArg = false;
@@ -290,14 +356,7 @@ SPACE [ \t\r]+
 
 ,{SPACE}* {
     if (isArg) {
-        int pos = 0;
-        for (int i = 0; i < arg.length(); i++) {
-            if (arg[i] == ' ') {
-                pos = i + 1;
-                break;
-            }
-        }
-        args.push_back(arg.substr(pos));
+        args.push_back(arg);
         arg = "";
     } else {
         addText(yytext);
@@ -311,11 +370,7 @@ SPACE [ \t\r]+
 
 \} {
     braces--;
-    if (braces == 0) {
-//        addText("\n");
-    } else {
-        addText(yytext);
-    }
+    if (braces > 0) addText(yytext);
 }
 
 \n {
@@ -342,7 +397,7 @@ SPACE [ \t\r]+
 
         isMpcOutput = false;
     } else if (isWriteDB) {
-        textPython += tab(3) + textLine;
+        textPython += textLine;
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
@@ -356,6 +411,7 @@ SPACE [ \t\r]+
     args.clear();
     isEmptyLine = true;
 
+//    printf("-\n");
     textLine = "";
 }
 

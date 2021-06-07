@@ -4,13 +4,12 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
+from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput, getAccount
 from ratel.src.python.utils import fp
 
-
-def removeLiquidity(appContract, tokenA, tokenB, amt):
+def removeLiquidity(appContract, tokenA, tokenB, amt, account):
     amt = int(amt * fp)
-    idx = reserveInput(web3, appContract, 1)[0]
+    idx = reserveInput(web3, appContract, 1, account)[0]
     print(idx)
     mask = asyncio.run(get_inputmasks(f'{idx}'))[0]
     maskedAmt = amt + mask
@@ -26,4 +25,5 @@ if __name__=='__main__':
     abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    removeLiquidity(appContract, ETH, tokenAddress, 0.2)
+    account = getAccount(web3, f'/opt/poa/keystore/server_0/')
+    removeLiquidity(appContract, ETH, tokenAddress, 0.2, account)

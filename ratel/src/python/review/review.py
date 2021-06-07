@@ -5,21 +5,13 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput, getAccount
+from ratel.src.python.deploy import url, parse_contract, appAddress, reserveInput, getAccount
 from ratel.src.python.utils import fp
 
 contract_name = 'review'
 
 def initSession(appContract):
-    timeRegistration = 10
-    timeReview = 40
-    numReviewer = 2
-    reviewerAddrs = []
-    for reviewer in range(numReviewer):
-        account = getAccount(web3, f'/opt/poa/keystore/server_{reviewer}/')
-        reviewerAddrs.append(account.address)
-
-    tx_hash = appContract.functions.initSession(timeRegistration, timeReview, numReviewer, reviewerAddrs).transact()
+    tx_hash = appContract.functions.initSession(timeRegistration, numReviewer, reviewerAddrs).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
     log = appContract.events.NewSession().processReceipt(receipt)
@@ -31,12 +23,12 @@ def registerPaper(appContract, sessionId, paperNum):
         tx_hash = appContract.functions.registerPaper(sessionId).transact()
         web3.eth.wait_for_transaction_receipt(tx_hash)
 
-def assignReviewer(appContract, sessionId, reviewersPerPaper, paperNum):
+def assignReviewer(appContract, sessionId, timeReview, reviewersPerPaper, paperNum):
     dueRegistration = appContract.functions.dueRegistration(sessionId).call()
     while True:
         time.sleep(1)
         blkNum = web3.eth.get_block_number()
-        print(dueRegistration, blkNum)
+        print('!!!! assignReviewer', dueRegistration, blkNum)
         if blkNum >= dueRegistration:
             break
 
@@ -44,14 +36,17 @@ def assignReviewer(appContract, sessionId, reviewersPerPaper, paperNum):
     for i in range(paperNum):
         for j in range(reviewersPerPaper):
             reviewers.append(j)
-    tx_hash = appContract.functions.assignReviewer(sessionId, reviewersPerPaper, reviewers).transact()
+    tx_hash = appContract.functions.assignReviewer(sessionId, timeReview, reviewersPerPaper, reviewers).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
+
+    dueReview = appContract.functions.dueReview(sessionId).call()
+    print('!!!! dueReview', dueReview)
 
 def peerReview(appContract, sessionId, paperNum, reviewersPerPaper):
     for i in range(paperNum):
         for j in range(reviewersPerPaper):
             score = i + j
-            print(i, j, score)
+            print('!!!! peerReview', i, j, score)
 
             account = getAccount(web3, f'/opt/poa/keystore/server_{j}/')
             idx = reserveInput(web3, appContract, 1, account)[0]
@@ -62,17 +57,13 @@ def peerReview(appContract, sessionId, paperNum, reviewersPerPaper):
             signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
             web3.eth.send_raw_transaction(signedTx.rawTransaction)
             web3.eth.wait_for_transaction_receipt(signedTx.hash)
-            print(signedTx.hash.hex())
-            receipt = web3.eth.get_transaction_receipt(signedTx.hash)
-            log = appContract.events.PeerReview().processReceipt(receipt)
-            print(log)
 
 def calcResult(appContract, sessionId, threshold):
     dueReview = appContract.functions.dueReview(sessionId).call()
     while True:
         time.sleep(1)
         blkNum = web3.eth.get_block_number()
-        print(dueReview, blkNum)
+        print('!!!! calcResult', dueReview, blkNum)
         if blkNum >= dueReview:
             break
 
@@ -93,17 +84,24 @@ if __name__=='__main__':
     abi, bytecode = parse_contract(contract_name)
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    # sessionId = initSession(appContract)
-    #
-    # reviewerNum = 2
-    # paperNum = 3
-    # registerPaper(appContract, sessionId, paperNum)
-    #
-    # assignReviewer(appContract, sessionId, reviewerNum, paperNum)
-    #
-    # peerReview(appContract, sessionId, paperNum, reviewerNum)
+    timeRegistration = 10
+    timeReview = 30
+    numReviewer = 2
+    reviewerAddrs = []
+    for reviewer in range(numReviewer):
+        account = getAccount(web3, f'/opt/poa/keystore/server_{reviewer}/')
+        reviewerAddrs.append(account.address)
 
-    sessionId = 26
+    sessionId = initSession(appContract)
+
+    reviewerNum = 2
+    paperNum = 3
+    registerPaper(appContract, sessionId, paperNum)
+
+    assignReviewer(appContract, sessionId, timeReview, reviewerNum, paperNum)
+
+    peerReview(appContract, sessionId, paperNum, reviewerNum)
+
     threshold = 1.5
     calcResult(appContract, sessionId, threshold)
 

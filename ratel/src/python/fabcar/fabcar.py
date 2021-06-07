@@ -5,8 +5,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
-from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput
-from ratel.src.python.utils import fp, blsPrime
+from ratel.src.python.deploy import url, parse_contract, appAddress, reserveInput, getAccount
 
 contract_name = 'fabcar'
 
@@ -19,29 +18,29 @@ def createTruck(appContract):
     truckId = log[0]['args']['truckId']
     return truckId
 
-def recordShipment(appContract, truckId, timeLoad, timeUnload):
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
+def recordShipment(appContract, truckId, timeLoad, timeUnload, account):
+    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = timeLoad + maskA, timeUnload + maskB
     tx_hash = appContract.functions.recordShipment(truckId, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
-def queryPositions(appContract, truckId, tL, tR):
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
+def queryPositions(appContract, truckId, tL, tR, account):
+    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = tL + maskA, tR + maskB
     tx_hash = appContract.functions.queryPositions(truckId, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
-def queryNumber(appContract, truckId, tL, tR):
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
+def queryNumber(appContract, truckId, tL, tR, account):
+    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = tL + maskA, tR + maskB
     tx_hash = appContract.functions.queryNumber(truckId, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
-def queryFirst(appContract, truckId, tL, tR):
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2)
+def queryFirst(appContract, truckId, tL, tR, account):
+    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = tL + maskA, tR + maskB
     tx_hash = appContract.functions.queryFirst(truckId, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
@@ -56,16 +55,19 @@ if __name__=='__main__':
     abi, bytecode = parse_contract(contract_name)
     appContract = web3.eth.contract(address=appAddress, abi=abi)
 
-    # truckId = createTruck(appContract)
-    # recordShipment(appContract, truckId, 1, 3)
-    # recordShipment(appContract, truckId, 2, 4)
-    # recordShipment(appContract, truckId, 3, 5)
-    #
-    # time.sleep(10)
+    account = getAccount(web3, f'/opt/poa/keystore/server_0/')
 
-    truckId = 1
+    truckId = createTruck(appContract)
 
-    # queryPositions(appContract, truckId, 4, 4)
-    # queryNumber(appContract, truckId, 3, 3)
-    queryFirst(appContract, truckId, 3, 3)
+    recordShipment(appContract, truckId, 1, 3, account)
+    recordShipment(appContract, truckId, 2, 4, account)
+    recordShipment(appContract, truckId, 3, 5, account)
+
+    time.sleep(10)
+
+    # truckId = 1
+
+    queryPositions(appContract, truckId, 4, 4, account)
+    queryNumber(appContract, truckId, 4, 4, account)
+    queryFirst(appContract, truckId, 4, 4, account)
 

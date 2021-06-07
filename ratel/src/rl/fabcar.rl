@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 contract fabcar {
 
     uint public nextTruckId;
+    uint public queryCnt;
 
     mapping (uint => address) public truckOwner;
 
@@ -21,163 +22,127 @@ contract fabcar {
         require(truckOwner[truckId] != address(0));
 
         mpc(uint truckId, $uint timeLoad, $uint timeUnload) {
-            timeLoad *= fp
-            timeUnload *= fp
+            mpcInput(sint timeLoad, sint timeUnload)
+            print_ln('**** timeLoad %s', timeLoad.reveal())
+            print_ln('**** timeUnload %s', timeUnload.reveal())
 
-            mpcInput(timeLoad, timeUnload)
-            timeLoad = sfix._new(timeLoad)
-            timeUnload = sfix._new(timeUnload)
-            print_ln('timeLoad %s', timeLoad.reveal())
-            print_ln('timeUnload %s', timeUnload.reveal())
+            validShipment = timeLoad.less_equal(timeUnload, bit_length=bit_length).reveal()
 
-            validShipment = (timeLoad <= timeUnload).reveal()
-            validShipment = sint(validShipment)
+            print_ln('**** validShipment %s', validShipment)
+            mpcOutput(cint validShipment)
 
-            mpcOutput(validShipment)
-
-            print(validShipment)
+            print('**** validShipment', validShipment)
             if validShipment == 1:
-                truckRegistry = readDB(f'truckRegistry_{truckId}')
-                try:
-                    import ast
-                    truckRegistry = truckRegistry.decode(encoding='utf-8')
-                    truckRegistry = list(ast.literal_eval(truckRegistry))
-                except:
-                    truckRegistry = []
+                truckRegistry = readDB(f'truckRegistry_{truckId}', list)
 
                 truckRegistry.append((timeLoad, timeUnload))
-                print(truckRegistry)
+                print('**** truckRegistry', truckRegistry)
 
-                truckRegistry = str(truckRegistry)
-                truckRegistry = bytes(truckRegistry, encoding='utf-8')
-                writeDB(f'truckRegistry_{truckId}', truckRegistry)
+                writeDB(f'truckRegistry_{truckId}', truckRegistry, list)
         }
     }
 
     function queryPositions(uint truckId, $uint tL, $uint tR) public {
-        mpc(uint truckId, $uint tL, $uint tR) {
-            tL *= fp
-            tR *= fp
+        uint querySeq = ++queryCnt;
 
-            truckRegistry = readDB(f'truckRegistry_{truckId}')
-            try:
-                import ast
-                truckRegistry = truckRegistry.decode(encoding='utf-8')
-                truckRegistry = list(ast.literal_eval(truckRegistry))
-            except:
-                truckRegistry = []
+        mpc(uint querySeq, uint truckId, $uint tL, $uint tR) {
+            truckRegistry = readDB(f'truckRegistry_{truckId}', list)
 
-            print('truckRegistry', truckRegistry)
             positions = []
             for i, (timeLoad, timeUnload) in enumerate(truckRegistry):
-                print(i, (timeLoad, timeUnload))
-                mpcInput(tL, tR, timeLoad, timeUnload)
-                tL = sfix._new(tL)
-                tR = sfix._new(tR)
-                timeLoad = sfix._new(timeLoad)
-                timeUnload = sfix._new(timeUnload)
+                print('**** i', i)
 
-                inRange = ((timeLoad <= tR) * (timeUnload >= tL)).reveal()
-                inRange = sint(inRange)
+                mpcInput(sint tL, sint tR, sint timeLoad, sint timeUnload)
+                print_ln('**** tL %s', tL.reveal())
+                print_ln('**** tR %s', tR.reveal())
+                print_ln('**** timeLoad %s', timeLoad.reveal())
+                print_ln('**** timeUnload %s', timeUnload.reveal())
 
-                mpcOutput(inRange)
+                inRange = ((timeLoad.less_equal(tR, bit_length=bit_length)) * (timeUnload.greater_equal(tL, bit_length=bit_length))).reveal()
+                print_ln('**** inRange %s', inRange)
 
-                print('inRange', inRange)
+                mpcOutput(cint inRange)
+
+                print('**** inRange', inRange)
                 if inRange == 1:
                     positions.append(i)
-                print(positions)
+                print('**** positions', positions)
+
+            writeDB(f'query_{querySeq}', positions, list)
         }
     }
 
     function queryNumber(uint truckId, $uint tL, $uint tR) public {
-        mpc(uint truckId, $uint tL, $uint tR) {
-            tL *= fp
-            tR *= fp
+        uint querySeq = ++queryCnt;
 
-            truckRegistry = readDB(f'truckRegistry_{truckId}')
-            try:
-                import ast
-                truckRegistry = truckRegistry.decode(encoding='utf-8')
-                truckRegistry = list(ast.literal_eval(truckRegistry))
-            except:
-                truckRegistry = []
+        mpc(uint querySeq, uint truckId, $uint tL, $uint tR) {
+            truckRegistry = readDB(f'truckRegistry_{truckId}', list)
+            print('**** truckRegistry', truckRegistry)
 
-            print('truckRegistry', truckRegistry)
             cnt = 0
             for i, (timeLoad, timeUnload) in enumerate(truckRegistry):
-                print(i, (timeLoad, timeUnload))
-                mpcInput(tL, tR, timeLoad, timeUnload, cnt)
-                tL = sfix._new(tL)
-                tR = sfix._new(tR)
-                timeLoad = sfix._new(timeLoad)
-                timeUnload = sfix._new(timeUnload)
+                print('**** i', i)
 
-                inRange = (timeLoad <= tR) * (timeUnload >= tL)
-                print_ln('inRange %s', inRange.reveal())
+                mpcInput(sint tL, sint tR, sint timeLoad, sint timeUnload, sint cnt)
+                print_ln('**** tL %s', tL.reveal())
+                print_ln('**** tR %s', tR.reveal())
+                print_ln('**** timeLoad %s', timeLoad.reveal())
+                print_ln('**** timeUnload %s', timeUnload.reveal())
+
+                inRange = (timeLoad.less_equal(tR, bit_length=bit_length)) * (timeUnload.greater_equal(tL, bit_length=bit_length))
+                print_ln('**** inRange %s', inRange.reveal())
+
                 cnt += inRange
-                print_ln('cnt %s', cnt.reveal())
+                print_ln('**** cnt %s', cnt.reveal())
 
-                mpcOutput(cnt)
+                mpcOutput(sint cnt)
 
-            mpcInput(cnt)
+            mpcInput(sint cnt)
 
-            cnt = sint(cnt.reveal())
+            cnt = cnt.reveal()
 
-            mpcOutput(cnt)
-            print(cnt)
+            mpcOutput(cint cnt)
+            print('**** cnt', cnt)
+
+            writeDB(f'query_{querySeq}', cnt, int)
         }
     }
 
     function queryFirst(uint truckId, $uint tL, $uint tR) public {
-        mpc(uint truckId, $uint tL, $uint tR) {
-            print('yes')
-            tL *= fp
-            tR *= fp
+        uint querySeq = ++queryCnt;
 
-            truckRegistry = readDB(f'truckRegistry_{truckId}')
-            try:
-                import ast
-                truckRegistry = truckRegistry.decode(encoding='utf-8')
-                truckRegistry = list(ast.literal_eval(truckRegistry))
-            except:
-                truckRegistry = []
+        mpc(uint querySeq, uint truckId, $uint tL, $uint tR) {
+            truckRegistry = readDB(f'truckRegistry_{truckId}', list)
+            print('**** truckRegistry', truckRegistry)
 
-            print('truckRegistry', truckRegistry)
             a, b = 0, 0
             for i, (timeLoad, timeUnload) in enumerate(truckRegistry):
-                mpcInput(tL, tR, timeLoad, timeUnload, a, b)
-                tL = sfix._new(tL)
-                tR = sfix._new(tR)
-                timeLoad = sfix._new(timeLoad)
-                timeUnload = sfix._new(timeUnload)
-                a = sfix._new(a)
-                b = sfix._new(b)
-                print_ln('a %s', a.reveal())
-                print_ln('b %s', b.reveal())
+                mpcInput(sint tL, sint tR, sint timeLoad, sint timeUnload, sint a, sint b)
+                print_ln('**** a %s', a.reveal())
+                print_ln('**** b %s', b.reveal())
 
-                inRange = (timeLoad <= tR) * (timeUnload >= tL)
-                firstMatched = (a == 0) * inRange
-                print_ln('inRange %s', inRange.reveal())
-                print_ln('firstMatched %s', firstMatched.reveal())
+                inRange = (timeLoad.less_equal(tR, bit_length=bit_length)) * (timeUnload.greater_equal(tL, bit_length=bit_length))
+                firstMatched = (a.equal(0, bit_length=bit_length)) * inRange
+                print_ln('**** inRange %s', inRange.reveal())
+                print_ln('**** firstMatched %s', firstMatched.reveal())
                 a += firstMatched * timeLoad
                 b += firstMatched * timeUnload
-                print_ln('a %s', a.reveal())
-                print_ln('b %s', b.reveal())
 
-                a = a.v
-                b = b.v
-                mpcOutput(a, b)
+                print_ln('**** a %s', a.reveal())
+                print_ln('**** b %s', b.reveal())
+                mpcOutput(sint a, sint b)
 
-            mpcInput(a, b)
-            a = sfix._new(a)
-            b = sfix._new(b)
+            mpcInput(sint a, sint b)
 
-            a = sint(a.reveal().v)
-            b = sint(b.reveal().v)
-            mpcOutput(a, b)
-            a //= fp
-            b //= fp
-            print(a, b)
+            a = a.reveal()
+            b = b.reveal()
+
+            mpcOutput(cint a, cint b)
+
+            print('****', 'a', a, 'b', b)
+
+            ans = [a, b]
+            writeDB(f'query_{querySeq}', ans, list)
         }
     }
 }

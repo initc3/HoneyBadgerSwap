@@ -11,12 +11,12 @@ contract rockPaperScissors {
     uint public gameCnt;
 
     mapping (uint => uint) public status; // active-1, ready-2, completed-3
-    mapping (address => uint) public valueStatus;
-    mapping (uint => uint) public countStatus;
+    mapping (address => uint) public statusValue;
+    mapping (uint => uint) public statusCount;
 
-    mapping (uint => address) public winners;
-    mapping (address => address) public valueWinners;
-    mapping (address => uint) public countWinners;
+    mapping (uint => string) public winners;
+    mapping (address => string) public winnersValue;
+    mapping (string => uint) public winnersCount;
 
     constructor() public {}
 
@@ -25,29 +25,20 @@ contract rockPaperScissors {
         uint gameId = ++gameCnt;
 
         mpc(uint gameId, address player1, $uint value1) {
-            print(value1, type(value1))
+            mpcInput(sint value1)
 
-            value1 *= fp
-            mpcInput(value1)
-            value1 = sfix._new(value1)
+            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
 
-            valid = (value1 >= 1) * (value1 <= 3)
-            valid = sint(valid.reveal())
+            mpcOutput(cint valid)
 
-            mpcOutput(valid)
-
-            print(valid)
+            print('**** valid', valid)
             if valid == 1:
                 game = {
                     'player1': player1,
-                    'value1': value1 // fp,
+                    'value1': value1,
                 }
-                print(game)
-                game = str(game)
-                print(game)
-                game = bytes(game, encoding='utf-8')
-                print(game)
-                writeDB(f'gameBoard_{gameId}', game)
+                print('**** game', game)
+                writeDB(f'gameBoard_{gameId}', game, dict)
 
                 curStatus = 1
                 set(status, uint curStatus, uint gameId)
@@ -56,36 +47,26 @@ contract rockPaperScissors {
 
     function joinGame(uint gameId, $uint value2) public {
         require(status[gameId] == 1);
-
         address player2 = msg.sender;
 
         mpc(uint gameId, address player2, $uint value2) {
-            value2 *= fp
-            mpcInput(value2)
-            value2 = sfix._new(value2)
+            mpcInput(sint value2)
 
-            valid = (value2 >= 1) * (value2 <= 3)
-            valid = sint(valid.reveal())
+            valid = ((value2.greater_equal(1, bit_length=bit_length)) * (value2.less_equal(3, bit_length=bit_length))).reveal()
 
-            mpcOutput(valid)
+            mpcOutput(cint valid)
 
-            print(valid)
+            print('**** valid', valid)
             if valid == 1:
 
-                game = readDB(f'gameBoard_{gameId}')
-                game = game.decode(encoding='utf-8')
-                import ast
-                game = dict(ast.literal_eval(game))
+                game = readDB(f'gameBoard_{gameId}', dict)
 
                 game['player2'] = player2
-                game['value2'] = value2 // fp
+                game['value2'] = value2
 
-                print(game)
-                game = str(game)
-                print(game)
-                game = bytes(game, encoding='utf-8')
-                print(game)
-                writeDB(f'gameBoard_{gameId}', game)
+                print('**** game', game)
+
+                writeDB(f'gameBoard_{gameId}', game, dict)
 
                 curStatus = 2
                 set(status, uint curStatus, uint gameId)
@@ -97,43 +78,34 @@ contract rockPaperScissors {
         status[gameId]++;
 
         mpc(uint gameId) {
-            game = readDB(f'gameBoard_{gameId}')
-            game = game.decode(encoding='utf-8')
-            game = dict(ast.literal_eval(game))
+            game = readDB(f'gameBoard_{gameId}', dict)
 
-            value1 = game['value1'] * fp
-            value2 = game['value2'] * fp
+            value1 = game['value1']
+            value2 = game['value2']
 
-            mpcInput(value1, value2)
-            value1 = sfix._new(value1)
-            value2 = sfix._new(value2)
-
-            print_ln('value1 %s', value1.reveal())
-            print_ln('value2 %s', value2.reveal())
+            mpcInput(sint value1, sint value2)
+            print_ln('**** value1 %s', value1.reveal())
+            print_ln('**** value2 %s', value2.reveal())
 
             result = (value1 - value2).reveal()
-            print_ln('result %s', result)
-            result = sint(result.v)
-            print_ln('result %s', result.reveal())
 
-            mpcOutput(result)
-            if result != 0:
+            print_ln('**** result %s', result)
+            mpcOutput(cint result)
+
+            if result > 2:
                 result -= blsPrime
-            print(result)
-            result //= fp
-            print(result)
-
+            print('****', result)
             if result == 0:
-                print('tie')
+                print('**** tie')
                 winner = 'tie'
             elif result == 1 or result == -2:
-                print('player1')
-                winner = game['player1']
+                print('**** player1')
+                winner = 'player1'
             else:
-                print('player2')
-                winner = game['player2']
+                print('**** player2')
+                winner = 'player2'
 
-            set(winners, address winner, uint gameId)
+            set(winners, string memory winner, uint gameId)
         }
     }
 }
