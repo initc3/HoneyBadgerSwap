@@ -291,11 +291,6 @@ SPACE [ \t\r]+
     cntValueDB = 0;
 }
 
-^.*monitorEvent\( {
-    isEvent = true;
-    isArg = true;
-}
-
 ^.*readDB\( {
     isReadDB = true;
     isArg = true;
