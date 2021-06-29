@@ -46,7 +46,7 @@ def get_inverse(a):
         a = (a * a) % blsPrime
     return ret
 
-def recover_input(db, masked_value, idx): # return: hex
+def recover_input(db, masked_value, idx): # return: int
     try:
         input_mask_share = db.Get(key_inputmask(idx))
     except KeyError:
