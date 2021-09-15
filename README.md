@@ -1,7 +1,9 @@
 # HoneyBadgerSwap
 
+`docker-compose -f docker-compose-dev.yml build --no-cache`
 
-## Troubleshooting
+`docker-compose -f docker-compose-dev.yml up -d`
 
-### Expired TLS/SSL Certificates
-See [./testkeys/README.md](./testkeys/README.md).
+`docker exec -it honeybadgerswap_dev_1 bash`
+
+

@@ -132,7 +132,6 @@ def check_consistency(shares):
         if reconstruct(shares, i) != value:
             print('inconsistent')
 
-
 def reconstruct(shares, n):
     inputmask = 0
     for i in range(1, n + 1):

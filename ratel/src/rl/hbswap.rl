@@ -22,8 +22,6 @@ contract Hbswap {
     mapping (uint => bool) public secretWithdrawFinish;
     mapping (uint => mapping (uint => uint)) public secretWithdrawCount;
 
-    uint public tradeCnt;
-
     constructor() public {}
 
     function publicDeposit(address token, uint amt) payable public {
@@ -71,9 +69,8 @@ contract Hbswap {
     function secretWithdraw(address token, uint amt) public {
         address user = msg.sender;
         require(amt > 0);
-        uint secretWithdrawSeq = ++secretWithdrawCnt;
 
-        mpc(uint secretWithdrawSeq, address user, address token, uint amt) {
+        mpc(address user, address token, uint amt) {
             balance = readDB(f'balance_{token}_{user}', int)
 
             mpcInput(sfix balance, sfix amt)
@@ -88,7 +85,7 @@ contract Hbswap {
 
             print('****', balance, enough)
             if enough == 1:
-                add(publicBalance, uint secretWithdrawSeq, uint amt, address token, address user)
+                add(publicBalance, uint seqSecretWithdraw, uint amt, address token, address user)
                 writeDB(f'balance_{token}_{user}', balance, int)
         }
     }
@@ -257,9 +254,8 @@ contract Hbswap {
     function trade(address tokenA, address tokenB, $uint amtA, $uint amtB) public {
         require(tokenA < tokenB);
         address user = msg.sender;
-        uint tradeSeq = ++tradeCnt;
 
-        mpc(uint tradeSeq, address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
+        mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             poolA = readDB(f'pool_{tokenA}_{tokenB}_{tokenA}', int)
@@ -268,6 +264,11 @@ contract Hbswap {
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
+
+            print_ln('**** balanceA %s', balanceA.reveal())
+            print_ln('**** balanceB %s', balanceB.reveal())
+            print_ln('**** poolA %s', poolA.reveal())
+            print_ln('**** poolB %s', poolB.reveal())
 
             feeRate = 0.003
             batchSize = 2
@@ -312,6 +313,8 @@ contract Hbswap {
             print_ln('**** totalCnt %s', totalCnt.reveal())
 
             batchPrice = sint(0).reveal()
+            print_ln('**** batchPrice %s', batchPrice)
+            print_ln('**** cond %s', totalCnt.reveal() >= batchSize)
             if_then(totalCnt.reveal() >= batchSize)
             batchPrice = (totalPrice / totalCnt).reveal()
             end_if()
@@ -335,7 +338,7 @@ contract Hbswap {
 
             returnPriceInterval = 60
             await asyncio.sleep(returnPriceInterval)
-            writeDB(f'price_{tradeSeq}', price, int)
+            writeDB(f'price_{seqTrade}', price, int)
         }
     }
 }

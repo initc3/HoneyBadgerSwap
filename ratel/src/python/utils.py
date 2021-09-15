@@ -54,9 +54,31 @@ def recover_input(db, masked_value, idx): # return: int
     input_mask_share = int.from_bytes(input_mask_share, 'big')
     return (masked_value - input_mask_share) % blsPrime
 
+def players(contract):
+    players = contract.functions.N().call()
+    print('players', players)
+    return players
+
+def threshold(contract):
+    threshold = contract.functions.T().call()
+    print('threshold', threshold)
+    return threshold
+
+def reconstruct(shares, n):
+    inputmask = 0
+    for i in range(1, n + 1):
+        tot = 1
+        for j in range(1, n + 1):
+            if i == j:
+                continue
+            tot = tot * j * get_inverse(j - i) % blsPrime
+        inputmask = (inputmask + shares[i - 1] * tot) % blsPrime
+    print(inputmask)
+    return inputmask
+
 prog = './malicious-shamir-party.x'
-players = 4
-threshold = 1
+init_players = 3 #4
+init_threshold = 1
 blsPrime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
 leaderHostname = 'mpcnode0'
 R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
