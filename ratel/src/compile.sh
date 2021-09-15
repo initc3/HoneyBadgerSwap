@@ -20,7 +20,7 @@ compile_mpc() {
   cd mpc
   for d in *; do
     mkdir -p ../../../Programs/Source
-    cp $d ../../../Programs/Source/$d
+#    cp $d ../../../Programs/Source/$d
     ./../../../compile.py -v -C -F 256 $d
   done
   cd ..
@@ -52,15 +52,17 @@ rm ratel/genfiles/mpc/* || true
 rm Programs/Source/* || true
 rm ratel/genfiles/contracts/* || true
 
+#mv ratel/src/mpc ratel/genfiles/mpc
+
 cd ratel/genfiles
 
 compile_flexes
 
 parse hbswap
-parse volumeMatching
-parse rockPaperScissors
-parse fabcar
-parse review
+#parse volumeMatching
+#parse rockPaperScissors
+#parse fabcar
+#parse review
 
 compile_sol
 compile_mpc

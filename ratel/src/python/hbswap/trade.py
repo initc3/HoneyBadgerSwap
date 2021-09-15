@@ -11,7 +11,7 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
     amtA = int(amtA * fp)
     amtB = int(amtB * fp)
     idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
-    maskA, maskB = asyncio.run(get_inputmasks(f'{idxAmtA},{idxAmtB}'))
+    maskA, maskB = asyncio.run(get_inputmasks(appContract, f'{idxAmtA},{idxAmtB}'))
     maskedAmtA, maskedAmtB = (amtA + maskA) % blsPrime, (amtB + maskB) % blsPrime
     tx_hash = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)

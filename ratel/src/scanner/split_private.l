@@ -30,6 +30,8 @@ vector<string> args;
 
 string prefix;
 
+string textRecover;
+
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
         if (st[i] == ' ') {
@@ -128,12 +130,20 @@ void monitorEvent() {
     textPython += "            for log in logs:\n";
     textPython += "\n";
 
+    textPython += tab(4) + "seq" + funcName + " = log['args']['seq" + funcName + "']\n";
     int num = args.size();
     for (int i = 0; i < num; i++) {
         string arg = args[i];
         textPython += tab(4) + arg + " = log['args']['" + arg + "']\n";
     }
     textPython += "\n";
+
+    textRecover += "def recover" + funcName + "(seq" + funcName;
+    for (int i = 0; i < num; i++) {
+        textRecover += ", " + args[i];
+    }
+    textRecover += "):\n";
+    textRecover += "    return [";
 }
 
 void readDB() {
@@ -142,7 +152,7 @@ void readDB() {
     string value = "value" + to_string(++cntValueDB);
 
     textLine = prefix + "try:\n";
-    textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".encode())\n";
+    textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".lower().encode())\n";
     textLine += prefix + "except KeyError:\n";
     textLine += prefix + "    " + value + " = bytes(0)\n";
     if (args[1] == "int") {
@@ -158,7 +168,7 @@ void readDB() {
         textLine += prefix + "    " + value + " = " + value + ".decode(encoding='utf-8')\n";
         textLine += prefix + "    " + value + " = dict(ast.literal_eval(" + value + "))\n";
         textLine += prefix + "except:\n";
-        textLine += prefix + "    " + value + " = []\n";
+        textLine += prefix + "    " + value + " = {}\n";
     } else {
         assert(0);
     }
@@ -169,7 +179,7 @@ void writeDB() {
     if (args[2] == "int") {
         string key = args[0];
         string value = args[1];
-        textLine += tab(3) + "db.Put(" + key + ".encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
+        textLine += tab(3) + "db.Put(" + key + ".lower().encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
     } else if (args[2] == "list" || args[2] == "dict") {
         string key = args[0];
         string value = args[1];
@@ -177,11 +187,13 @@ void writeDB() {
 
         textTmp = prefix + value + " = str(" + value + ")\n";
         textTmp += prefix + value + " = bytes(" + value + ", encoding='utf-8')\n";
-        textLine += tab(3) + "db.Put(" + key + ".encode(), " + value + ")";
+        textLine += tab(3) + "db.Put(" + key + ".lower().encode(), " + value + ")";
         textLine = textTmp + textLine;
     } else {
         assert(0);
     }
+
+    textRecover += args[0] + ", ";
 }
 
 void mpcInput() {
@@ -213,7 +225,7 @@ void mpcInput() {
 
     //python
     textPython += prefix + "env = os.environ.copy()\n";
-    textPython += prefix + "cmd = [prog, \'-N\', f\'{players}\', \'-T\', f\'{threshold}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
+    textPython += prefix + "cmd = [prog, \'-N\', f\'{players(contract)}\', \'-T\', f\'{threshold(contract)}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
     textPython += prefix + "task = subprocess.Popen(cmd, env=env)\n";
     textPython += prefix + "task.wait()\n";
     textPython += "\n";
@@ -366,6 +378,7 @@ SPACE [ \t\r]+
 \} {
     braces--;
     if (braces > 0) addText(yytext);
+    else textRecover += "]\n\n";
 }
 
 \n {
@@ -425,6 +438,13 @@ int main(int argc, char **argv) {
     yylex();
 
     finalizePython();
+
+    textRecover += "\n";
+    FILE *recoverFp;
+    string recoverFile = "python/" + fileName + "Recover.py";
+    recoverFp = fopen(recoverFile.c_str(), "a");
+    fprintf(recoverFp, "%s", textRecover.c_str());
+    fclose(recoverFp);
 
 	return 0;
 }

@@ -11,7 +11,7 @@ def removeLiquidity(appContract, tokenA, tokenB, amt, account):
     amt = int(amt * fp)
     idx = reserveInput(web3, appContract, 1, account)[0]
     print(idx)
-    mask = asyncio.run(get_inputmasks(f'{idx}'))[0]
+    mask = asyncio.run(get_inputmasks(appContract, f'{idx}'))[0]
     maskedAmt = amt + mask
     tx_hash = appContract.functions.removeLiquidity(tokenA, tokenB, idx, maskedAmt).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)

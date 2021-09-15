@@ -120,7 +120,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN npm install -g truffle
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    flex
+    flex \
+    vim
 
 WORKDIR /go/src/github.com/ethereum/go-ethereum
 RUN make geth

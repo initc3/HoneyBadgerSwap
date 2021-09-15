@@ -14,5 +14,6 @@ services:
       - ./scripts/chain-latest.sh:/usr/src/hbswap/chain-latest.sh
       - ./poa:/opt/poa
       - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/hbswap/setup-ssl.sh
+      - ./ratel/genfiles/mpc:/usr/src/hbswap//Programs/Source
     working_dir: /usr/src/hbswap
     command: tail -F anything
