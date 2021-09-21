@@ -1,8 +1,7 @@
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
-
 from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH
 from ratel.src.python.utils import fp
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
 
 def initPool(appContract, tokenA, tokenB, amtA, amtB):
     tx_hash = appContract.functions.initPool(tokenA, tokenB, int(amtA * fp), int(amtB * fp)).transact()

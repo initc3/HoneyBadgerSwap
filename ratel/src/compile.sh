@@ -20,7 +20,6 @@ compile_mpc() {
   cd mpc
   for d in *; do
     mkdir -p ../../../Programs/Source
-#    cp $d ../../../Programs/Source/$d
     ./../../../compile.py -v -C -F 256 $d
   done
   cd ..
@@ -43,16 +42,15 @@ parse() {
   rm mpc/$1.mpc
 }
 
-#bash setup-ssl.sh 4
-#mkdir -p ratel/genfiles/contracts
-#mkdir -p ratel/genfiles/python
-#mkdir -p ratel/genfiles/mpc
-
-rm ratel/genfiles/mpc/* || true
-rm Programs/Source/* || true
-rm ratel/genfiles/contracts/* || true
-
-#mv ratel/src/mpc ratel/genfiles/mpc
+# INIT: only run when enter a new docker container
+bash setup-ssl.sh 4
+rm -rf ratel/genfiles
+mkdir -p ratel/genfiles
+mkdir -p ratel/genfiles/python
+cp -r ratel/src/mpc ratel/genfiles/
+cp -r ratel/src/contracts ratel/genfiles/
+cp -r ratel/src/truffle-config.js ratel/genfiles
+cp -r ratel/src/node_modules ratel/genfiles
 
 cd ratel/genfiles
 
@@ -66,6 +64,4 @@ parse hbswap
 
 compile_sol
 compile_mpc
-
-# bash ratel/src/compile.sh
 
