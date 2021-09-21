@@ -4,5 +4,3 @@ poa/data
 *build/
 *__pycache__
 ratel/genfiles
-!ratel/genfiles/truffle-config.js
-!ratel/genfiles/node_modules/@openzeppelin/

@@ -90,6 +90,28 @@ class Server:
         await site.start()
         await asyncio.sleep(100 * 3600)
 
+    async def init(self, recover, app_tasks):
+        print(recover)
+        async def prepare(recover, app_tasks):
+            isServer = self.contract.functions.isServer(self.account.address).call()
+            if not isServer:
+                self.registerServer()
+                await self.recoverHistory(recover)
+
+            tasks = [
+                     self.preprocessing(),
+                     self.monitorNewServer(),
+                     self.http_server()
+            ]
+            tasks.extend(app_tasks)
+            await asyncio.gather(*tasks)
+
+        tasks = [
+            prepare(recover, app_tasks),
+            self.monitorGenInputMask(),
+        ]
+        await asyncio.wait(tasks)
+
     def genInputMask(self):
         print('Generating new inputmasks...')
 
@@ -161,8 +183,6 @@ class Server:
         signedTx = self.web3.eth.account.sign_transaction(tx, private_key=self.account.privateKey)
         self.web3.eth.send_raw_transaction(signedTx.rawTransaction)
         self.web3.eth.wait_for_transaction_receipt(signedTx.hash)
-        # receipt = self.web3.eth.get_transaction_receipt(signedTx.hash)
-        # log = self.contract.events.NewServer().processReceipt(receipt)
 
     async def recoverHistory(self, recover):
         while True:
@@ -195,51 +215,47 @@ class Server:
 
         request_keys = {}
         for i in range(opCnt):
-            print(i)
+            print('missing opSeq', i)
             if not i in execHistory:
                 keys = recover(self.contract, i)
                 for key in keys:
                     request_keys[key] = True
-        del request_keys['execHistory']
-        print([*request_keys])
-        mask_idxes = reserveInput(self.web3, self.contract, len([*request_keys]), self.account)
-        print('mask_idxes', mask_idxes)
-        keys = str(mask_idxes[0])
-        for key in [*request_keys]:
-            keys += f',{key.lower()}'
-        print(keys)
+        if len(request_keys):
+            if 'execHistory' in request_keys.keys():
+                del request_keys['execHistory']
+            print('request_keys', [*request_keys])
+            mask_idxes = reserveInput(self.web3, self.contract, len([*request_keys]), self.account)
+            print('mask_idxes', mask_idxes)
+            keys = str(mask_idxes[0])
+            for key in [*request_keys]:
+                keys += f',{key.lower()}'
 
-        # fetch share from other servers
-        shares = []
-        for serverID in range(players(self.contract)):
-            if serverID != self.serverID:
-                print(serverID)
-                url = f"http://{http_host}:{http_port + serverID}/recoverdb/{keys}"
-                print(url)
-                result = await send_request(url)
-                for i, share in enumerate(re.split(",", result["values"])):
-                    if len(share) <= 0:
-                        continue
-                    if (len(shares) <= i):
-                        shares.append([])
-                    shares[i].append(int(share))
-        print(shares)
-        mask_idx = mask_idxes[0]
-        for key, _shares in zip(keys, shares):
-            print(_shares, len(_shares))
-            masked_value = reconstruct(_shares, len(_shares))
-            input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(mask_idx))), 'big')
-            share = (masked_value - input_mask) % blsPrime
-            print(share)
-            mask_idx += 1
-            self.db.Put(key.encode(), share.to_bytes((share.bit_length() + 7) // 8, 'big'))
+            # fetch share from other servers
+            shares = []
+            for serverID in range(players(self.contract)):
+                if serverID != self.serverID:
+                    url = f"http://{http_host}:{http_port + serverID}/recoverdb/{keys}"
+                    result = await send_request(url)
+                    for i, share in enumerate(re.split(",", result["values"])):
+                        if len(share) <= 0:
+                            continue
+                        if (len(shares) <= i):
+                            shares.append([])
+                        shares[i].append(int(share))
+            print('shares', shares)
+            mask_idx = mask_idxes[0]
+            for key, _shares in zip(keys, shares):
+                masked_value = reconstruct(_shares, len(_shares))
+                input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(mask_idx))), 'big')
+                share = (masked_value - input_mask) % blsPrime
+                mask_idx += 1
+                self.db.Put(key.encode(), share.to_bytes((share.bit_length() + 7) // 8, 'big'))
 
-        # mark op as executed
-        for i in range(opCnt):
-            print(i)
-            if not i in execHistory:
-                execHistory[i] = True
-        execHistory = str(execHistory)
-        execHistory = bytes(execHistory, encoding='utf-8')
-        self.db.Put(f'execHistory'.encode(), execHistory)
+            # mark op as executed
+            for i in range(opCnt):
+                if not i in execHistory:
+                    execHistory[i] = True
+            execHistory = str(execHistory)
+            execHistory = bytes(execHistory, encoding='utf-8')
+            self.db.Put(f'execHistory'.encode(), execHistory)
 

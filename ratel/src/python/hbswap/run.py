@@ -1,45 +1,46 @@
 import asyncio
+import ratel.genfiles.python.hbswap as hbswap
 import sys
 
+from ratel.genfiles.python.hbswapRecover import recover
 from ratel.src.python.Server import Server, getAccount
 from ratel.src.python.deploy import parse_contract, appAddress, confirmation, url
 from ratel.src.python.utils import openDB, location_db, http_port, http_host
-from ratel.genfiles.python.hbswap import monitorSecretDeposit, monitorInitPool, monitorAddLiquidity, monitorTrade, \
-    monitorRemoveLiquidity, monitorSecretWithdraw
 from web3 import Web3
 
 if __name__ == '__main__':
     serverID = int(sys.argv[1])
-
     db = openDB(location_db(serverID))
-
     web3 = Web3(Web3.WebsocketProvider(url))
-
     account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
 
+    ### ACCESS contract
     abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
+    ###
 
     server = Server(
-        serverID, db, http_host, http_port + serverID, appContract, web3, account, confirmation
+        serverID,
+        db,
+        http_host,
+        http_port + serverID,
+        appContract,
+        web3,
+        account,
+        confirmation
     )
 
-    isServer = appContract.functions.isServer(account.address).call()
-    print('!!!! isServer', isServer)
-    if not isServer:
-        server.registerServer()
-        # recoverHistory()
+    ### EDIT application specific monitoring tasks below
+    app_tasks = [
+        hbswap.monitorSecretDeposit(web3, db, serverID, appContract, confirmation, account),
+        hbswap.monitorSecretWithdraw(web3, db, serverID, appContract, confirmation, account),
+        hbswap.monitorInitPool(web3, db, serverID, appContract, confirmation, account),
+        hbswap.monitorAddLiquidity(web3, db, serverID, appContract, confirmation, account),
+        hbswap.monitorRemoveLiquidity(web3, db, serverID, appContract, confirmation, account),
+        hbswap.monitorTrade(web3, db, serverID, appContract, confirmation, account)
+    ]
+    ###
 
-    loop = asyncio.get_event_loop()
-    tasks = [monitorSecretDeposit(web3, db, serverID, appContract, confirmation, account),
-             monitorSecretWithdraw(web3, db, serverID, appContract, confirmation, account),
-             monitorInitPool(web3, db, serverID, appContract, confirmation, account),
-             monitorAddLiquidity(web3, db, serverID, appContract, confirmation, account),
-             monitorRemoveLiquidity(web3, db, serverID, appContract, confirmation, account),
-             monitorTrade(web3, db, serverID, appContract, confirmation, account),
-             server.preprocessing(),
-             server.monitorGenInputMask(),
-             server.monitorNewServer(),
-             server.http_server()]
-    loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()
+    ### CHANGE: recover function
+    asyncio.run(server.init(recover, app_tasks))
+    ###
