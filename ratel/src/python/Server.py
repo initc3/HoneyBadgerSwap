@@ -18,7 +18,7 @@ def getAccount(web3, keystoreDir):
             return web3.eth.account.privateKeyToAccount(privateKey)
 
 class Server:
-    def __init__(self, serverID, db, host, http_port, contract, web3, account, confirmation):
+    def __init__(self, serverID, db, host, http_port, contract, web3, account, confirmation, init_players, init_threshold):
         self.serverID = serverID
         self.db = db
         self.host = host
@@ -27,6 +27,8 @@ class Server:
         self.web3 = web3
         self.account = account
         self.confirmation = confirmation
+        self.players = init_players
+        self.threshold = init_threshold
 
         self.totInputMask = 0 #self.contract.functions.inputMaskCnt().call()
 
@@ -91,7 +93,6 @@ class Server:
         await asyncio.sleep(100 * 3600)
 
     async def init(self, recover, app_tasks):
-        print(recover)
         async def prepare(recover, app_tasks):
             isServer = self.contract.functions.isServer(self.account.address).call()
             if not isServer:
@@ -171,6 +172,8 @@ class Server:
                 blkNum = curBlkNum - self.confirmation + 1
                 for log in logs:
                     newServer = log['args']['server']
+
+                    self.players += 1
 
                     tx = self.contract.functions.addServer(newServer).buildTransaction({'from': self.account.address, 'gas': 1000000, 'nonce': self.web3.eth.get_transaction_count(self.account.address)})
                     signedTx = self.web3.eth.account.sign_transaction(tx, private_key=self.account.privateKey)

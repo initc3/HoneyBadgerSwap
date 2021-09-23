@@ -19,7 +19,6 @@ compile_sol() {
 compile_mpc() {
   cd mpc
   for d in *; do
-    mkdir -p ../../../Programs/Source
     ./../../../compile.py -v -C -F 256 $d
   done
   cd ..
@@ -47,6 +46,7 @@ bash setup-ssl.sh 4
 rm -rf ratel/genfiles
 mkdir -p ratel/genfiles
 mkdir -p ratel/genfiles/python
+mkdir -p ../../../Programs/Source
 cp -r ratel/src/mpc ratel/genfiles/
 cp -r ratel/src/contracts ratel/genfiles/
 cp -r ratel/src/truffle-config.js ratel/genfiles
