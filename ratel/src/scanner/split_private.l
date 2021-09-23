@@ -22,7 +22,7 @@ int cntMPC;
 bool isMPC;
 
 string textLine;
-string textPython, textMpc;
+string textPythonUpper, textPythonLower, textMpc;
 
 bool isArg;
 string arg;
@@ -31,6 +31,8 @@ vector<string> args;
 string prefix;
 
 string textRecover;
+
+vector<string> events;
 
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
@@ -73,19 +75,45 @@ string getPrefix(string text) {
 }
 
 void initPython() {
-    textPython += "import ast\n";
-    textPython += "import asyncio\n";
-    textPython += "import os\n";
-    textPython += "import subprocess\n";
-    textPython += "from ratel.src.python.utils import location_sharefile, prog, players, threshold, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
-    textPython += "\n";
+    textPythonUpper += "import ast\n";
+    textPythonUpper += "import asyncio\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
+    textPythonUpper += "\n";
+
+    textPythonUpper += "async def monitor(server):\n";
+    textPythonUpper += "    blkNum = server.web3.eth.get_block_number()\n";
+    textPythonUpper += "    while True:\n";
+    textPythonUpper += "        await asyncio.sleep(5)\n";
+    textPythonUpper += "        curBlkNum = server.web3.eth.get_block_number()\n";
+    textPythonUpper += "        if curBlkNum - blkNum > server.confirmation:\n";
 
     string pythonFile = "python/" + fileName + ".py";
     pythonFp = fopen(pythonFile.c_str(), "w");
 }
 
 void finalizePython() {
-    fprintf(pythonFp, "%s", textPython.c_str());
+    textPythonUpper += "            logs = []\n";
+    textPythonUpper += "\n";
+
+    for (vector<string>::iterator it = events.begin(); it != events.end(); it++) {
+        string eventName = *it;
+        textPythonUpper += "            eventFilter = server.contract.events." + eventName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - server.confirmation)\n";
+        textPythonUpper += "            _logs = eventFilter.get_all_entries()\n";
+        textPythonUpper += "            for log in _logs:\n";
+        textPythonUpper += "                logs.append((log[\'blockNumber\'], log[\'transactionIndex\'], \'" + eventName + "\', log))\n";
+    }
+    textPythonUpper += "\n";
+
+    textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
+    textPythonUpper += "            for log in logs:\n";
+    textPythonUpper += "                await eval(f'run\{log[2]\}')(server, log[3])\n";
+    textPythonUpper += "\n";
+
+    textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
+    textPythonUpper += "\n";
+
+    fprintf(pythonFp, "%s", textPythonUpper.c_str());
+    fprintf(pythonFp, "%s", textPythonLower.c_str());
     fclose(pythonFp);
 }
 
@@ -117,26 +145,18 @@ void finalizeMPC() {
 }
 
 void monitorEvent() {
-    textPython += "\n";
-    textPython += "async def monitor" + funcName + "(web3, db, serverID, contract, confirmation, account):\n";
-    textPython += "    blkNum = web3.eth.get_block_number()\n";
-    textPython += "    while True:\n";
-    textPython += "        await asyncio.sleep(5)\n";
-    textPython += "        curBlkNum = web3.eth.get_block_number()\n";
-    textPython += "        if curBlkNum - blkNum > confirmation:\n";
-    textPython += "            eventFilter = contract.events." + funcName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - confirmation)\n";
-    textPython += "            logs = eventFilter.get_all_entries()\n";
-    textPython += "            blkNum = curBlkNum - confirmation + 1\n";
-    textPython += "            for log in logs:\n";
-    textPython += "\n";
+    events.push_back(funcName);
 
-    textPython += tab(4) + "seq" + funcName + " = log['args']['seq" + funcName + "']\n";
+    textPythonLower += "\n";
+    textPythonLower += "async def run" + funcName + "(server, log):\n";
+
+    textPythonLower += tab(1) + "seq" + funcName + " = log['args']['seq" + funcName + "']\n";
     int num = args.size();
     for (int i = 0; i < num; i++) {
         string arg = args[i];
-        textPython += tab(4) + arg + " = log['args']['" + arg + "']\n";
+        textPythonLower += tab(1) + arg + " = log['args']['" + arg + "']\n";
     }
-    textPython += "\n";
+    textPythonLower += "\n";
 
     textRecover += "def recover" + funcName + "(seq" + funcName;
     for (int i = 0; i < num; i++) {
@@ -152,7 +172,7 @@ void readDB() {
     string value = "value" + to_string(++cntValueDB);
 
     textLine = prefix + "try:\n";
-    textLine += prefix + "    " + value + " = db.Get(" + args[0] + ".lower().encode())\n";
+    textLine += prefix + "    " + value + " = server.db.Get(" + args[0] + ".lower().encode())\n";
     textLine += prefix + "except KeyError:\n";
     textLine += prefix + "    " + value + " = bytes(0)\n";
     if (args[1] == "int") {
@@ -179,7 +199,7 @@ void writeDB() {
     if (args[2] == "int") {
         string key = args[0];
         string value = args[1];
-        textLine += tab(3) + "db.Put(" + key + ".lower().encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
+        textLine += "server.db.Put(" + key + ".lower().encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
     } else if (args[2] == "list" || args[2] == "dict") {
         string key = args[0];
         string value = args[1];
@@ -187,7 +207,7 @@ void writeDB() {
 
         textTmp = prefix + value + " = str(" + value + ")\n";
         textTmp += prefix + value + " = bytes(" + value + ", encoding='utf-8')\n";
-        textLine += tab(3) + "db.Put(" + key + ".lower().encode(), " + value + ")";
+        textLine += "server.db.Put(" + key + ".lower().encode(), " + value + ")";
         textLine = textTmp + textLine;
     } else {
         assert(0);
@@ -198,16 +218,16 @@ void writeDB() {
 
 void mpcInput() {
     //python
-    textPython += "\n";
-    textPython += prefix + "file = location_sharefile(serverID)\n";
-    textPython += prefix + "with open(file, \"wb\") as f:\n";
-    textPython += prefix + "    f.write(\n";
+    textPythonLower += "\n";
+    textPythonLower += prefix + "file = location_sharefile(server.serverID)\n";
+    textPythonLower += prefix + "with open(file, \"wb\") as f:\n";
+    textPythonLower += prefix + "    f.write(\n";
     numInput = args.size();
     for (int i = 0; i < numInput; i++) {
-        textPython += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
+        textPythonLower += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
     }
-    textPython += prefix + "    )\n";
-    textPython += "\n";
+    textPythonLower += prefix + tab(1) + ")\n";
+    textPythonLower += "\n";
 
     //mpc
     initMPC();
@@ -224,11 +244,15 @@ void mpcInput() {
     textMpc += "\n";
 
     //python
-    textPython += prefix + "env = os.environ.copy()\n";
-    textPython += prefix + "cmd = [prog, \'-N\', f\'{players(contract)}\', \'-T\', f\'{threshold(contract)}\', \'-p\', f\'{serverID}\', \'-pn\', f\'{mpcPort()}\', \'-P\', f\'{blsPrime}\', \'" + mpcFile.substr(4, mpcFile.length() - 8) + "\']\n";
-    textPython += prefix + "task = subprocess.Popen(cmd, env=env)\n";
-    textPython += prefix + "task.wait()\n";
-    textPython += "\n";
+    textPythonLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {mpcPort(seq" + funcName + ")} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
+    textPythonLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
+    textPythonLower += prefix + "stdout, stderr = await proc.communicate()\n";
+    textPythonLower += prefix + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
+    textPythonLower += prefix + "if stdout:\n";
+    textPythonLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
+    textPythonLower += prefix + "if stderr:\n";
+    textPythonLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    textPythonLower += "\n";
 }
 
 void mpcOutput() {
@@ -254,13 +278,13 @@ void mpcOutput() {
     finalizeMPC();
 
     //python
-    textPython += prefix + "input_arg_num = " + to_string(numInput) + "\n";
-    textPython += prefix + "with open(file, \"rb\") as f:\n";
-    textPython += prefix + "    f.seek(input_arg_num * sz)\n";
+    textPythonLower += prefix + "input_arg_num = " + to_string(numInput) + "\n";
+    textPythonLower += prefix + "with open(file, \"rb\") as f:\n";
+    textPythonLower += prefix + "    f.seek(input_arg_num * sz)\n";
     for (int i = 0; i < num; i++) {
-        textPython += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
+        textPythonLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
-    textPython += "\n";
+    textPythonLower += "\n";
 }
 
 void addText(char *yytext) {
@@ -308,8 +332,8 @@ SPACE [ \t\r]+
     isArg = true;
 
     string text = string(yytext);
-    prefix = getPrefix(text) + tab(3);
-    textLine += tab(3) + text.substr(0, text.length() - 7);
+    prefix = getPrefix(text);
+    textLine += text.substr(0, text.length() - 7);
 }
 
 ^.*writeDB\( {
@@ -317,7 +341,7 @@ SPACE [ \t\r]+
     isArg = true;
 
     string text = string(yytext);
-    prefix = getPrefix(text) + tab(3);
+    prefix = getPrefix(text);
     textLine += text.substr(0, text.length() - 8);
 }
 
@@ -325,7 +349,7 @@ SPACE [ \t\r]+
     isMpcInput = true;
     isArg = true;
 
-    prefix = getPrefix(string(yytext)) + tab(3);
+    prefix = getPrefix(string(yytext));
 }
 
 ^.*mpcOutput\( {
@@ -391,7 +415,7 @@ SPACE [ \t\r]+
 
         isEvent = false;
     } else if (isReadDB) {
-        textPython += textLine;
+        textPythonLower += textLine;
 
         isReadDB = false;
     } else if (isMpcInput) {
@@ -405,14 +429,14 @@ SPACE [ \t\r]+
 
         isMpcOutput = false;
     } else if (isWriteDB) {
-        textPython += textLine;
+        textPythonLower += textLine;
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
         if (isMPC) {
             textMpc += tab(1) + removeSpace(textLine);
         } else {
-            textPython += tab(3) + textLine;
+            textPythonLower += textLine;
         }
     }
 

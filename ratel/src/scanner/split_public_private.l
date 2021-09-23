@@ -183,7 +183,7 @@ void unmaskInput() {
             string varName = removeType(args[i]);
             string postVarName = varName;
             postVarName[0] = toupper(postVarName[0]);
-            textLine += "    " + varName + " = recover_input(db, masked" + postVarName + ", idx" + postVarName + ")\n";
+            textLine += "    " + varName + " = recover_input(server.db, masked" + postVarName + ", idx" + postVarName + ")\n";
         }
     }
 }
@@ -289,16 +289,16 @@ void callFunc(string op) {
     }
 
     textPrivate += "\n";
-    textPrivate += indent + "    tx = contract.functions." + opName + op + "(";
+    textPrivate += indent + "    tx = server.server.contract.functions." + opName + op + "(";
     for (int i = 1; i < args.size(); i++) {
         if (i > 1) textPrivate += ", ";
         textPrivate += removeType(args[i]);
     }
-    textPrivate += ").buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})\n";
-    textPrivate += indent + "    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)\n";
-    textPrivate += indent + "    web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
-    textPrivate += indent + "    web3.eth.wait_for_transaction_receipt(signedTx.hash)\n";
-    textPrivate += indent + "    print(contract.functions." + varName + "(";
+    textPrivate += ").buildTransaction({'from': server.account.address, 'gas': 1000000, 'nonce': server.web3.eth.get_transaction_count(server.account.address)})\n";
+    textPrivate += indent + "    signedTx = server.web3.eth.account.sign_transaction(tx, private_key=server.account.privateKey)\n";
+    textPrivate += indent + "    server.web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
+    textPrivate += indent + "    server.web3.eth.wait_for_transaction_receipt(signedTx.hash)\n";
+    textPrivate += indent + "    print(server.contract.functions." + varName + "(";
 
     for (int i = 2 + init; i < args.size(); i++) {
         if (i > 2 + init) textPrivate += ", ";
@@ -486,8 +486,8 @@ int main(int argc, char **argv) {
     textRecover += "from eth_abi import decode_single\n";
     textRecover += "\n";
     textRecover += "def recover(contract, opSeq):\n";
-    textRecover += "    opEvent = contract.functions.opEvent(opSeq).call()\n";
-    textRecover += "    opContent = contract.functions.opContent(opSeq).call()\n";
+    textRecover += "    opEvent = server.contract.functions.opEvent(opSeq).call()\n";
+    textRecover += "    opContent = server.contract.functions.opContent(opSeq).call()\n";
     textRecover += "\n";
 
 	yylex();

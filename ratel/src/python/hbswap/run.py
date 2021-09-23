@@ -4,12 +4,15 @@ import sys
 
 from ratel.genfiles.python.hbswapRecover import recover
 from ratel.src.python.Server import Server, getAccount
-from ratel.src.python.deploy import parse_contract, appAddress, confirmation, url
-from ratel.src.python.utils import openDB, location_db, http_port, http_host
+from ratel.src.python.deploy import parse_contract, appAddress, url
+from ratel.src.python.utils import openDB, location_db, http_port, http_host, confirmation
 from web3 import Web3
 
 if __name__ == '__main__':
     serverID = int(sys.argv[1])
+    init_players = int(sys.argv[2])
+    init_threshold = int(sys.argv[3])
+
     db = openDB(location_db(serverID))
     web3 = Web3(Web3.WebsocketProvider(url))
     account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
@@ -27,19 +30,14 @@ if __name__ == '__main__':
         appContract,
         web3,
         account,
-        confirmation
+        confirmation,
+        init_players,
+        init_threshold,
     )
 
-    ### EDIT application specific monitoring tasks below
     app_tasks = [
-        hbswap.monitorSecretDeposit(web3, db, serverID, appContract, confirmation, account),
-        hbswap.monitorSecretWithdraw(web3, db, serverID, appContract, confirmation, account),
-        hbswap.monitorInitPool(web3, db, serverID, appContract, confirmation, account),
-        hbswap.monitorAddLiquidity(web3, db, serverID, appContract, confirmation, account),
-        hbswap.monitorRemoveLiquidity(web3, db, serverID, appContract, confirmation, account),
-        hbswap.monitorTrade(web3, db, serverID, appContract, confirmation, account)
+        hbswap.monitor(server)
     ]
-    ###
 
     ### CHANGE: recover function
     asyncio.run(server.init(recover, app_tasks))

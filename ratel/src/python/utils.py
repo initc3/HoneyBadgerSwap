@@ -4,8 +4,8 @@ import os
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
 
-def mpcPort():
-    return 5000
+def mpcPort(seq):
+    return mpc_port + seq % concurrency
 
 def key_inputmask(idx):
     return f'inputmask_{idx}'.encode()
@@ -77,8 +77,6 @@ def reconstruct(shares, n):
     return inputmask
 
 prog = './malicious-shamir-party.x'
-init_players = 3 #4
-init_threshold = 1
 blsPrime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
 leaderHostname = 'mpcnode0'
 R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
@@ -93,3 +91,8 @@ batchShares = 1000
 
 http_host = "0.0.0.0"
 http_port = 4000
+
+mpc_port = 5000
+concurrency = 1
+
+confirmation = 2
