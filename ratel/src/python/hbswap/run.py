@@ -2,7 +2,9 @@ import asyncio
 import ratel.genfiles.python.hbswap as hbswap
 import sys
 
+### recover function
 from ratel.genfiles.python.hbswapRecover import recover
+###
 from ratel.src.python.Server import Server, getAccount
 from ratel.src.python.deploy import parse_contract, appAddress, url
 from ratel.src.python.utils import openDB, location_db, http_port, http_host, confirmation
@@ -17,7 +19,7 @@ if __name__ == '__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
     account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
 
-    ### ACCESS contract
+    ### App contract
     abi, bytecode = parse_contract('hbswap')
     appContract = web3.eth.contract(address=appAddress, abi=abi)
     ###
@@ -35,10 +37,5 @@ if __name__ == '__main__':
         init_threshold,
     )
 
-    app_tasks = [
-        hbswap.monitor(server)
-    ]
-
-    ### CHANGE: recover function
-    asyncio.run(server.init(recover, app_tasks))
-    ###
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(server.init(recover, hbswap.monitor(server, loop)))

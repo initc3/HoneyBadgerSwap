@@ -80,7 +80,7 @@ void initPython() {
     textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
     textPythonUpper += "\n";
 
-    textPythonUpper += "async def monitor(server):\n";
+    textPythonUpper += "async def monitor(server, loop):\n";
     textPythonUpper += "    blkNum = server.web3.eth.get_block_number()\n";
     textPythonUpper += "    while True:\n";
     textPythonUpper += "        await asyncio.sleep(5)\n";
@@ -106,7 +106,7 @@ void finalizePython() {
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
     textPythonUpper += "            for log in logs:\n";
-    textPythonUpper += "                await eval(f'run\{log[2]\}')(server, log[3])\n";
+    textPythonUpper += "                asyncio.ensure_future(eval(f'run\{log[2]\}')(server, log[3]), loop=loop)\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
@@ -244,7 +244,9 @@ void mpcInput() {
     textMpc += "\n";
 
     //python
-    textPythonLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {mpcPort(seq" + funcName + ")} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
+    textPythonLower += prefix + "port = mpcPort(seq" + funcName + ")\n";
+    textPythonLower += prefix + "await server.portLock[port].acquire()\n";
+    textPythonLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
     textPythonLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
     textPythonLower += prefix + "stdout, stderr = await proc.communicate()\n";
     textPythonLower += prefix + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
@@ -252,6 +254,7 @@ void mpcInput() {
     textPythonLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
     textPythonLower += prefix + "if stderr:\n";
     textPythonLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    textPythonLower += prefix + "server.portLock[port].release()\n";
     textPythonLower += "\n";
 }
 
