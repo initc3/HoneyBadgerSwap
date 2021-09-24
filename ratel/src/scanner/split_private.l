@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <assert.h>
+#include <set>
 
 using namespace std;
 
@@ -22,7 +23,9 @@ int cntMPC;
 bool isMPC;
 
 string textLine;
-string textPythonUpper, textPythonLower, textMpc;
+string textPythonUpper, textPythonLower;
+string textFuncUpper, textFuncMid, textFuncLower;
+string textMpc;
 
 bool isArg;
 string arg;
@@ -33,6 +36,9 @@ string prefix;
 string textRecover;
 
 vector<string> events;
+
+bool isFuncLower;
+set<string> keyReadDB, keyWriteDB;
 
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
@@ -147,16 +153,16 @@ void finalizeMPC() {
 void monitorEvent() {
     events.push_back(funcName);
 
-    textPythonLower += "\n";
-    textPythonLower += "async def run" + funcName + "(server, log):\n";
+    textFuncUpper += "\n";
+    textFuncUpper += "async def run" + funcName + "(server, log):\n";
 
-    textPythonLower += tab(1) + "seq" + funcName + " = log['args']['seq" + funcName + "']\n";
+    textFuncUpper += tab(1) + "seq" + funcName + " = log['args']['seq" + funcName + "']\n";
     int num = args.size();
     for (int i = 0; i < num; i++) {
         string arg = args[i];
-        textPythonLower += tab(1) + arg + " = log['args']['" + arg + "']\n";
+        textFuncUpper += tab(1) + arg + " = log['args']['" + arg + "']\n";
     }
-    textPythonLower += "\n";
+    textFuncUpper += "\n";
 
     textRecover += "def recover" + funcName + "(seq" + funcName;
     for (int i = 0; i < num; i++) {
@@ -170,6 +176,8 @@ void readDB() {
     string textTmp = textLine;
 
     string value = "value" + to_string(++cntValueDB);
+
+    keyReadDB.insert(args[0]);
 
     textLine = prefix + "try:\n";
     textLine += prefix + "    " + value + " = server.db.Get(" + args[0] + ".lower().encode())\n";
@@ -196,6 +204,7 @@ void readDB() {
 }
 
 void writeDB() {
+    keyWriteDB.insert(args[0]);
     if (args[2] == "int") {
         string key = args[0];
         string value = args[1];
@@ -218,16 +227,16 @@ void writeDB() {
 
 void mpcInput() {
     //python
-    textPythonLower += "\n";
-    textPythonLower += prefix + "file = location_sharefile(server.serverID)\n";
-    textPythonLower += prefix + "with open(file, \"wb\") as f:\n";
-    textPythonLower += prefix + "    f.write(\n";
+    textFuncLower += "\n";
+    textFuncLower += prefix + "file = location_sharefile(server.serverID)\n";
+    textFuncLower += prefix + "with open(file, \"wb\") as f:\n";
+    textFuncLower += prefix + "    f.write(\n";
     numInput = args.size();
     for (int i = 0; i < numInput; i++) {
-        textPythonLower += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
+        textFuncLower += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
     }
-    textPythonLower += prefix + tab(1) + ")\n";
-    textPythonLower += "\n";
+    textFuncLower += prefix + tab(1) + ")\n";
+    textFuncLower += "\n";
 
     //mpc
     initMPC();
@@ -244,18 +253,18 @@ void mpcInput() {
     textMpc += "\n";
 
     //python
-    textPythonLower += prefix + "port = mpcPort(seq" + funcName + ")\n";
-    textPythonLower += prefix + "await server.portLock[port].acquire()\n";
-    textPythonLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
-    textPythonLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
-    textPythonLower += prefix + "stdout, stderr = await proc.communicate()\n";
-    textPythonLower += prefix + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
-    textPythonLower += prefix + "if stdout:\n";
-    textPythonLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
-    textPythonLower += prefix + "if stderr:\n";
-    textPythonLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
-    textPythonLower += prefix + "server.portLock[port].release()\n";
-    textPythonLower += "\n";
+    textFuncLower += prefix + "port = mpcPort(seq" + funcName + ")\n";
+    textFuncLower += prefix + "await server.portLock[port].acquire()\n";
+    textFuncLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
+    textFuncLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
+    textFuncLower += prefix + "stdout, stderr = await proc.communicate()\n";
+    textFuncLower += prefix + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
+    textFuncLower += prefix + "if stdout:\n";
+    textFuncLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
+    textFuncLower += prefix + "if stderr:\n";
+    textFuncLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    textFuncLower += prefix + "server.portLock[port].release()\n";
+    textFuncLower += "\n";
 }
 
 void mpcOutput() {
@@ -281,13 +290,13 @@ void mpcOutput() {
     finalizeMPC();
 
     //python
-    textPythonLower += prefix + "input_arg_num = " + to_string(numInput) + "\n";
-    textPythonLower += prefix + "with open(file, \"rb\") as f:\n";
-    textPythonLower += prefix + "    f.seek(input_arg_num * sz)\n";
+    textFuncLower += prefix + "input_arg_num = " + to_string(numInput) + "\n";
+    textFuncLower += prefix + "with open(file, \"rb\") as f:\n";
+    textFuncLower += prefix + "    f.seek(input_arg_num * sz)\n";
     for (int i = 0; i < num; i++) {
-        textPythonLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
+        textFuncLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
-    textPythonLower += "\n";
+    textFuncLower += "\n";
 }
 
 void addText(char *yytext) {
@@ -328,11 +337,18 @@ SPACE [ \t\r]+
     isArg = true;
     cntMPC = 0;
     cntValueDB = 0;
+    isFuncLower = false;
+    textFuncUpper = "";
+    textFuncMid = "";
+    textFuncLower = "";
+    keyReadDB.clear();
+    keyWriteDB.clear();
 }
 
 ^.*readDB\( {
     isReadDB = true;
     isArg = true;
+    isFuncLower = true;
 
     string text = string(yytext);
     prefix = getPrefix(text);
@@ -405,7 +421,61 @@ SPACE [ \t\r]+
 \} {
     braces--;
     if (braces > 0) addText(yytext);
-    else textRecover += "]\n\n";
+    else {
+        textRecover += "]\n\n";
+
+        textFuncUpper += "\n";
+        textFuncUpper += "    await server.dbLock['access'].acquire()\n";
+        textFuncUpper += "    readKeys = [";
+        set<string> _set;
+        string tmp;
+        for (set<string>::iterator it = keyReadDB.begin(); it != keyReadDB.end(); it++) {
+            string key = *it;
+            if (keyWriteDB.find(key) != keyWriteDB.end()) {
+                _set.insert(key);
+            }
+        }
+        for (set<string>::iterator it = _set.begin(); it != _set.end(); it++) {
+            keyReadDB.erase(*it);
+        }
+        for (set<string>::iterator it = keyReadDB.begin(); it != keyReadDB.end(); it++) {
+            tmp += *it + ", ";
+        }
+
+        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+        textFuncUpper += tmp + "]\n";
+
+        textFuncUpper += "    writeKeys = [";
+        tmp = "";
+        for (set<string>::iterator it = keyWriteDB.begin(); it != keyWriteDB.end(); it++) {
+            tmp += *it + ", ";
+        }
+        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+        textFuncUpper += tmp + "]\n";
+
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+
+        textFuncUpper += "    server.dbLock['access'].release()\n";
+
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        await server.dbLock[key].acquire()\n";
+
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        await server.dbLock[key].acquire()\n";
+
+        textFuncUpper += "\n";
+
+        textFuncMid += "    for key in readKeys:\n";
+        textFuncMid += "        server.dbLock[key].release()\n";
+
+        textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
+    }
 }
 
 \n {
@@ -418,7 +488,7 @@ SPACE [ \t\r]+
 
         isEvent = false;
     } else if (isReadDB) {
-        textPythonLower += textLine;
+        textFuncMid += textLine;
 
         isReadDB = false;
     } else if (isMpcInput) {
@@ -432,14 +502,20 @@ SPACE [ \t\r]+
 
         isMpcOutput = false;
     } else if (isWriteDB) {
-        textPythonLower += textLine;
+        textFuncLower += textLine;
+        string key = args[0];
+        textFuncLower += "    server.dbLock[" + key + "].release()\n";
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
         if (isMPC) {
             textMpc += tab(1) + removeSpace(textLine);
         } else {
-            textPythonLower += textLine;
+            if (isFuncLower) {
+                textFuncLower += textLine;
+            } else {
+                textFuncUpper += textLine;
+            }
         }
     }
 

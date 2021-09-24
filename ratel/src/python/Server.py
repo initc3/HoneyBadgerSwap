@@ -34,7 +34,10 @@ class Server:
 
         self.portLock = {}
         for i in range(concurrency):
-            self.portLock[mpc_port + i] = asyncio.Lock()
+            self.portLock[mpc_port + i * 100] = asyncio.Lock()
+
+        self.dbLock  = {}
+        self.dbLock['access'] = asyncio.Lock()
 
     async def http_server(self):
         async def handler_inputmask(request):
