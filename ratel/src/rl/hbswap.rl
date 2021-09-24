@@ -41,16 +41,21 @@ contract Hbswap {
         publicBalance[token][user] -= amt;
 
         mpc(address user, address token, uint amt) {
+            print('**** begin deposit', seqSecretDeposit)
+
             secretBalance = readDB(f'balance_{token}_{user}', int)
 
             mpcInput(sfix secretBalance, sfix amt)
 
             secretBalance += amt
+            print_ln("**** secretBalance %s", secretBalance.reveal())
 
             mpcOutput(sfix secretBalance)
 
             print('**** secretBalance', token, secretBalance)
             writeDB(f'balance_{token}_{user}', secretBalance, int)
+
+            print('**** end deposit', seqSecretDeposit)
         }
     }
 
@@ -95,6 +100,7 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, uint amtA, uint amtB) {
+            print('**** begin initPool')
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             balanceLT = readDB(f'balance_{tokenA}+{tokenB}_{user}', int)
@@ -112,6 +118,10 @@ contract Hbswap {
             enoughB = balanceB >= amtB
             zeroTotalLT = totalSupplyLT == 0
             validOrder = (enoughA * enoughB * zeroTotalLT).reveal()
+            print_ln("**** balanceA %s", balanceA.reveal())
+            print_ln("**** balanceB %s", balanceB.reveal())
+            print_ln("**** poolA %s", poolA.reveal())
+            print_ln("**** poolB %s", poolB.reveal())
 
             if_then(validOrder)
             balanceA -= amtA
@@ -121,8 +131,14 @@ contract Hbswap {
             poolB += amtB
             totalSupplyLT += amtLT
             end_if()
+            print_ln("**** balanceA %s", balanceA.reveal())
+            print_ln("**** balanceB %s", balanceB.reveal())
+            print_ln("**** balanceLT %s", balanceLT.reveal())
+            print_ln("**** poolA %s", poolA.reveal())
+            print_ln("**** poolB %s", poolB.reveal())
+            print_ln("**** totalSupplyLT %s", totalSupplyLT.reveal())
 
-            mpcOutput(sfix balanceA, sfix balanceB, sfix balanceLT, sfix poolA, sfix poolB, sfix totalSupplyLT)
+            mpcOutput(cint validOrder, sfix balanceA, sfix balanceB, sfix balanceLT, sfix poolA, sfix poolB, sfix totalSupplyLT)
 
             print('**** after initPool', balanceA, balanceB, balanceLT, poolA, poolB, totalSupplyLT)
 
@@ -133,9 +149,12 @@ contract Hbswap {
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenB}', poolB, int)
             writeDB(f'total_supply_{tokenA}_{tokenB}', totalSupplyLT, int)
 
-            initPrice = str(1. * amtB / amtA)
-            print('**** initPrice', initPrice, tokenA, tokenB)
-            set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
+            if validOrder == 1:
+                initPrice = str(1. * amtB / amtA)
+                print('**** initPrice', initPrice, tokenA, tokenB)
+                set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
+
+            print('**** end initPool')
         }
     }
 

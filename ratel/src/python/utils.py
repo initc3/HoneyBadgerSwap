@@ -5,7 +5,7 @@ from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
 
 def mpcPort(seq):
-    return mpc_port + seq % concurrency
+    return mpc_port + seq % concurrency * 100
 
 def key_inputmask(idx):
     return f'inputmask_{idx}'.encode()
@@ -93,6 +93,6 @@ http_host = "0.0.0.0"
 http_port = 4000
 
 mpc_port = 5000
-concurrency = 1
+concurrency = 2
 
 confirmation = 2
