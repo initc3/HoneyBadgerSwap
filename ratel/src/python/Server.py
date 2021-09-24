@@ -8,7 +8,7 @@ import subprocess
 from aiohttp import web
 from ratel.src.python.Client import send_request, reserveInput
 from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, batchShares, blsPrime, \
-    location_inputmask, http_host, http_port, reconstruct
+    location_inputmask, http_host, http_port, reconstruct, mpc_port, concurrency
 
 def getAccount(web3, keystoreDir):
     for filename in os.listdir(keystoreDir):
@@ -31,6 +31,10 @@ class Server:
         self.threshold = init_threshold
 
         self.totInputMask = 0 #self.contract.functions.inputMaskCnt().call()
+
+        self.portLock = {}
+        for i in range(concurrency):
+            self.portLock[mpc_port + i] = asyncio.Lock()
 
     async def http_server(self):
         async def handler_inputmask(request):
@@ -92,23 +96,23 @@ class Server:
         await site.start()
         await asyncio.sleep(100 * 3600)
 
-    async def init(self, recover, app_tasks):
-        async def prepare(recover, app_tasks):
+    async def init(self, recover, apptask):
+        async def prepare(recover, apptask):
             isServer = self.contract.functions.isServer(self.account.address).call()
             if not isServer:
                 self.registerServer()
                 await self.recoverHistory(recover)
 
             tasks = [
-                     self.preprocessing(),
-                     self.monitorNewServer(),
-                     self.http_server()
+                self.preprocessing(),
+                self.monitorNewServer(),
+                self.http_server(),
+                apptask,
             ]
-            tasks.extend(app_tasks)
             await asyncio.gather(*tasks)
 
         tasks = [
-            prepare(recover, app_tasks),
+            prepare(recover, apptask),
             self.monitorGenInputMask(),
         ]
         await asyncio.wait(tasks)
