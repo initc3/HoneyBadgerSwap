@@ -255,6 +255,7 @@ void mpcInput() {
     //python
     textFuncLower += prefix + "port = mpcPort(seq" + funcName + ")\n";
     textFuncLower += prefix + "await server.portLock[port].acquire()\n";
+    textFuncLower += prefix + "server.dbLock['access'].release()\n";
     textFuncLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
     textFuncLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
     textFuncLower += prefix + "stdout, stderr = await proc.communicate()\n";
@@ -460,8 +461,6 @@ SPACE [ \t\r]+
         textFuncUpper += "    for key in writeKeys:\n";
         textFuncUpper += "        if key not in server.dbLock.keys():\n";
         textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
-
-        textFuncUpper += "    server.dbLock['access'].release()\n";
 
         textFuncUpper += "    for key in readKeys:\n";
         textFuncUpper += "        await server.dbLock[key].acquire()\n";
