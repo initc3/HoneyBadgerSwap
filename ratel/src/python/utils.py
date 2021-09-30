@@ -1,8 +1,42 @@
+import asyncio
+
 import leveldb
 import os
 
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
+
+class MultiAcquire(asyncio.Task):
+    _check_lock = asyncio.Lock()  # to suspend for creating task that acquires objects
+    _release_event = asyncio.Event()  # to suspend for any object was released
+
+    def __init__(self, locks):
+        super().__init__(self._task_coro())
+        self._locks = locks
+        # Here we use decorator to subscribe all release() calls,
+        # _release_event would be set in this case:
+        for l in self._locks:
+            l.release = self._notify(l.release)
+
+    async def _task_coro(self):
+        while True:
+            # Create task to acquire all locks and break on success:
+            async with type(self)._check_lock:
+                if not any(l.locked() for l in self._locks):  # task would be created only if all objects can be acquired
+                    task = asyncio.gather(*[l.acquire() for l in self._locks])  # create task to acquire all objects
+                    await asyncio.sleep(0)  # start task without waiting for it
+                    break
+            # Wait for any release() to try again:
+            await type(self)._release_event.wait()
+        # Wait for task:
+        return await task
+
+    def _notify(self, func):
+        def wrapper(*args, **kwargs):
+            type(self)._release_event.set()
+            type(self)._release_event.clear()
+            return func(*args, **kwargs)
+        return wrapper
 
 def mpcPort(seq):
     return mpc_port + seq % concurrency * 100
