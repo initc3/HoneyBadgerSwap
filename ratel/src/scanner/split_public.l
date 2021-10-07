@@ -43,6 +43,10 @@ SPACE [ \t\r]*
     textPublic += "    mapping (address => uint) public numCommittee;\n";
     textPublic += "\n";
 
+    textPublic += "    mapping (uint => uint) public voteFinalization;\n";
+    textPublic += "    mapping (uint => mapping (address => bool)) public votedFinalization;\n";
+    textPublic += "    mapping (uint => uint) public finalizedTime;\n";
+
     textPublic += string(yytext);
     isConstructorHead = true;
 }
@@ -148,8 +152,18 @@ SPACE [ \t\r]*
         textPublic += "           inputMaskIndexes[i] = inputMaskIdx;\n";
         textPublic += "        }\n";
         textPublic += "        emit InputMask(inputMaskIndexes);\n";
-        textPublic += "    }";
+        textPublic += "    }\n";
         textPublic += "\n";
+
+        textPublic += "    function finalize(uint seq) public {\n";
+        textPublic += "        address server = msg.sender;\n";
+        textPublic += "        require(isServer[server] && !votedFinalization[seq][server]);\n";
+        textPublic += "        votedFinalization[seq][server] = true;\n";
+        textPublic += "        voteFinalization[seq] += 1;\n";
+        textPublic += "        if (voteFinalization[seq] > T && finalizedTime[seq] != 0) {\n";
+        textPublic += "            finalizedTime[seq] = block.number;\n";
+        textPublic += "        }\n";
+        textPublic += "    }\n";
 
     } else textPublic += string(yytext);
 }
