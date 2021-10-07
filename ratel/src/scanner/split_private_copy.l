@@ -261,7 +261,7 @@ void mpcInput() {
     textFuncLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
     textFuncLower += prefix + "if stderr:\n";
     textFuncLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
-//    textFuncLower += prefix + "server.portLock[port].release()\n";
+    textFuncLower += prefix + "server.portLock[port].release()\n";
     textFuncLower += "\n";
 }
 
@@ -475,21 +475,6 @@ SPACE [ \t\r]+
         textFuncMid += "    for key in readKeys:\n";
         textFuncMid += "        server.dbLock[key].release()\n";
 
-        textFuncLower += "    tx = server.contract.functions.finalize(seq" + funcName + ").buildTransaction({'from': server.account.address, 'gas': 1000000, 'nonce': server.web3.eth.get_transaction_count(server.account.address)})\n";
-        textFuncLower += "    signedTx = server.web3.eth.account.sign_transaction(tx, private_key=server.account.privateKey)\n";
-        textFuncLower += "    server.web3.eth.send_raw_transaction(signedTx.rawTransaction)\n";
-        textFuncLower += "    while True:\n";
-        textFuncLower += "        finalizedTime = server.contract.functions.finalizedTime(seq" + funcName + ").call()\n";
-        textFuncLower += "        blockNum = server.web3.eth.block_number\n";
-        textFuncLower += "        if finalizedTime != 0 and blockNum - finalizedTime > server.confirmation:\n";
-        textFuncLower += "            break\n";
-        textFuncLower += "        await asyncio.sleep(1)\n";
-        textFuncLower += "\n";
-
-        textFuncLower += "    server.portLock[port].release()\n";
-        textFuncLower += "    for key in writeKeys:\n";
-        textFuncLower += "        server.dbLock[key].release()\n";
-
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
     }
 }
@@ -520,7 +505,7 @@ SPACE [ \t\r]+
     } else if (isWriteDB) {
         textFuncLower += textLine;
         string key = args[0];
-//        textFuncLower += "    server.dbLock[" + key + "].release()\n";
+        textFuncLower += "    server.dbLock[" + key + "].release()\n";
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
