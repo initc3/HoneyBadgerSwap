@@ -11,14 +11,14 @@ RUN git clone https://github.com/ethereum/go-ethereum.git
 
 COPY src /go/src/github.com/initc3/HoneyBadgerSwap/src
 
-WORKDIR /go/src/github.com/initc3/HoneyBadgerSwap/src
-RUN go get -d -v ./...
+#WORKDIR /go/src/github.com/initc3/HoneyBadgerSwap/src
+#RUN go get -d -v ./...
 
 # needed to deploy contracts
 # TODO: verify whether poa dir is really needed, or what is needed from it, maybe
 # the keystore is sufficient
-COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
-COPY poa/keystore /opt/poa/keystore
+#COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it
+#COPY poa/keystore /opt/poa/keystore
 
 
 # MPC program compilation to bytecodes
@@ -89,7 +89,7 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 COPY --from=go-deps /go/src /go/src
-RUN go build -o $HBSWAP_HOME/mpcserver /go/src/github.com/initc3/HoneyBadgerSwap/src/go/server/server.go
+#RUN go build -o $HBSWAP_HOME/mpcserver /go/src/github.com/initc3/HoneyBadgerSwap/src/go/server/server.go
 
 # Python (HTTP server) dependencies for HTTP server
 RUN apt-get update && apt-get install -y --no-install-recommends \
