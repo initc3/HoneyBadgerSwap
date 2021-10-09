@@ -22,7 +22,7 @@ COPY poa/keystore /opt/poa/keystore
 
 
 # MPC program compilation to bytecodes
-FROM python:3.8 as mpc-bytecodes
+FROM python:3.8-buster as mpc-bytecodes
 
 ENV PYTHONUNBUFFERED 1
 
@@ -36,7 +36,7 @@ RUN bash compile.sh
 
 
 # main image
-FROM python:3.8
+FROM python:3.8-buster
 
 ENV PYTHONUNBUFFERED 1
 
