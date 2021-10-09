@@ -1,4 +1,4 @@
-FROM python:3.8 as base-mp-spdz
+FROM python:3.8-buster as base-mp-spdz
 
 ENV PYTHONUNBUFFERED 1
 
@@ -82,7 +82,7 @@ RUN make malicious-shamir-party.x
 ########################## end of mp-spdz builds #######################################
 
 #FROM base-mp-spdz as hbswap
-FROM python:3.8 as hbswap
+FROM python:3.8-buster as hbswap
 
 ENV PYTHONUNBUFFERED 1
 
