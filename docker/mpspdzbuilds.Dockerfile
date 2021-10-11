@@ -1,4 +1,4 @@
-FROM python:3.8 as compiler
+FROM python:3.8-buster as compiler
 
 ENV PYTHONUNBUFFERED 1
 
@@ -9,7 +9,7 @@ COPY MP-SPDZ/Compiler Compiler
 RUN mkdir -p Programs/Source
 ###############################################################################
 
-FROM python:3.8 as machines
+FROM python:3.8-buster as machines
 
 ENV PYTHONUNBUFFERED 1
 
