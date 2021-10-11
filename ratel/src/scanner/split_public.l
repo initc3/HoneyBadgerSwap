@@ -160,7 +160,7 @@ SPACE [ \t\r]*
         textPublic += "        require(isServer[server] && !votedFinalization[seq][server]);\n";
         textPublic += "        votedFinalization[seq][server] = true;\n";
         textPublic += "        voteFinalization[seq] += 1;\n";
-        textPublic += "        if (voteFinalization[seq] > T && finalizedTime[seq] != 0) {\n";
+        textPublic += "        if (voteFinalization[seq] > T && finalizedTime[seq] == 0) {\n";
         textPublic += "            finalizedTime[seq] = block.number;\n";
         textPublic += "        }\n";
         textPublic += "    }\n";
