@@ -5,9 +5,8 @@ import sys
 ### recover function
 from ratel.genfiles.python.hbswapRecover import recover
 ###
-from ratel.src.python.Server import Server, getAccount
-from ratel.src.python.deploy import parse_contract, appAddress, url
-from ratel.src.python.utils import openDB, location_db, http_port, http_host, confirmation
+from ratel.src.python.Server import Server
+from ratel.src.python.deploy import parse_contract, url, addrs
 from web3 import Web3
 
 if __name__ == '__main__':
@@ -15,24 +14,17 @@ if __name__ == '__main__':
     init_players = int(sys.argv[2])
     init_threshold = int(sys.argv[3])
 
-    db = openDB(location_db(serverID))
     web3 = Web3(Web3.WebsocketProvider(url))
-    account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
 
     ### App contract
     abi, bytecode = parse_contract('hbswap')
-    appContract = web3.eth.contract(address=appAddress, abi=abi)
+    appContract = web3.eth.contract(address=addrs[0], abi=abi)
     ###
 
     server = Server(
         serverID,
-        db,
-        http_host,
-        http_port + serverID,
-        appContract,
         web3,
-        account,
-        confirmation,
+        appContract,
         init_players,
         init_threshold,
     )

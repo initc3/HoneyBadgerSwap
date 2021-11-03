@@ -289,7 +289,7 @@ void callFunc(string op) {
     }
 
     textPrivate += "\n";
-    textPrivate += indent + "    tx = server.server.contract.functions." + opName + op + "(";
+    textPrivate += indent + "    tx = server.contract.functions." + opName + op + "(";
     for (int i = 1; i < args.size(); i++) {
         if (i > 1) textPrivate += ", ";
         textPrivate += removeType(args[i]);
