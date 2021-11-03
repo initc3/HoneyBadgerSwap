@@ -8,24 +8,18 @@ import subprocess
 from aiohttp import web
 from ratel.src.python.Client import send_request, reserveInput
 from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, batchShares, blsPrime, \
-    location_inputmask, http_host, http_port, reconstruct, mpc_port, concurrency
-
-def getAccount(web3, keystoreDir):
-    for filename in os.listdir(keystoreDir):
-        with open(keystoreDir + filename) as keyfile:
-            encryptedKey = keyfile.read()
-            privateKey = web3.eth.account.decrypt(encryptedKey, '')
-            return web3.eth.account.privateKeyToAccount(privateKey)
+    location_inputmask, http_host, http_port, reconstruct, mpc_port, concurrency, location_db, openDB, getAccount, \
+    confirmation
 
 class Server:
-    def __init__(self, serverID, db, host, http_port, contract, web3, account, confirmation, init_players, init_threshold):
+    def __init__(self, serverID, web3, contract, init_players, init_threshold):
         self.serverID = serverID
-        self.db = db
-        self.host = host
-        self.http_port = http_port
+        self.db = openDB(location_db(serverID))
+        self.host = http_host
+        self.http_port = http_port + serverID
         self.contract = contract
         self.web3 = web3
-        self.account = account
+        self.account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
         self.confirmation = confirmation
         self.players = init_players
         self.threshold = init_threshold

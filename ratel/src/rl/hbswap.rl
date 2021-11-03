@@ -41,7 +41,7 @@ contract Hbswap {
         publicBalance[token][user] -= amt;
 
         mpc(address user, address token, uint amt) {
-            print('**** begin deposit', seqSecretDeposit)
+            #print('**** begin deposit', seqSecretDeposit)
 
             secretBalance = readDB(f'balance_{token}_{user}', int)
 
@@ -52,10 +52,10 @@ contract Hbswap {
 
             mpcOutput(sfix secretBalance)
 
-            print('**** secretBalance', token, secretBalance)
+            #print('**** secretBalance', token, secretBalance)
             writeDB(f'balance_{token}_{user}', secretBalance, int)
 
-            print('**** end deposit', seqSecretDeposit)
+            #print('**** end deposit', seqSecretDeposit)
         }
     }
 
@@ -100,7 +100,7 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, uint amtA, uint amtB) {
-            print('**** begin initPool')
+            #print('**** begin initPool')
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             balanceLT = readDB(f'balance_{tokenA}+{tokenB}_{user}', int)
@@ -111,7 +111,7 @@ contract Hbswap {
             import math
             amtLT = math.floor(math.sqrt(amtA * amtB))
 
-            print('**** before initPool', balanceA, amtA, balanceB, amtB, totalSupplyLT, balanceLT, poolA, poolB, amtLT)
+            #print('**** before initPool', balanceA, amtA, balanceB, amtB, totalSupplyLT, balanceLT, poolA, poolB, amtLT)
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix totalSupplyLT, sfix balanceLT, sfix poolA, sfix poolB, sfix amtLT)
 
             enoughA = balanceA >= amtA
@@ -140,7 +140,7 @@ contract Hbswap {
 
             mpcOutput(cint validOrder, sfix balanceA, sfix balanceB, sfix balanceLT, sfix poolA, sfix poolB, sfix totalSupplyLT)
 
-            print('**** after initPool', balanceA, balanceB, balanceLT, poolA, poolB, totalSupplyLT)
+            #print('**** after initPool', balanceA, balanceB, balanceLT, poolA, poolB, totalSupplyLT)
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -154,7 +154,7 @@ contract Hbswap {
                 print('**** initPrice', initPrice, tokenA, tokenB)
                 set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
 
-            print('**** end initPool')
+            #print('**** end initPool')
         }
     }
 
@@ -177,6 +177,8 @@ contract Hbswap {
             print_ln('**** balanceB %s', balanceB.reveal())
             print_ln('**** balanceLT %s', balanceLT.reveal())
             print_ln('**** totalSupplyLT %s', totalSupplyLT.reveal())
+            print_ln('**** amtA %s', amtA.reveal())
+            print_ln('**** amtB %s', amtB.reveal())
 
             enoughA = balanceA >= amtA
             positiveA = amtA > 0
@@ -184,12 +186,23 @@ contract Hbswap {
             positiveB = amtB > 0
             positiveTotalLT = totalSupplyLT > 0
             validOrder = (enoughA * positiveA * enoughB * positiveB * positiveTotalLT).reveal()
+            print_ln('**** enoughA %s', enoughA.reveal())
+            print_ln('**** positiveA %s', positiveA.reveal())
+            print_ln('**** enoughB %s', enoughB.reveal())
+            print_ln('**** positiveB %s', positiveB.reveal())
+            print_ln('**** positiveTotalLT %s', positiveTotalLT.reveal())
+            print_ln('**** validOrder %s', validOrder.reveal())
 
             surplusA = (amtA * poolB) > (amtB * poolA)
             nonSurplusA = 1 - surplusA
             changeA = validOrder * (surplusA * amtB * poolA / poolB + nonSurplusA * amtA)
             changeB = validOrder * (surplusA * amtB + nonSurplusA * amtA * poolB / poolA)
             changeLT = changeA * totalSupplyLT / poolA
+            print_ln('**** surplusA %s', surplusA.reveal())
+            print_ln('**** nonSurplusA %s', nonSurplusA.reveal())
+            print_ln('**** changeA %s', changeA.reveal())
+            print_ln('**** changeB %s', changeB.reveal())
+            print_ln('**** changeLT %s', changeLT.reveal())
 
             balanceA -= changeA
             balanceB -= changeB
@@ -282,34 +295,59 @@ contract Hbswap {
             totalPrice = readDB(f'totalPrice_{tokenA}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
+            time_mpc_start = time.perf_counter()
+
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
 
             print_ln('**** balanceA %s', balanceA.reveal())
             print_ln('**** balanceB %s', balanceB.reveal())
             print_ln('**** poolA %s', poolA.reveal())
             print_ln('**** poolB %s', poolB.reveal())
+            print_ln('**** amtA %s', amtA.reveal())
+            print_ln('**** amtB %s', amtB.reveal())
+            print_ln('**** totalPrice %s', totalPrice.reveal())
+            print_ln('**** totalCnt %s', totalCnt.reveal())
 
             feeRate = 0.003
-            batchSize = 2
+            batchSize = 10
 
             validOrder = (amtA * amtB) < 0
+            print_ln('**** validOrder %s', validOrder.reveal())
 
             buyA = amtA > 0
             totalB = (1 + feeRate) * amtB
-            enoughB = -totalB  <= balanceB
+            enoughB = ((-totalB)  <= balanceB)
+            tmp = -totalB
+            print_ln('**** tmp %s', tmp.reveal())
+            tmp = (tmp > balanceB)
+            print_ln('**** tmp %s', tmp.reveal())
             actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
             acceptA = actualAmtA  >= amtA
             flagBuyA = validOrder * buyA * enoughB * acceptA
+            print_ln('**** buyA %s', buyA.reveal())
+            print_ln('**** totalB %s', totalB.reveal())
+            print_ln('**** enoughB %s', enoughB.reveal())
+            print_ln('**** actualAmtA %s', actualAmtA.reveal())
+            print_ln('**** acceptA %s', acceptA.reveal())
+            print_ln('**** flagBuyA %s', flagBuyA.reveal())
 
             buyB = 1 - buyA
             totalA = (1 + feeRate) * amtA
-            enoughA = -totalA  <= balanceA
+            enoughA = (-totalA <= balanceA)
             actualAmtB = poolB  - poolA * poolB / (poolA  - amtA)
             acceptB = actualAmtB  >= amtB
             flagBuyB = validOrder * buyB * enoughA * acceptB
+            print_ln('**** buyB %s', buyB.reveal())
+            print_ln('**** totalA %s', totalA.reveal())
+            print_ln('**** enoughA %s', enoughA.reveal())
+            print_ln('**** actualAmtB %s', actualAmtB.reveal())
+            print_ln('**** acceptB %s', acceptB.reveal())
+            print_ln('**** flagBuyB %s', flagBuyB.reveal())
 
             changeA = flagBuyA * actualAmtA + flagBuyB * totalA
             changeB = flagBuyA * totalB + flagBuyB * actualAmtB
+            print_ln('**** changeA %s', changeA.reveal())
+            print_ln('**** changeB %s', changeB.reveal())
 
             poolA -= changeA
             poolB -= changeB
@@ -341,6 +379,11 @@ contract Hbswap {
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 
+            time_mpc_end = time.perf_counter()
+            time_mpc = time_mpc_end - time_mpc_start
+            with open('ratel/benchmark/data/log.csv', 'a') as f:
+                f.write(f'trade\ts{server.serverID}\tseq\t{seqTrade}\ttime_mpc_start\t{time_mpc_start}\ttime_mpc_end\t{time_mpc_end}\ttime_mpc\t{time_mpc}\n')
+
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenA}', poolA, int)
@@ -355,7 +398,7 @@ contract Hbswap {
             writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
 
-            returnPriceInterval = 60
+            returnPriceInterval = 10
             await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
         }

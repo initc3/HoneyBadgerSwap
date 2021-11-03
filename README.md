@@ -44,3 +44,9 @@ python3 -m ratel.src.python.hbswap.deposit 0x00000000000000000000000000000000000
 
 ```
 
+Introduce latency:
+```bash
+./latency-control.sh start 200 50
+./latency-control.sh stop
+```
+

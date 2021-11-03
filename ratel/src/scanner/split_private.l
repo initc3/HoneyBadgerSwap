@@ -83,6 +83,7 @@ string getPrefix(string text) {
 void initPython() {
     textPythonUpper += "import ast\n";
     textPythonUpper += "import asyncio\n";
+    textPythonUpper += "import time\n";
     textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
     textPythonUpper += "\n";
 

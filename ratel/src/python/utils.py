@@ -1,10 +1,27 @@
 import asyncio
-
+import json
 import leveldb
 import os
 
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
+
+def parse_contract(name):
+    contract = json.load(open(f'ratel/genfiles/build/contracts/{name}.json'))
+    return contract['abi'], contract['bytecode']
+
+def sign_and_send(tx, web3, account):
+    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
+    web3.eth.send_raw_transaction(signedTx.rawTransaction)
+    web3.eth.wait_for_transaction_receipt(signedTx.hash)
+    return signedTx.hash
+
+def getAccount(web3, keystoreDir):
+    for filename in os.listdir(keystoreDir):
+        with open(keystoreDir + filename) as keyfile:
+            encryptedKey = keyfile.read()
+            privateKey = web3.eth.account.decrypt(encryptedKey, '')
+            return web3.eth.account.privateKeyToAccount(privateKey)
 
 class MultiAcquire(asyncio.Task):
     _check_lock = asyncio.Lock()  # to suspend for creating task that acquires objects
@@ -127,6 +144,7 @@ http_host = "0.0.0.0"
 http_port = 4000
 
 mpc_port = 5000
-concurrency = 2
+concurrency = 1
 
 confirmation = 2
+
