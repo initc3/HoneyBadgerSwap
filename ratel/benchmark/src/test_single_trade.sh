@@ -12,13 +12,14 @@ rm ratel/benchmark/data/gas.csv || true
 players=4
 threshold=1
 
-token_num=1
 client_num=1
+token_num=$client_num
+
 concurrency=1
 
 bash ratel/src/deploy.sh hbswap $token_num $players $threshold
 
-bash ratel/src/run.sh hbswap 0,1,2,3 $players $threshold
+bash ratel/src/run.sh hbswap 0,1,2,3 $players $threshold $concurrency
 
 python3 -m ratel.src.python.refill $client_num $token_num
 
@@ -32,10 +33,4 @@ python3 -m ratel.src.python.hbswap.deposit $client_id $token_B_id 10000
 python3 -m ratel.src.python.hbswap.initPool $client_id $token_A_id $token_B_id 1000 1000
 
 rep=$1
-for ((i=0;i<$rep;i++)); do
-  echo '!!!!' $i
-  sleep 1
-  python3 -m ratel.src.python.hbswap.trade $client_id $token_A_id $token_B_id 0.5 -1
-  sleep 1
-  python3 -m ratel.src.python.hbswap.trade $client_id $token_A_id $token_B_id -1 0.5
-done
+python3 -m ratel.src.python.hbswap.trade $client_id $token_A_id $token_B_id 0.5 -1 $rep

@@ -8,11 +8,11 @@ import subprocess
 from aiohttp import web
 from ratel.src.python.Client import send_request, reserveInput
 from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, batchShares, blsPrime, \
-    location_inputmask, http_host, http_port, reconstruct, mpc_port, concurrency, location_db, openDB, getAccount, \
+    location_inputmask, http_host, http_port, reconstruct, mpc_port, location_db, openDB, getAccount, \
     confirmation
 
 class Server:
-    def __init__(self, serverID, web3, contract, init_players, init_threshold):
+    def __init__(self, serverID, web3, contract, init_players, init_threshold, concurrency):
         self.serverID = serverID
         self.db = openDB(location_db(serverID))
         self.host = http_host
@@ -23,6 +23,7 @@ class Server:
         self.confirmation = confirmation
         self.players = init_players
         self.threshold = init_threshold
+        self.concurrency = concurrency
 
         self.totInputMask = 0 #self.contract.functions.inputMaskCnt().call()
 

@@ -243,7 +243,7 @@ void writeDB() {
 void mpcInput() {
     //python
     textFuncLower += "\n";
-    textFuncLower += prefix + "file = location_sharefile(server.serverID)\n";
+    textFuncLower += prefix + "file = location_sharefile(server.serverID, port)\n";
     textFuncLower += prefix + "with open(file, \"wb\") as f:\n";
     textFuncLower += prefix + "    f.write(\n";
     numInput = args.size();
@@ -481,7 +481,7 @@ SPACE [ \t\r]+
         textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
         textFuncUpper += "    for key in writeKeys:\n";
         textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
-        textFuncUpper += "    port = mpcPort(seq" + funcName + ")\n";
+        textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
         textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
         textFuncUpper += "    await asyncio.wait(tasks)\n";
 

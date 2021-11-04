@@ -13,6 +13,7 @@ if __name__ == '__main__':
     serverID = int(sys.argv[1])
     init_players = int(sys.argv[2])
     init_threshold = int(sys.argv[3])
+    concurrency = int(sys.argv[4])
 
     web3 = Web3(Web3.WebsocketProvider(url))
 
@@ -27,6 +28,7 @@ if __name__ == '__main__':
         appContract,
         init_players,
         init_threshold,
+        concurrency,
     )
 
     loop = asyncio.get_event_loop()
