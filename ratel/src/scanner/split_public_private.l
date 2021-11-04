@@ -411,9 +411,9 @@ SPACE [ \t\r]+
     if (isFunc) {
         if (isMpc) {
             if (braces == pos) {
-                textPrivate += "    execHistory = readDB(f'execHistory', dict)\n";
-                textPrivate += "    execHistory[seq" + funcName + "] = True\n";
-                textPrivate += "    writeDB(f'execHistory', execHistory, dict)\n";
+//                textPrivate += "    execHistory = readDB(f'execHistory', dict)\n";
+//                textPrivate += "    execHistory[seq" + funcName + "] = True\n";
+//                textPrivate += "    writeDB(f'execHistory', execHistory, dict)\n";
                 isMpc = false;
             }
             if (isMpcParam) {
