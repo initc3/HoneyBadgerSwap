@@ -115,6 +115,20 @@ void finalizePython() {
     textPythonUpper += "            for log in logs:\n";
     textPythonUpper += "                asyncio.ensure_future(eval(f'run\{log[2]\}')(server, log[3]), loop=loop)\n";
     textPythonUpper += "\n";
+    textPythonUpper += "                try:\n";
+    textPythonUpper += "                    execHistory = server.db.Get(f'execHistory'.encode())\n";
+    textPythonUpper += "                except KeyError:\n";
+    textPythonUpper += "                    execHistory = bytes(0)\n";
+    textPythonUpper += "                try:\n";
+    textPythonUpper += "                    execHistory = execHistory.decode(encoding='utf-8')\n";
+    textPythonUpper += "                    execHistory = dict(ast.literal_eval(execHistory))\n";
+    textPythonUpper += "                except:\n";
+    textPythonUpper += "                    execHistory = {}\n";
+    textPythonUpper += "                execHistory[f'seq\{log[2]\}'] = True\n";
+    textPythonUpper += "                execHistory = str(execHistory)\n";
+    textPythonUpper += "                execHistory = bytes(execHistory, encoding='utf-8')\n";
+    textPythonUpper += "                server.db.Put(f'execHistory'.encode(), execHistory)\n";
+    textPythonUpper += "\n";
 
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "\n";
