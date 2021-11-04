@@ -1,23 +1,41 @@
 #!/usr/bin/env bash
+#####
+##### ./ratel/benchmark/src/test_single_trade.sh [num_repetition]
+#####
 
-rm ratel/benchmark/data/log.csv
+set -e
+set -x
 
-bash ratel/src/deploy.sh hbswap 4 1
+rm ratel/benchmark/data/latency.csv || true
+rm ratel/benchmark/data/gas.csv || true
 
-bash ratel/src/run.sh hbswap 0,1,2,3 4 1
+players=4
+threshold=1
 
-python3 -m ratel.src.python.refill 1
+token_num=1
+client_num=1
+concurrency=1
 
-python3 -m ratel.src.python.hbswap.deposit 1 0x0000000000000000000000000000000000000000 10000
-python3 -m ratel.src.python.hbswap.deposit 1 0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385 10000
+bash ratel/src/deploy.sh hbswap $token_num $players $threshold
 
-python3 -m ratel.src.python.hbswap.initPool 1 0x0000000000000000000000000000000000000000 0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385 1000 1000
+bash ratel/src/run.sh hbswap 0,1,2,3 $players $threshold
+
+python3 -m ratel.src.python.refill $client_num $token_num
+
+token_A_id=0
+token_B_id=1
+client_id=1
+
+python3 -m ratel.src.python.hbswap.deposit $client_id $token_A_id 10000
+python3 -m ratel.src.python.hbswap.deposit $client_id $token_B_id 10000
+
+python3 -m ratel.src.python.hbswap.initPool $client_id $token_A_id $token_B_id 1000 1000
 
 rep=$1
-for ((i=1;i<=$rep;i++)); do
+for ((i=0;i<$rep;i++)); do
   echo '!!!!' $i
   sleep 1
-  python3 -m ratel.src.python.hbswap.trade 1 0x0000000000000000000000000000000000000000 0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385 0.5 -1
+  python3 -m ratel.src.python.hbswap.trade $client_id $token_A_id $token_B_id 0.5 -1
   sleep 1
-  python3 -m ratel.src.python.hbswap.trade 1 0x0000000000000000000000000000000000000000 0x6b5c9637e0207c72Ee1a275b6C3b686ba8D87385 -1 0.5
+  python3 -m ratel.src.python.hbswap.trade $client_id $token_A_id $token_B_id -1 0.5
 done
