@@ -6,7 +6,7 @@ import sys
 from ratel.genfiles.python.hbswapRecover import recover
 ###
 from ratel.src.python.Server import Server
-from ratel.src.python.deploy import parse_contract, url, addrs
+from ratel.src.python.deploy import parse_contract, url, app_addr
 from web3 import Web3
 
 if __name__ == '__main__':
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     ### App contract
     abi, bytecode = parse_contract('hbswap')
-    appContract = web3.eth.contract(address=addrs[0], abi=abi)
+    appContract = web3.eth.contract(address=app_addr, abi=abi)
     ###
 
     server = Server(

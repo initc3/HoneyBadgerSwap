@@ -6,11 +6,12 @@ clear() {
 }
 
 app=$1
-players=$2
-threshold=$3
+token_num=$2
+players=$3
+threshold=$4
 
 bash chain-latest.sh &
 sleep 3
 
 clear
-python3 -m ratel.src.python.deploy $app $players $threshold
+python3 -m ratel.src.python.deploy $app $token_num $players $threshold

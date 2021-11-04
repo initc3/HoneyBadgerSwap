@@ -134,17 +134,15 @@ R = 1092033888706381446467550399231597617788887966458528839425026660803596727091
 inverse_R = get_inverse(R)
 fp = 2 ** 16
 decimal = 10 ** 15
-
 sz = 32
-
-spareShares = 100
-batchShares = 1000
 
 http_host = "0.0.0.0"
 http_port = 4000
 
 mpc_port = 5000
-concurrency = 1
+concurrency = 2
+
+spareShares = 100
+batchShares = 1000
 
 confirmation = 2
-
