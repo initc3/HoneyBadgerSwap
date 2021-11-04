@@ -55,14 +55,14 @@ class MultiAcquire(asyncio.Task):
             return func(*args, **kwargs)
         return wrapper
 
-def mpcPort(seq):
+def mpcPort(seq, concurrency):
     return mpc_port + seq % concurrency * 100
 
 def key_inputmask(idx):
     return f'inputmask_{idx}'.encode()
 
-def location_sharefile(server_id):
-    return f'Persistence/Transactions-P{server_id}.data'
+def location_sharefile(server_id, base_port):
+    return f'Persistence/Transactions-P{server_id}-{base_port}.data'
 
 def location_db(server_id):
     db_path = os.getenv('DB_PATH', '/opt/hbswap/db')
@@ -140,7 +140,7 @@ http_host = "0.0.0.0"
 http_port = 4000
 
 mpc_port = 5000
-concurrency = 2
+# concurrency = 2
 
 spareShares = 100
 batchShares = 1000

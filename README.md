@@ -50,3 +50,17 @@ Introduce latency:
 ./latency-control.sh stop
 ```
 
+Test single trade
+```
+./ratel/benchmark/src/test_single_trade.sh 1
+```
+
+Test concurrent trade
+```
+./latency-control.sh stop
+./ratel/benchmark/src/test_concurrent_trade_start.sh 1
+
+./latency-control.sh start 200 50
+./ratel/benchmark/src/test_concurrent_trade_run.sh 1
+```
+

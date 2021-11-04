@@ -4,7 +4,7 @@ app=$1
 IDs=$2
 players=$3
 threshold=$4
-
+concurrency=$5
 
 IFS=','
 
@@ -18,5 +18,5 @@ done
 
 for id in "${strarr[@]}";
 do
-  python3 -m ratel.src.python.$app.run $id $players $threshold &
+  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency &
 done

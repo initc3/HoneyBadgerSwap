@@ -381,7 +381,7 @@ contract Hbswap {
 
             time_mpc_end = time.perf_counter()
             time_mpc = time_mpc_end - time_mpc_start
-            with open('ratel/benchmark/data/log.csv', 'a') as f:
+            with open('ratel/benchmark/data/latency.csv', 'a') as f:
                 f.write(f'trade\ts{server.serverID}\tseq\t{seqTrade}\ttime_mpc_start\t{time_mpc_start}\ttime_mpc_end\t{time_mpc_end}\ttime_mpc\t{time_mpc}\n')
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
