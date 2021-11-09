@@ -33,6 +33,7 @@ class Server:
 
         self.dbLock  = {}
         self.dbLock['access'] = asyncio.Lock()
+        self.dbLock['execHistory'] = asyncio.Lock()
 
     async def http_server(self):
         async def handler_inputmask(request):
@@ -113,7 +114,7 @@ class Server:
             prepare(recover, apptask),
             self.monitorGenInputMask(),
         ]
-        await asyncio.wait(tasks)
+        await asyncio.gather(*tasks)
 
     def genInputMask(self):
         print('Generating new inputmasks...')

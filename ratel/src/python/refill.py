@@ -14,7 +14,7 @@ def transferEther(client_account, server_account, amt):
     })
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
-    print(f'**** client {client_id} ether balance {web3.eth.get_balance(client_account.address)}')
+    print(f'**** receiver {receiver} ether balance {web3.eth.get_balance(client_account.address)}')
 
 def transferToken(token_index, client_account, amt):
     token_addr = token_addrs[token_index]
@@ -27,26 +27,26 @@ def transferToken(token_index, client_account, amt):
     tx_hash = tokenContract.functions.transfer(client_account.address, amt).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
-    print(f'**** client {client_id} token {token_index} balance {tokenContract.functions.balanceOf(client_account.address).call()}')
+    print(f'**** receiver {receiver} token {token_index} balance {tokenContract.functions.balanceOf(client_account.address).call()}')
 
-def refill(client_id, token_id):
-    client_account = getAccount(web3, f'/opt/poa/keystore/client_{client_id}/')
-    server_account = getAccount(web3, f'/opt/poa/keystore/server_0/')
+def refill(receiver, token_id):
+    client_account = getAccount(web3, f'/opt/poa/keystore/{receiver}/')
+    server_account = getAccount(web3, f'/opt/poa/keystore/admin/')
     web3.eth.defaultAccount = server_account.address
 
     amt = int(1e8 * 1e18)
 
-    transferEther(client_account, server_account, amt)
-    transferToken(token_id, client_account, amt)
+    if token_id == 0:
+        transferEther(client_account, server_account, amt)
+    else:
+        transferToken(token_id, client_account, amt)
 
 if __name__=='__main__':
-    client_num = int(sys.argv[1])
-    token_num = int(sys.argv[2])
+    receiver = sys.argv[1]
+    token_id = int(sys.argv[2])
 
     web3 = Web3(Web3.WebsocketProvider(url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-    for client_id in range(1, client_num + 1):
-        for token_id in range(1, token_num + 1):
-            refill(client_id, token_id)
+    refill(receiver, token_id)
 

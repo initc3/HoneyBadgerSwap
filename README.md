@@ -52,13 +52,14 @@ Introduce latency:
 
 Test single trade
 ```
-./ratel/benchmark/src/test_single_trade.sh 1
+./ratel/benchmark/src/test_concurrent_trade_start.sh 1 1
+./ratel/benchmark/src/test_concurrent_trade_run.sh 1 1 1
 ```
 
 Test concurrent trade
 ```
 ./latency-control.sh stop
-./ratel/benchmark/src/test_concurrent_trade_start.sh 1
+./ratel/benchmark/src/test_concurrent_trade_start.sh
 
 ./latency-control.sh start 200 50
 ./ratel/benchmark/src/test_concurrent_trade_run.sh 1

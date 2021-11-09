@@ -288,6 +288,12 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
+            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+                f.write(f'start_trade\t'
+                        f's{server.serverID}\t'
+                        f'seq\t{seqTrade}\t'
+                        f'{time.perf_counter()}\n')
+
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             poolA = readDB(f'pool_{tokenA}_{tokenB}_{tokenA}', int)
@@ -309,7 +315,7 @@ contract Hbswap {
             print_ln('**** totalCnt %s', totalCnt.reveal())
 
             feeRate = 0.003
-            batchSize = 10
+            batchSize = 1000
 
             validOrder = (amtA * amtB) < 0
             print_ln('**** validOrder %s', validOrder.reveal())
@@ -381,8 +387,13 @@ contract Hbswap {
 
             time_mpc_end = time.perf_counter()
             time_mpc = time_mpc_end - time_mpc_start
-            with open('ratel/benchmark/data/latency.csv', 'a') as f:
-                f.write(f'trade\ts{server.serverID}\tseq\t{seqTrade}\ttime_mpc_start\t{time_mpc_start}\ttime_mpc_end\t{time_mpc_end}\ttime_mpc\t{time_mpc}\n')
+            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+                f.write(f'trade\t'
+                        f's{server.serverID}\t'
+                        f'seq\t{seqTrade}\t'
+                        f'start_mpc\t{time_mpc_start}\t'
+                        f'end_mpc\t{time_mpc_end}\t'
+                        f'duration_mpc\t{time_mpc}\n')
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -398,9 +409,21 @@ contract Hbswap {
             writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
 
+            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+                f.write(f'wait_interval\t'
+                        f's{server.serverID}\t'
+                        f'seq\t{seqTrade}\t'
+                        f'{time.perf_counter()}\n')
+
             returnPriceInterval = 10
             await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
+
+            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+                f.write(f'end_trade\t'
+                        f's{server.serverID}\t'
+                        f'seq\t{seqTrade}\t'
+                        f'{time.perf_counter()}\n')
         }
     }
 }

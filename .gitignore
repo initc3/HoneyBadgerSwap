@@ -4,5 +4,4 @@ poa/data
 *build/
 *__pycache__
 ratel/genfiles
-ratel/benchmark/data/gas.csv
-ratel/benchmark/data/latency.csv
+ratel/benchmark/data/*

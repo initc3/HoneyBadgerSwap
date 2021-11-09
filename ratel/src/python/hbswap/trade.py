@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import time
 
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
@@ -28,7 +29,8 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
                 f"client\t{client_id}\t"
                 f"tokenA\t{tokenA}\t"
                 f"tokenB\t{tokenB}\t"
-                f"gasUsed\t{receipt['gasUsed']}\n")
+                f"gasUsed\t{receipt['gasUsed']}\t"
+                f"{time.perf_counter()}\n")
 
 if __name__=='__main__':
     client_id = int(sys.argv[1])

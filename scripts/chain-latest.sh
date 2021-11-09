@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 POADIR=${POADIR:-/opt/poa}
-KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/server_0}
+KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/admin}
 DATADIR=${POA_DATADIR:-/opt/poa/data}
 
-pkill -f geth
+pkill -f /go/src/github.com/ethereum/go-ethereum/build/bin/geth
 
 rm -rf $DATADIR
 mkdir $DATADIR
