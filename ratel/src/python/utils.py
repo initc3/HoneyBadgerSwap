@@ -146,3 +146,5 @@ spareShares = 100
 batchShares = 1000
 
 confirmation = 2
+
+replay = 2

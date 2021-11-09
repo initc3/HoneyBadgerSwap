@@ -84,13 +84,12 @@ void initPython() {
     textPythonUpper += "import ast\n";
     textPythonUpper += "import asyncio\n";
     textPythonUpper += "import time\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp, replay\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "async def monitor(server, loop):\n";
     textPythonUpper += "    blkNum = server.web3.eth.get_block_number()\n";
     textPythonUpper += "    while True:\n";
-    textPythonUpper += "        await asyncio.sleep(5)\n";
     textPythonUpper += "        curBlkNum = server.web3.eth.get_block_number()\n";
     textPythonUpper += "        if curBlkNum - blkNum > server.confirmation:\n";
 
@@ -113,24 +112,11 @@ void finalizePython() {
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
     textPythonUpper += "            for log in logs:\n";
-    textPythonUpper += "                asyncio.ensure_future(eval(f'run\{log[2]\}')(server, log[3]), loop=loop)\n";
-    textPythonUpper += "\n";
-    textPythonUpper += "                try:\n";
-    textPythonUpper += "                    execHistory = server.db.Get(f'execHistory'.encode())\n";
-    textPythonUpper += "                except KeyError:\n";
-    textPythonUpper += "                    execHistory = bytes(0)\n";
-    textPythonUpper += "                try:\n";
-    textPythonUpper += "                    execHistory = execHistory.decode(encoding='utf-8')\n";
-    textPythonUpper += "                    execHistory = dict(ast.literal_eval(execHistory))\n";
-    textPythonUpper += "                except:\n";
-    textPythonUpper += "                    execHistory = {}\n";
-    textPythonUpper += "                execHistory[f'seq\{log[2]\}'] = True\n";
-    textPythonUpper += "                execHistory = str(execHistory)\n";
-    textPythonUpper += "                execHistory = bytes(execHistory, encoding='utf-8')\n";
-    textPythonUpper += "                server.db.Put(f'execHistory'.encode(), execHistory)\n";
-    textPythonUpper += "\n";
-
+    textPythonUpper += "                for _ in range((1 if log[2] != 'Trade' else replay)):\n";
+    textPythonUpper += "                    loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
+    textPythonUpper += "        else:\n";
+    textPythonUpper += "            await asyncio.sleep(1)\n";
     textPythonUpper += "\n";
 
     fprintf(pythonFp, "%s", textPythonUpper.c_str());
@@ -276,8 +262,6 @@ void mpcInput() {
     textFuncLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
     textFuncLower += prefix + "if stderr:\n";
     textFuncLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
-    textFuncLower += prefix + "server.portLock[port].release()\n";
-    textFuncLower += "\n";
 }
 
 void mpcOutput() {
@@ -309,6 +293,7 @@ void mpcOutput() {
     for (int i = 0; i < num; i++) {
         textFuncLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
+    textFuncLower += prefix + "server.portLock[port].release()\n";
     textFuncLower += "\n";
 }
 
@@ -491,6 +476,23 @@ SPACE [ \t\r]+
         textFuncMid += "        server.dbLock[key].release()\n";
 
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
+
+        textPythonLower += "    await server.dbLock['execHistory'].acquire()\n";
+        textPythonLower += "    try:\n";
+        textPythonLower += "        execHistory = server.db.Get(f'execHistory'.encode())\n";
+        textPythonLower += "    except KeyError:\n";
+        textPythonLower += "        execHistory = bytes(0)\n";
+        textPythonLower += "    try:\n";
+        textPythonLower += "        execHistory = execHistory.decode(encoding='utf-8')\n";
+        textPythonLower += "        execHistory = dict(ast.literal_eval(execHistory))\n";
+        textPythonLower += "    except:\n";
+        textPythonLower += "        execHistory = {}\n";
+        textPythonLower += "    execHistory[f'seq" + funcName + "'] = True\n";
+        textPythonLower += "    execHistory = str(execHistory)\n";
+        textPythonLower += "    execHistory = bytes(execHistory, encoding='utf-8')\n";
+        textPythonLower += "    server.db.Put(f'execHistory'.encode(), execHistory)\n";
+        textPythonLower += "    server.dbLock['execHistory'].release()\n";
+        textPythonLower += "\n";
     }
 }
 
@@ -538,7 +540,6 @@ SPACE [ \t\r]+
     args.clear();
     isEmptyLine = true;
 
-//    printf("-\n");
     textLine = "";
 }
 
