@@ -59,9 +59,16 @@ Test single trade
 Test concurrent trade
 ```
 ./latency-control.sh stop
-./ratel/benchmark/src/test_concurrent_trade_start.sh
+./ratel/benchmark/src/test_concurrent_trade_start.sh 10 10
+./ratel/benchmark/src/test_concurrent_trade_start.sh 2 1
 
 ./latency-control.sh start 200 50
-./ratel/benchmark/src/test_concurrent_trade_run.sh 1
+./ratel/benchmark/src/test_concurrent_trade_run.sh 10 10 10
+./ratel/benchmark/src/test_concurrent_trade_run.sh 10 5 5
+```
+
+Test MP-SPDZ concurrency
+```bash
+python3 -m ratel.benchmark.src.test_mpc
 ```
 

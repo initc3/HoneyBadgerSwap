@@ -54,7 +54,7 @@ with open(file, 'r') as f:
         time = trunc_time(element[10])
         add(client, time, replay)
 
-fig = plt.figure(figsize=(13, 4))
+plt.figure(figsize=(13, 4))
 
 plot(plt, client, 0, 'client')
 plot(plt, start, 1, 'start')

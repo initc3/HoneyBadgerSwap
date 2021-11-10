@@ -42,5 +42,5 @@ done
 for (( client_id = 1; client_id <= $client_num; client_id++ )) do
   token_B_id=$client_id
   python3 -m ratel.src.python.hbswap.initPool $client_id $token_A_id $token_B_id 1000 1000 &
-  sleep 1
+  sleep 2
 done
