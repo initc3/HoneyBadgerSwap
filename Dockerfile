@@ -127,6 +127,7 @@ WORKDIR /go/src/github.com/ethereum/go-ethereum
 RUN make geth
 
 RUN pip3 install web3
+RUN pip3 install matplotlib
 
 RUN mkdir -p /opt/hbswap/db
 RUN mkdir -p /usr/src/hbswap/Persistence
