@@ -115,17 +115,11 @@ def threshold(contract):
     print('threshold', threshold)
     return threshold
 
-def reconstruct(shares, n):
-    inputmask = 0
-    for i in range(1, n + 1):
-        tot = 1
-        for j in range(1, n + 1):
-            if i == j:
-                continue
-            tot = tot * j * get_inverse(j - i) % blsPrime
-        inputmask = (inputmask + shares[i - 1] * tot) % blsPrime
-    print(inputmask)
-    return inputmask
+def list_to_str(list):
+    st = ''
+    for v in list:
+        st += f"{',' if len(st) > 0 else ''}{v}"
+    return st
 
 prog = './malicious-shamir-party.x'
 blsPrime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
@@ -143,7 +137,7 @@ mpc_port = 5000
 # concurrency = 2
 
 spareShares = 100
-batchShares = 1000
+shareBatchSize = 1000
 
 confirmation = 2
 

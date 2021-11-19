@@ -2,7 +2,7 @@ import asyncio
 import re
 
 from aiohttp import ClientSession
-from ratel.src.python.utils import players, http_port, http_host, get_inverse, blsPrime
+from ratel.src.python.utils import http_port, http_host, get_inverse, blsPrime
 
 def reserveInput(web3, appContract, num, account):
     tx = appContract.functions.reserveInput(num).buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})
@@ -13,49 +13,53 @@ def reserveInput(web3, appContract, num, account):
     log = appContract.events.InputMask().processReceipt(receipt)
     return log[0]['args']['inpusMaskIndexes']
 
+def interpolate(shares):
+    value = 0
+    n = len(shares)
+    for i in range(n):
+        tot = 1
+        for j in range(n):
+            if i == j:
+                continue
+            tot = tot * shares[j][0] * get_inverse(shares[j][0] - shares[i][0]) % blsPrime
+        value = (value + shares[i][1] * tot) % blsPrime
+    return value
+
+def batch_interpolate(results):
+    res = []
+    num = len(results[0])
+    players = len(results)
+    for i in range(num):
+        shares = []
+        for j in range(players):
+            result = int(results[j][i])
+            if result != 0:
+                shares.append((j + 1, result))
+        res.append(interpolate(shares))
+    return res
+
 async def send_request(url):
     async with ClientSession() as session:
         async with session.get(url) as resp:
             json_response = await resp.json()
             return json_response
 
-def interpolate(cur_players, shares):
-    inputmask = 0
-    for i in range(1, cur_players + 1):
-        tot = 1
-        for j in range(1, cur_players + 1):
-            if i == j:
-                continue
-            tot = tot * j * get_inverse(j - i) % blsPrime
-        inputmask = (inputmask + shares[i - 1] * tot) % blsPrime
-    return inputmask
-
-async def req_inputmask_shares(host, port, inputmask_idxes):
-    url = f"http://{host}:{port}/inputmasks/{inputmask_idxes}"
-    print(url)
-    result = await send_request(url)
-    return re.split(",", result["inputmask_shares"])
-
-async def get_inputmasks(contract, inputmask_idxes):
-    cur_players = players(contract)
+async def send_requests(players, request):
     tasks = []
-    for serverID in range(cur_players):
-        task = asyncio.ensure_future(
-            req_inputmask_shares(http_host, http_port + serverID, inputmask_idxes)
-        )
+    for server_id in range(players):
+        task = send_request(f"http://{http_host}:{http_port + server_id}/{request}")
         tasks.append(task)
 
-    for task in tasks:
-        await task
+    results = await asyncio.gather(*tasks)
+    return results
 
-    inputmask_shares = []
-    for task in tasks:
-        inputmask_shares.append(task.result())
+async def get_inputmasks(players, inputmask_idxes):
 
-    inputmasks = []
-    for i in range(len(tasks[0].result())):
-        shares = []
-        for j in range(cur_players):
-            shares.append(int(inputmask_shares[j][i]))
-        inputmasks.append(interpolate(cur_players, shares))
+    request = f"inputmasks/{inputmask_idxes}"
+    results = await send_requests(players, request)
+    for i in range(len(results)):
+        results[i] = re.split(",", results[i]["inputmask_shares"])
+
+    inputmasks = batch_interpolate(results)
+
     return inputmasks

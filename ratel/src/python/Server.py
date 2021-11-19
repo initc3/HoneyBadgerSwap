@@ -6,13 +6,14 @@ import re
 import subprocess
 
 from aiohttp import web
-from ratel.src.python.Client import send_request, reserveInput
-from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, batchShares, blsPrime, \
-    location_inputmask, http_host, http_port, reconstruct, mpc_port, location_db, openDB, getAccount, \
-    confirmation
+from ratel.src.python.Client import send_requests, batch_interpolate
+from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, blsPrime, \
+    location_inputmask, http_host, http_port, mpc_port, location_db, openDB, getAccount, \
+    confirmation, shareBatchSize, list_to_str
+
 
 class Server:
-    def __init__(self, serverID, web3, contract, init_players, init_threshold, concurrency):
+    def __init__(self, serverID, web3, contract, init_players, init_threshold, concurrency, recover, test=False):
         self.serverID = serverID
         self.db = openDB(location_db(serverID))
         self.host = http_host
@@ -25,7 +26,11 @@ class Server:
         self.threshold = init_threshold
         self.concurrency = concurrency
 
-        self.totInputMask = 0 #self.contract.functions.inputMaskCnt().call()
+        self.recover = recover
+
+        self.test = test
+
+        self.input_mask_queue_tail = 0 #self.contract.functions.inputMaskCnt().call() if db has not been cleared
 
         self.portLock = {}
         for i in range(concurrency):
@@ -36,6 +41,7 @@ class Server:
         self.dbLock['execHistory'] = asyncio.Lock()
 
     async def http_server(self):
+
         async def handler_inputmask(request):
             print(f"s{self.serverID} request: {request}")
             mask_idxes = re.split(',', request.match_info.get("mask_idxes"))
@@ -48,30 +54,22 @@ class Server:
             print(f"s{self.serverID} response: {res}")
             return web.json_response(data)
 
+
         async def handler_recover_db(request):
             print(f"s{self.serverID} request: {request}")
-            keys = re.split(',', request.match_info.get("keys"))
-            mask_idx = int(keys[0])
-            keys = keys[1:]
-            num = len(keys)
-            print('mask_idx, num', mask_idx, num)
-            print('keys', keys)
-            res = ''
-            for key in keys:
-                try:
-                    secret = int.from_bytes(bytes(self.db.Get(key.encode())), 'big')
-                    input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(mask_idx))), 'big')
-                    masked_secret = (secret + input_mask) % blsPrime
-                    print('masked_secret', masked_secret)
-                    res += f"{',' if len(res) > 0 else ''}{masked_secret}"
-                except KeyError:
-                    res += f"{',' if len(res) > 0 else ''}"
-                mask_idx += 1
+            seq_num_list = re.split(',', request.match_info.get("list"))
+
+            keys = self.collect_keys(seq_num_list)
+            masked_shares = self.mask_shares(keys)
+
+            res = list_to_str(masked_shares)
+
             data = {
                 "values": res,
             }
             print(f"s{self.serverID} response: {res}")
             return web.json_response(data)
+
 
         app = web.Application()
 
@@ -85,7 +83,7 @@ class Server:
 
         resource = cors.add(app.router.add_resource("/inputmasks/{mask_idxes}"))
         cors.add(resource.add_route("GET", handler_inputmask))
-        resource = cors.add(app.router.add_resource("/recoverdb/{keys}"))
+        resource = cors.add(app.router.add_resource("/recoverdb/{list}"))
         cors.add(resource.add_route("GET", handler_recover_db))
 
         print('Starting http server...')
@@ -95,12 +93,12 @@ class Server:
         await site.start()
         await asyncio.sleep(100 * 3600)
 
-    async def init(self, recover, apptask):
-        async def prepare(recover, apptask):
+    async def init(self, apptask):
+        async def prepare(apptask):
             isServer = self.contract.functions.isServer(self.account.address).call()
             if not isServer:
                 self.registerServer()
-                await self.recoverHistory(recover)
+                await self.recoverHistory()
 
             tasks = [
                 self.preprocessing(),
@@ -111,38 +109,41 @@ class Server:
             await asyncio.gather(*tasks)
 
         tasks = [
-            prepare(recover, apptask),
-            self.monitorGenInputMask(),
+            prepare(apptask),
+            self.monitorGenInputMask(shareBatchSize),
         ]
         await asyncio.gather(*tasks)
 
-    def genInputMask(self):
+    def genInputMask(self, shareBatchSize):
         print('Generating new inputmasks...')
 
         env = os.environ.copy()
-        cmd = ['./random-shamir.x', '-i', f'{self.serverID}', '-N', f'{players(self.contract)}', '-T', f'{threshold(self.contract)}', '--nshares', f'{batchShares}']
+        cmd = ['./random-shamir.x', '-i', f'{self.serverID}', '-N', f'{players(self.contract)}', '-T', f'{threshold(self.contract)}', '--nshares', f'{shareBatchSize}']
         task = subprocess.Popen(cmd, env=env)
         task.wait()
 
         file = location_inputmask(self.serverID)
         with open(file, 'r') as f:
             for line in f.readlines():
-                key = key_inputmask(self.totInputMask)
+                key = key_inputmask(self.input_mask_queue_tail)
                 share = int(line) % blsPrime
                 self.db.Put(key, share.to_bytes((share.bit_length() + 7) // 8, 'big'))
-                self.totInputMask += 1
+                self.input_mask_queue_tail += 1
 
-        print(f'Total inputmask number: {self.totInputMask}\n')
+        print(f'Total inputmask number: {self.input_mask_queue_tail}\n')
+
+    def check_input_mask_availability(self):
+        input_mask_queue_head = self.contract.functions.inputMaskCnt().call()
+        if input_mask_queue_head + spareShares >= self.input_mask_queue_tail:
+            self.genInputMask(shareBatchSize)
 
     async def preprocessing(self):
         while True:
             if self.contract.functions.isInputMaskReady().call() > self.contract.functions.T().call() and self.contract.functions.isServer(self.account.address).call():
-                cnt = self.contract.functions.inputMaskCnt().call()
-                if cnt + spareShares >= self.totInputMask:
-                    self.genInputMask()
+                self.check_input_mask_availability()
             await asyncio.sleep(60)
 
-    async def monitorGenInputMask(self):
+    async def monitorGenInputMask(self, shareBatchSize):
         blkNum = self.web3.eth.get_block_number()
         while True:
             await asyncio.sleep(5)
@@ -152,11 +153,11 @@ class Server:
                 logs = eventFilter.get_all_entries()
                 blkNum = curBlkNum - self.confirmation + 1
                 for log in logs:
-                    inputMaskCnt = log['args']['inputMaskCnt']
+                    input_mask_queue_head = log['args']['inputMaskCnt']
                     committeeChangeCnt = log['args']['committeeChangeCnt']
 
-                    self.totInputMask = inputMaskCnt
-                    self.genInputMask()
+                    self.input_mask_queue_tail = input_mask_queue_head
+                    self.genInputMask(shareBatchSize)
 
                     tx = self.contract.functions.setReady(committeeChangeCnt).buildTransaction({'from': self.account.address, 'gas': 1000000, 'nonce': self.web3.eth.get_transaction_count(self.account.address)})
                     signedTx = self.web3.eth.account.sign_transaction(tx, private_key=self.account.privateKey)
@@ -190,7 +191,7 @@ class Server:
         self.web3.eth.send_raw_transaction(signedTx.rawTransaction)
         self.web3.eth.wait_for_transaction_receipt(signedTx.hash)
 
-    async def recoverHistory(self, recover):
+    async def recoverHistory(self):
         while True:
             isServer = self.contract.functions.isServer(self.account.address).call()
             print('isServer', isServer)
@@ -205,9 +206,18 @@ class Server:
                 break
             await asyncio.sleep(1)
 
-        # check which op is missing and collect missing keys/values
-        opCnt = self.contract.functions.opCnt().call()
-        print('!!!! opCnt', opCnt)
+        #TODO: test below
+        seq_num_list = self.check_missing_tasks()
+        request = f'recoverdb/{list_to_str(seq_num_list)}'
+        masked_shares = await send_requests(players(self.contract), request)
+        for i in range(len(masked_shares)):
+            masked_shares[i] = re.split(",", masked_shares[i]["values"])
+        keys = self.collect_keys(seq_num_list)
+        masked_states = batch_interpolate(masked_shares)
+        state_shares = self.recover_states(masked_states)
+        self.restore_db(seq_num_list, keys, state_shares)
+
+    def check_missing_tasks(self):
         try:
             execHistory = self.db.Get(f'execHistory'.encode())
         except KeyError:
@@ -219,49 +229,78 @@ class Server:
         except:
             execHistory = {}
 
-        request_keys = {}
-        for i in range(opCnt):
-            print('missing opSeq', i)
-            if not i in execHistory:
-                keys = recover(self.contract, i)
-                for key in keys:
-                    request_keys[key] = True
-        if len(request_keys):
-            if 'execHistory' in request_keys.keys():
-                del request_keys['execHistory']
-            print('request_keys', [*request_keys])
-            mask_idxes = reserveInput(self.web3, self.contract, len([*request_keys]), self.account)
-            print('mask_idxes', mask_idxes)
-            keys = str(mask_idxes[0])
-            for key in [*request_keys]:
-                keys += f',{key.lower()}'
+        opCnt = self.contract.functions.opCnt().call()
+        seq_num_list = []
+        for seq in range(opCnt):
+            if not seq in execHistory:
+                print('missing opSeq', seq)
+                seq_num_list.append(seq)
+        return seq_num_list
 
-            # fetch share from other servers
-            shares = []
-            for serverID in range(players(self.contract)):
-                if serverID != self.serverID:
-                    url = f"http://{http_host}:{http_port + serverID}/recoverdb/{keys}"
-                    result = await send_request(url)
-                    for i, share in enumerate(re.split(",", result["values"])):
-                        if len(share) <= 0:
-                            continue
-                        if (len(shares) <= i):
-                            shares.append([])
-                        shares[i].append(int(share))
-            print('shares', shares)
-            mask_idx = mask_idxes[0]
-            for key, _shares in zip(keys, shares):
-                masked_value = reconstruct(_shares, len(_shares))
-                input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(mask_idx))), 'big')
-                share = (masked_value - input_mask) % blsPrime
-                mask_idx += 1
-                self.db.Put(key.encode(), share.to_bytes((share.bit_length() + 7) // 8, 'big'))
+    def collect_keys(self, seq_num_list):
+        if not self.test:
+            seq_num_list = list(set(seq_num_list))
 
-            # mark op as executed
-            for i in range(opCnt):
-                if not i in execHistory:
-                    execHistory[i] = True
-            execHistory = str(execHistory)
-            execHistory = bytes(execHistory, encoding='utf-8')
-            self.db.Put(f'execHistory'.encode(), execHistory)
+        keys = []
+        for seq_num in seq_num_list:
+            keys.extend(self.recover(self.contract, int(seq_num)))
 
+        if not self.test:
+            keys = list(set(keys))
+
+        return keys
+
+    def mask_shares(self, keys):
+        masked_shares = []
+
+        for key in keys:
+            masked_state_share = 0
+            try:
+                secret = int.from_bytes(bytes(self.db.Get(key.lower().encode())), 'big')
+
+                self.check_input_mask_availability()
+                input_mask_share = int.from_bytes(bytes(self.db.Get(key_inputmask(self.input_mask_queue_tail - 1))), 'big')
+                self.input_mask_queue_tail -= 1
+                masked_state_share = (secret + input_mask_share) % blsPrime
+
+            except KeyError:
+                print(f'Do not have the state {key}')
+
+            masked_shares.append(masked_state_share)
+
+        return masked_shares
+
+    def recover_states(self, masked_states):
+        state_shares = []
+
+        for masked_state in masked_states:
+            input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(self.input_mask_queue_tail - 1))), 'big')
+            self.input_mask_queue_tail -= 1
+            state_share = (masked_state - input_mask) % blsPrime
+            state_shares.append(state_share)
+
+        return state_shares
+
+    def restore_db(self, seq_num_list, keys, values):
+        assert len(keys) == len(values)
+
+        for key, value in zip(keys, values):
+            self.db.Put(key.encode(), value.to_bytes((value.bit_length() + 7) // 8, 'big'))
+
+        try:
+            execHistory = self.db.Get(f'execHistory'.encode())
+        except KeyError:
+            execHistory = bytes(0)
+
+        try:
+            execHistory = execHistory.decode(encoding='utf-8')
+            execHistory = dict(ast.literal_eval(execHistory))
+        except:
+            execHistory = {}
+
+        for seq in seq_num_list:
+                execHistory[seq] = True
+
+        execHistory = str(execHistory)
+        execHistory = bytes(execHistory, encoding='utf-8')
+        self.db.Put(f'execHistory'.encode(), execHistory)
