@@ -15,12 +15,7 @@ client_num=$1
 concurrency=$2
 token_num=$client_num
 
-clear() {
-  pkill -f python || true
-  pkill -f ./malicious-shamir-party.x || true
-  rm -rf /opt/hbswap/db/*
-}
-
+.utils
 clear
 
 bash ratel/src/deploy.sh hbswap $token_num $players $threshold

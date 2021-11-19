@@ -14,6 +14,7 @@ if __name__ == '__main__':
     init_players = int(sys.argv[2])
     init_threshold = int(sys.argv[3])
     concurrency = int(sys.argv[4])
+    test = bool(sys.argv[5])
 
     web3 = Web3(Web3.WebsocketProvider(url))
 
@@ -29,7 +30,9 @@ if __name__ == '__main__':
         init_players,
         init_threshold,
         concurrency,
+        recover,
+        test,
     )
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(server.init(recover, hbswap.monitor(server, loop)))
+    loop.run_until_complete(server.init(hbswap.monitor(server, loop)))

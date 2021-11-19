@@ -101,7 +101,7 @@ void addEventEmit() {
         if (i > 0) textRecover += ",";
         if (args[i][0] == '$') {
             string varType = getType(args[i]).substr(1);
-            textRecover += "uint256, " + varType;
+            textRecover += "uint256," + varType;
         } else {
             textRecover += getType(args[i]);
         }
@@ -486,8 +486,8 @@ int main(int argc, char **argv) {
     textRecover += "from eth_abi import decode_single\n";
     textRecover += "\n";
     textRecover += "def recover(contract, opSeq):\n";
-    textRecover += "    opEvent = server.contract.functions.opEvent(opSeq).call()\n";
-    textRecover += "    opContent = server.contract.functions.opContent(opSeq).call()\n";
+    textRecover += "    opEvent = contract.functions.opEvent(opSeq).call()\n";
+    textRecover += "    opContent = contract.functions.opContent(opSeq).call()\n";
     textRecover += "\n";
 
 	yylex();

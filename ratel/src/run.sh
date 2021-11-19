@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source ./ratel/benchmark/src/utils.sh
 
 set -e
 set -x
@@ -8,18 +9,17 @@ IDs=$2
 players=$3
 threshold=$4
 concurrency=$5
+test=$6
+
+kill_python
+kill_mpc
 
 IFS=','
-
 read -a strarr <<< "$IDs"
 
-
 for id in "${strarr[@]}";
 do
-  pkill -f "python3 -m ratel.src.python.$app.run $id" || true
+  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test &
 done
 
-for id in "${strarr[@]}";
-do
-  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency &
-done
+sleep 3

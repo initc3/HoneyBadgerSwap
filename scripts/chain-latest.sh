@@ -27,3 +27,5 @@ mkdir $DATADIR
     --syncmode full \
     --ipcpath "$DATADIR/geth.ipc" \
     2>> $DATADIR/geth.log &
+
+sleep 3
