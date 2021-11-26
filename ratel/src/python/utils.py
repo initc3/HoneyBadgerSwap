@@ -142,3 +142,5 @@ shareBatchSize = 1000
 confirmation = 2
 
 replay = 2
+
+trade_key_num = 7

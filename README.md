@@ -72,3 +72,9 @@ Test MP-SPDZ concurrency
 python3 -m ratel.benchmark.src.test_mpc
 ```
 
+Test recover states
+```bash
+./ratel/benchmark/src/test_recover_states_start.sh 4
+./ratel/benchmark/src/test_recover_states_run.sh 4 5
+```
+
