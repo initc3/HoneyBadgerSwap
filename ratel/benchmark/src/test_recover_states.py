@@ -23,17 +23,23 @@ async def testing():
                 f'stage\t1\t'
                 f'{time.perf_counter()}\n')
 
+    keys = server.collect_keys(seq_num_list)
+
+    with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
+        f.write(f'state\t{repetition * trade_key_num}\t'
+                f'stage\t2\t'
+                f'{time.perf_counter()}\n')
+
     task = loop.create_task(send_requests(online_players, request))
 
-    keys = server.collect_keys(seq_num_list)
     await server.genInputMask(len(keys))
-
     await task
+
     masked_shares = task.result()
 
     with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
         f.write(f'state\t{repetition * trade_key_num}\t'
-                f'stage\t6\t'
+                f'stage\t7\t'
                 f'{time.perf_counter()}\n')
 
     for i in range(len(masked_shares)):
@@ -42,21 +48,21 @@ async def testing():
 
     with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
         f.write(f'state\t{repetition * trade_key_num}\t'
-                f'stage\t7\t'
+                f'stage\t8\t'
                 f'{time.perf_counter()}\n')
 
     state_shares = server.recover_states(masked_states)
 
     with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
         f.write(f'state\t{repetition * trade_key_num}\t'
-                f'stage\t8\t'
+                f'stage\t9\t'
                 f'{time.perf_counter()}\n')
 
     server.restore_db(seq_num_list, keys, state_shares)
 
     with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
         f.write(f'state\t{repetition * trade_key_num}\t'
-                f'stage\t9\t'
+                f'stage\t10\t'
                 f'{time.perf_counter()}\n')
 
     print('**** test finished!')
