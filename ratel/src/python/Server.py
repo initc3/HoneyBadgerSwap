@@ -65,7 +65,7 @@ class Server:
 
             with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
                 f.write(f'state\t{len(seq_num_list * trade_key_num)}\t'
-                        f'stage\t2\t'
+                        f'stage\t3\t'
                         f'{time.perf_counter()}\t'
                         f's-{self.serverID}\n')
 
@@ -74,7 +74,7 @@ class Server:
 
             with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
                 f.write(f'state\t{len(seq_num_list * trade_key_num)}\t'
-                        f'stage\t5\t'
+                        f'stage\t6\t'
                         f'{time.perf_counter()}\t'
                         f's-{self.serverID}\n')
 
@@ -83,7 +83,7 @@ class Server:
             data = {
                 "values": res,
             }
-            print(f"s{self.serverID} response: {res}")
+            # print(f"s{self.serverID} response: {res}")
             return web.json_response(data)
 
 
@@ -277,7 +277,7 @@ class Server:
 
         with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
             f.write(f'state\t{len(keys)}\t'
-                    f'stage\t3\t'
+                    f'stage\t4\t'
                     f'{time.perf_counter()}\t'
                     f's-{self.serverID}\n')
 
@@ -285,7 +285,7 @@ class Server:
 
         with open(f'ratel/benchmark/data/recover_states.csv', 'a') as f:
             f.write(f'state\t{len(keys)}\t'
-                    f'stage\t4\t'
+                    f'stage\t5\t'
                     f'{time.perf_counter()}\t'
                     f's-{self.serverID}\n')
 
