@@ -1,0 +1,14 @@
+def readshare(idx):
+    start = regint(idx * 32)
+    end = regint()
+    masked_value = sint()
+    readsharesfromfile(start, end, masked_value)
+    return masked_value
+
+def main():
+   #print_ln('!!!! %s', sfix._new(readshare(0)).reveal())
+   #print_ln('!!!! %s', readshare(0).reveal())
+   sint(0).reveal_to(0)
+   sint(10).reveal_to(0)
+
+main()
