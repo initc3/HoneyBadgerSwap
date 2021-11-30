@@ -60,11 +60,13 @@ compile_flexes
 ####
 
 #### compile application
-#parse hbswap
-#parse volumeMatching
-parse rockPaperScissors
-#parse fabcar
-#parse review
+apps=$1
+IFS=','
+read -a strarr <<< "$apps"
+for app in "${strarr[@]}";
+do
+  parse $app
+done
 
 compile_sol
 compile_mpc
