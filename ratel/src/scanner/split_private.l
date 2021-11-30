@@ -37,7 +37,7 @@ string textRecover;
 
 vector<string> events;
 
-bool isFuncLower;
+int funcStage;
 set<string> keyReadDB, keyWriteDB;
 
 string removeType(string st) {
@@ -262,6 +262,7 @@ void mpcInput() {
     textFuncLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
     textFuncLower += prefix + "if stderr:\n";
     textFuncLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    textFuncLower += "\n";
 }
 
 void mpcOutput() {
@@ -335,7 +336,7 @@ SPACE [ \t\r]+
     isArg = true;
     cntMPC = 0;
     cntValueDB = 0;
-    isFuncLower = false;
+    funcStage = 0;
     textFuncUpper = "";
     textFuncMid = "";
     textFuncLower = "";
@@ -346,7 +347,7 @@ SPACE [ \t\r]+
 ^.*readDB\( {
     isReadDB = true;
     isArg = true;
-    isFuncLower = true;
+    funcStage = 1;
 
     string text = string(yytext);
     prefix = getPrefix(text);
@@ -365,6 +366,7 @@ SPACE [ \t\r]+
 ^.*mpcInput\( {
     isMpcInput = true;
     isArg = true;
+    funcStage = 2;
 
     prefix = getPrefix(string(yytext));
 }
@@ -477,6 +479,7 @@ SPACE [ \t\r]+
 
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
 
+        textPythonLower += "\n";
         textPythonLower += "    await server.dbLock['execHistory'].acquire()\n";
         textPythonLower += "    try:\n";
         textPythonLower += "        execHistory = server.db.Get(f'execHistory'.encode())\n";
@@ -522,17 +525,19 @@ SPACE [ \t\r]+
     } else if (isWriteDB) {
         textFuncLower += textLine;
         string key = args[0];
-        textFuncLower += "    server.dbLock[" + key + "].release()\n";
+        textFuncLower += getPrefix(textLine) + "server.dbLock[" + key + "].release()\n";
 
         isWriteDB = false;
     } else if (!isEmptyLine) {
         if (isMPC) {
             textMpc += tab(1) + removeSpace(textLine);
         } else {
-            if (isFuncLower) {
-                textFuncLower += textLine;
-            } else {
+            if (funcStage == 0) {
                 textFuncUpper += textLine;
+            } else if (funcStage == 1) {
+                textFuncMid += textLine;
+            } else {
+                textFuncLower += textLine;
             }
         }
     }

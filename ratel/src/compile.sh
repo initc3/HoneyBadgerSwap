@@ -41,7 +41,7 @@ parse() {
   rm mpc/$1.mpc
 }
 
-# INIT: only run when enter a new docker container
+#### INIT: only run when enter a new docker container
 bash setup-ssl.sh 4
 rm -rf ratel/genfiles
 mkdir -p ratel/genfiles
@@ -51,17 +51,22 @@ cp -r ratel/src/mpc ratel/genfiles/
 cp -r ratel/src/contracts ratel/genfiles/
 cp -r ratel/src/truffle-config.js ratel/genfiles
 cp -r ratel/src/node_modules ratel/genfiles
+####
 
 cd ratel/genfiles
 
+#### compile ratel compiler
 compile_flexes
+####
 
-parse hbswap
+#### compile application
+#parse hbswap
 #parse volumeMatching
-#parse rockPaperScissors
+parse rockPaperScissors
 #parse fabcar
 #parse review
 
 compile_sol
 compile_mpc
+####
 

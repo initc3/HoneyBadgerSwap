@@ -107,12 +107,10 @@ def recover_input(db, masked_value, idx): # return: int
 
 def players(contract):
     players = contract.functions.N().call()
-    print('players', players)
     return players
 
 def threshold(contract):
     threshold = contract.functions.T().call()
-    print('threshold', threshold)
     return threshold
 
 def list_to_str(list):
