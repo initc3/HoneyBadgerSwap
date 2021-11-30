@@ -50,6 +50,8 @@ contract rockPaperScissors {
         address player2 = msg.sender;
 
         mpc(uint gameId, address player2, $uint value2) {
+            game = readDB(f'gameBoard_{gameId}', dict)
+
             mpcInput(sint value2)
 
             valid = ((value2.greater_equal(1, bit_length=bit_length)) * (value2.less_equal(3, bit_length=bit_length))).reveal()
@@ -58,9 +60,6 @@ contract rockPaperScissors {
 
             print('**** valid', valid)
             if valid == 1:
-
-                game = readDB(f'gameBoard_{gameId}', dict)
-
                 game['player2'] = player2
                 game['value2'] = value2
 
@@ -73,7 +72,7 @@ contract rockPaperScissors {
         }
     }
 
-    function startRecon(uint gameId) public {
+    function startRecon(uint gameId) public { // 1 < 2; 2 < 3; 3 < 1;
         require(status[gameId] == 2);
         status[gameId]++;
 
@@ -99,10 +98,10 @@ contract rockPaperScissors {
                 print('**** tie')
                 winner = 'tie'
             elif result == 1 or result == -2:
-                print('**** player1')
+                print('**** winner-player1')
                 winner = 'player1'
             else:
-                print('**** player2')
+                print('**** winner-player2')
                 winner = 'player2'
 
             set(winners, string memory winner, uint gameId)

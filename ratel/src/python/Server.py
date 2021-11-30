@@ -83,7 +83,7 @@ class Server:
             data = {
                 "values": res,
             }
-            # print(f"s{self.serverID} response: {res}")
+            print(f"s{self.serverID} response: {res}")
             return web.json_response(data)
 
 

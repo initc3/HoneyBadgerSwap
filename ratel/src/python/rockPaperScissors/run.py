@@ -3,37 +3,38 @@ import sys
 
 from web3 import Web3
 
-from ratel.genfiles.python.rockPaperScissors import monitorCreateGame, monitorJoinGame, monitorStartRecon
-from ratel.genfiles.python.volumeMatching import monitorSubmitBid, monitorVolumeMatch, monitorSecretWithdraw, \
-    monitorSecretDeposit
+from ratel.genfiles.python import rockPaperScissors
+from ratel.genfiles.python.rockPaperScissorsRecover import recover
 from ratel.src.python.Server import Server
-from ratel.src.python.deploy import parse_contract, getAccount, preprocessing, appAddress, confirmation, url
-from ratel.src.python.utils import openDB, location_db, http_port, http_host
+from ratel.src.python.deploy import url, app_addr
+from ratel.src.python.utils import parse_contract
 
 contract_name = 'rockPaperScissors'
 
 if __name__ == '__main__':
-    serverID = sys.argv[1]
+    serverID = int(sys.argv[1])
+    init_players = int(sys.argv[2])
+    init_threshold = int(sys.argv[3])
+    concurrency = int(sys.argv[4])
+    test = bool(sys.argv[5])
 
     web3 = Web3(Web3.WebsocketProvider(url))
 
-    account = getAccount(web3, f'/opt/poa/keystore/server_{serverID}/')
-
-    db = openDB(location_db(serverID))
-
+    ### App contract
     abi, bytecode = parse_contract(contract_name)
-    contract = web3.eth.contract(address=appAddress, abi=abi)
+    appContract = web3.eth.contract(address=app_addr, abi=abi)
+    ###
 
     server = Server(
-        serverID, db, http_host, http_port + int(serverID)
+        serverID,
+        web3,
+        appContract,
+        init_players,
+        init_threshold,
+        concurrency,
+        recover,
+        test,
     )
 
     loop = asyncio.get_event_loop()
-    tasks = [preprocessing(db, contract, serverID),
-             server.http_server(),
-             monitorCreateGame(web3, db, serverID, contract, confirmation, account),
-             monitorJoinGame(web3, db, serverID, contract, confirmation, account),
-             monitorStartRecon(web3, db, serverID, contract, confirmation, account),
-            ]
-    loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()
+    loop.run_until_complete(server.init(rockPaperScissors.monitor(server, loop)))
