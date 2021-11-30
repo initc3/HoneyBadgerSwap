@@ -1,4 +1,4 @@
-ratel/src/python/rockPaperScissors/interact.pyimport asyncio
+import asyncio
 import time
 
 from web3 import Web3
