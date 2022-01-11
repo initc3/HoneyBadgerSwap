@@ -1,5 +1,16 @@
 # RockPaperScissors
 
+RockPaperScissors is a two-player game, in which each player simultaneously forms one of three choices(rock, paper, and scissors).
+For each player, the game has three possible outcomes: a draw, a win, or a loss.
+A player who decides to play rock will beat another player who has chosen scissors, but will lose to one who has played paper; a play of paper will lose to a play of scissors.
+If both players choose the same shape, the game is tied.
+
+In our implementation, we use integer 0,1,2 to represent rock, scissors, paper respectively.
+One player creates a game by submitting his/her choice in secret format.
+The other player joins the game later and also submits his/her private choice to the application.
+Once both players are present in the game, anyone could trigger the process to publicly reconstruct the result of the game.
+The game is fair (two players decide what to play simultaneously) as no one would know the other player's choice. 
+
 ### Build docker image:
 `docker-compose -f docker-compose-dev.yml build --no-cache`
 
@@ -54,6 +65,6 @@ A suggestion is to compare the difference of `ratel/src/python/rockPaperScissors
 ```
 python3 -m ratel.src.python.rockPaperScissors.interact 
 ```
-`ratel/src/python/rockPaperScissors/interact.py` shows how a client would interact with the rock-paper-scissors application.
-
-
+`ratel/src/python/rockPaperScissors/interact.py` shows how clients would interact with the rock-paper-scissors application.
+In this Python program, we show all 9 possible scenarios of the RockPaperScissors game.
+You can search for "!!!! winner" in the terminal to see the result of each game.
