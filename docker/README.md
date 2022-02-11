@@ -14,9 +14,31 @@ MP-SPDZ builds used by HoneyBadgerSwap:`random-shamir.x` and
 https://hub.docker.com/repository/docker/sbellem/mpspdz. Different builds
 are available as different tags:
 
-* [`sbellem/mpspdz:randomshamirprep`](https://hub.docker.com/layers/139098383/sbellem/mpspdz/randomshamirprep/images/sha256-eab1c1ab1641ced1a2e89b4c0c6552948e4e1c9ade08d66b942b625169015f09?context=explore)
-* [`sbellem/mpspdz:maliciousshamirparty`](https://hub.docker.com/layers/139098336/sbellem/mpspdz/maliciousshamirparty/images/sha256-ac1f16820a16149d6991c916dd2a686139c11d28c4db0e8c861f457796537f8d?context=explore)
+* [`sbellem/mpspdz:randomshamirprep`](https://hub.docker.com/layers/sbellem/mpspdz/randomshamirshares-c77cc7ab6cc/images/sha256-9be48505316ffb810130b35c7f63ecf4988fb026c05db307e79f933161a29c75?context=explore)
+* [`sbellem/mpspdz:maliciousshamirparty`](https://hub.docker.com/layers/sbellem/mpspdz/maliciousshamirparty-c77cc7ab6cc/images/sha256-c1bba9cb1c64036571b0b93ab72cbb7871aa0eccd0bea9158b40cb1079957043?context=explore)
 
 Note that in order to run these pre-built binaries, `mpir` is necessary. See
 the `Dockerfile` under the root of this repository for examples of how these
 images can be used.
+
+### Building the images
+Pay attention to where you run the command relative to the root of this repository.
+
+#### random shamir shares for input masks
+Under the root of the repository:
+
+```console
+docker build \
+    --target random-shamir-shares \
+    --tag random-shamir-shares \
+    --file docker/mpspdzbuilds.Dockerfile .
+```
+
+#### malicious-shamir-party.x
+
+```console
+docker build \
+    --target malicious-shamir-party \
+    --tag malicious-shamir-party \
+    --file docker/mpspdzbuilds.Dockerfile .
+```
