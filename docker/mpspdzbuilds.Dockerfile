@@ -27,28 +27,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 yasm \
         && rm -rf /var/lib/apt/lists/*
 
+COPY .git /usr/src/.git
+COPY .git /usr/src/.gitmodules
+
 ENV MP_SPDZ_HOME /usr/src/MP-SPDZ
 WORKDIR $MP_SPDZ_HOME
-
-# mpir
-ENV LD_LIBRARY_PATH /usr/local/lib
-RUN mkdir -p /usr/local/share/info
-COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/lib/libmpir*.*a /usr/local/lib/
-COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/lib/libmpir.so.23.0.3 /usr/local/lib/
-COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/lib/libmpirxx.so.8.4.3 /usr/local/lib/
-COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/include/mpir*.h /usr/local/include/
-COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/share/info/* /usr/local/share/info/
-RUN set -ex \
-    && cd /usr/local/lib \
-    && ln -s libmpir.so.23.0.3 libmpir.so \
-    && ln -s libmpir.so.23.0.3 libmpir.so.23 \
-    && ln -s libmpirxx.so.8.4.3 libmpirxx.so \
-    && ln -s libmpirxx.so.8.4.3 libmpirxx.so.8
 
 COPY MP-SPDZ/Makefile .
 COPY MP-SPDZ/CONFIG .
 COPY MP-SPDZ/BMR BMR
-COPY MP-SPDZ/Exceptions Exceptions
+#COPY MP-SPDZ/Exceptions Exceptions
+COPY MP-SPDZ/ECDSA ECDSA
+COPY MP-SPDZ/FHE FHE
+COPY MP-SPDZ/FHEOffline FHEOffline
 COPY MP-SPDZ/GC GC
 COPY MP-SPDZ/Machines Machines
 COPY MP-SPDZ/Math Math
@@ -60,7 +51,11 @@ COPY MP-SPDZ/SimpleOT SimpleOT
 COPY MP-SPDZ/Tools Tools
 COPY MP-SPDZ/Utils Utils
 
-RUN make clean
+COPY MP-SPDZ/.git .git
+COPY MP-SPDZ/.gitmodules .gitmodules
+COPY MP-SPDZ/mpir mpir
+
+RUN make clean && make mpir
 
 # DEBUG and configuration flags
 RUN echo "MY_CFLAGS += -DDEBUG_NETWORKING" >> CONFIG.mine \
@@ -74,7 +69,7 @@ ENV N_PARTIES 4
 ENV THRESHOLD 1
 
 # Compile random-shamir
-FROM machines as random-shamir-prep
+FROM machines as random-shamir-shares
 ENV INPUTMASK_SHARES "/opt/hbswap/inputmask-shares"
 RUN mkdir -p $INPUTMASK_SHARES \
         && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/inputmask-shares/\"'" >> CONFIG.mine
