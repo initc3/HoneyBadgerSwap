@@ -281,7 +281,7 @@ void mpcOutput() {
         } else {
             assert(varType == "sint");
         }
-        textMpc += tab(1) + "writesharestofile(" + varName + ")\n";
+        textMpc += tab(1) + "sint.write_to_file(" + varName + ")\n";
     }
     textMpc += "\n";
 

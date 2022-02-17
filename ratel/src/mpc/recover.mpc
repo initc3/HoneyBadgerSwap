@@ -9,6 +9,6 @@ def main():
     secret = read_sint(0)
     input_mask = read_sint(1)
     masked_secret = secret + input_mask
-    writesharestofile(masked_secret)
+    sint.write_to_file(masked_secret)
 
 main()
