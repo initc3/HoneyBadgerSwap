@@ -33,27 +33,7 @@ COPY .git /usr/src/.gitmodules
 ENV MP_SPDZ_HOME /usr/src/MP-SPDZ
 WORKDIR $MP_SPDZ_HOME
 
-COPY MP-SPDZ/Makefile .
-COPY MP-SPDZ/CONFIG .
-COPY MP-SPDZ/BMR BMR
-#COPY MP-SPDZ/Exceptions Exceptions
-COPY MP-SPDZ/ECDSA ECDSA
-COPY MP-SPDZ/FHE FHE
-COPY MP-SPDZ/FHEOffline FHEOffline
-COPY MP-SPDZ/GC GC
-COPY MP-SPDZ/Machines Machines
-COPY MP-SPDZ/Math Math
-COPY MP-SPDZ/Networking Networking
-COPY MP-SPDZ/OT OT
-COPY MP-SPDZ/Processor Processor
-COPY MP-SPDZ/Protocols Protocols
-COPY MP-SPDZ/SimpleOT SimpleOT
-COPY MP-SPDZ/Tools Tools
-COPY MP-SPDZ/Utils Utils
-
-COPY MP-SPDZ/.git .git
-COPY MP-SPDZ/.gitmodules .gitmodules
-COPY MP-SPDZ/mpir mpir
+COPY MP-SPDZ .
 
 RUN make clean && make mpir
 
@@ -68,12 +48,15 @@ ENV PRIME 5243587517512619047944774050818596583769055250052763782260365869993858
 ENV N_PARTIES 4
 ENV THRESHOLD 1
 
+# setup keys
+
 # Compile random-shamir
 FROM machines as random-shamir-shares
 ENV INPUTMASK_SHARES "/opt/hbswap/inputmask-shares"
 RUN mkdir -p $INPUTMASK_SHARES \
         && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/inputmask-shares/\"'" >> CONFIG.mine
 RUN make random-shamir.x
+RUN ./Scripts/setup-ssl.sh 4
 
 # Compile malicious-shamir-party
 FROM machines as malicious-shamir-party
@@ -81,3 +64,12 @@ ENV PREP_DIR "/opt/hbswap/preprocessing-data"
 RUN mkdir -p $PREP_DIR \
         && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/preprocessing-data/\"'" >> CONFIG.mine
 RUN make malicious-shamir-party.x
+RUN ./Scripts/setup-ssl.sh 4
+
+# Compile mal-shamir-offline
+FROM machines as mal-shamir-offline
+ENV PREP_DIR "/opt/hbswap/preprocessing-data"
+RUN mkdir -p $PREP_DIR \
+        && echo "PREP_DIR = '-DPREP_DIR=\"/opt/hbswap/preprocessing-data/\"'" >> CONFIG.mine
+RUN make mal-shamir-offline.x
+RUN ./Scripts/setup-ssl.sh 4

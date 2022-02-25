@@ -20,4 +20,4 @@ services:
       #- ./MP-SPDZ/malicious-shamir-party.x:/usr/src/hbswap/malicious-shamir-party.x
       - ./ratel/genfiles/mpc:/usr/src/hbswap//Programs/Source
     working_dir: /usr/src/hbswap
-    #command: tail -F anything
+    command: tail -F anything

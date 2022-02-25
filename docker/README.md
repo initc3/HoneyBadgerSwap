@@ -34,6 +34,14 @@ docker build \
     --file docker/mpspdzbuilds.Dockerfile .
 ```
 
+To push to DockerHub, tag the image accordingly. As an example, from the
+MP-SPDZ git module or repository:
+
+```console
+cd MP-SPDZ && docker tag random-shamir-shares:latest \
+    sbellem/mpspdz:shamirshares-$(git log -n 1 --pretty=format:"%h")
+```
+
 #### malicious-shamir-party.x
 
 ```console
@@ -41,4 +49,27 @@ docker build \
     --target malicious-shamir-party \
     --tag malicious-shamir-party \
     --file docker/mpspdzbuilds.Dockerfile .
+```
+
+To push to DockerHub, tag the image accordingly, e.g.:
+
+```console
+cd MP-SPDZ && docker tag malicious-shamir-party:latest \
+    sbellem/mpspdz:malshamirparty-$(git log -n 1 --pretty=format:"%h")
+```
+
+#### mal-shamir-offline.x
+
+```console
+docker build \
+    --target mal-shamir-offline \
+    --tag mal-shamir-offline \
+    --file docker/mpspdzbuilds.Dockerfile .
+```
+
+To push to DockerHub, tag the image accordingly, e.g.:
+
+```console
+cd MP-SPDZ && docker tag mal-shamir-offline:latest \
+    sbellem/mpspdz:malshamiroffline-$(git log -n 1 --pretty=format:"%h")
 ```
