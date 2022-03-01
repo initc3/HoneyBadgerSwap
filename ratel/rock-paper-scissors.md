@@ -48,20 +48,23 @@ You can also deploy ERC-20 token contracts by specifying a non-zero [token_num].
 ### Transfer Ether(token_id=0) to MPC servers and clients for them to pay transaction fee
 ```shell
 python3 -m ratel.src.python.refill [user_name (see available choices in poa/keystore/)] [token_id]
-
-python3 -m ratel.src.python.refill server_0 0
-python3 -m ratel.src.python.refill server_1 0
-python3 -m ratel.src.python.refill server_2 0
-python3 -m ratel.src.python.refill server_3 0
-
-python3 -m ratel.src.python.refill client_1 0
-python3 -m ratel.src.python.refill client_2 0
+```
+```shell
+python3 -m ratel.src.python.refill server_0 0 \
+& python3 -m ratel.src.python.refill server_1 0 \
+& python3 -m ratel.src.python.refill server_2 0 \
+& python3 -m ratel.src.python.refill server_3 0
+```
+```shell
+python3 -m ratel.src.python.refill client_1 0 \
+& python3 -m ratel.src.python.refill client_2 0
 ```
 
 ### Start MPC servers to monitor events emitted by application contract and take MPC  tasks:
 ```shell
 bash ratel/src/run.sh [app_name] [MPC_server_IDs] [MPC_server_number] [threshold] [concurrency] [test_flag]
-
+```
+```shell
 bash ratel/src/run.sh rockPaperScissors 0,1,2,3 4 1 1 0
 ```
 The script `ratel/src/run.sh` calls `ratel/src/python/[app_name]/run.py` to start servers respectively. 
