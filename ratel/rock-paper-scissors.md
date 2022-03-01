@@ -12,16 +12,22 @@ Once both players are present in the game, anyone could trigger the process to p
 The game is fair (two players decide what to play simultaneously) as no one would know the other player's choice. 
 
 ### Build docker image:
-`docker-compose -f docker-compose-dev.yml build --no-cache`
+```shell
+docker-compose -f docker-compose-dev.yml build --no-cache`
+```
 
 ### Start docker container:
-`docker-compose -f docker-compose-dev.yml up -d`
+```shell
+docker-compose -f docker-compose-dev.yml up -d`
+```
 
 ### Enter docker container:
-`docker exec -it honeybadgerswap_dev_1 bash`
+```shell
+docker exec -it honeybadgerswap_dev_1 bash`
+```
 
 ### Compile ratel program:
-```
+```shell
 bash ratel/src/compile.sh [app_names]
 
 bash ratel/src/compile.sh rockPaperScissors
@@ -29,7 +35,7 @@ bash ratel/src/compile.sh rockPaperScissors
 Compile ratel programs (*.rl) in directory `ratel/src/rl` to python programs in `ratel/genfiles/python`, MP-SPDZ programs in `ratel/genfiles/mpc`, and Solidity contracts in `ratel/genfiles/contracts`.
 
 ### Start local private blockchain and deploy application contract:
-```
+```shell
 bash ratel/src/deploy.sh [app_name] [token_num] [MPC_server_number] [threshold]
 
 bash ratel/src/deploy.sh rockPaperScissors 0 4 1
@@ -38,7 +44,7 @@ bash ratel/src/deploy.sh rockPaperScissors 0 4 1
 You can also deploy ERC-20 token contracts by specifying a non-zero [token_num].
 
 ### Transfer Ether(token_id=0) to MPC servers and clients for them to pay transaction fee
-```
+```shell
 python3 -m ratel.src.python.refill [user_name (see available choices in poa/keystore/)] [token_id]
 
 python3 -m ratel.src.python.refill server_0 0
@@ -51,7 +57,7 @@ python3 -m ratel.src.python.refill client_2 0
 ```
 
 ### Start MPC servers to monitor events emitted by application contract and take MPC  tasks:
-```
+```shell
 bash ratel/src/run.sh [app_name] [MPC_server_IDs] [MPC_server_number] [threshold] [concurrency] [test_flag]
 
 bash ratel/src/run.sh rockPaperScissors 0,1,2,3 4 1 1 0
@@ -62,7 +68,7 @@ Whenever creating a new application, you need to write `run.py` for the new app 
 A suggestion is to compare the difference of `ratel/src/python/rockPaperScissors/run.py` and `ratel/src/python/hbswap/run.py` and you will know how to write `run.py` for your new application.
 
 ### Interact with app contract
-```
+```shell
 python3 -m ratel.src.python.rockPaperScissors.interact 
 ```
 `ratel/src/python/rockPaperScissors/interact.py` shows how clients would interact with the rock-paper-scissors application.
