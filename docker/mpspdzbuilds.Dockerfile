@@ -1,4 +1,4 @@
-FROM python:3.8-buster as compiler
+FROM python:3.8 as compiler
 
 ENV PYTHONUNBUFFERED 1
 
@@ -9,7 +9,7 @@ COPY MP-SPDZ/Compiler Compiler
 RUN mkdir -p Programs/Source
 ###############################################################################
 
-FROM python:3.8-buster as machines
+FROM python:3.8 as machines
 
 ENV PYTHONUNBUFFERED 1
 
@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 git \
                 libboost-dev \
                 libboost-thread-dev \
+                libntl-dev \
                 libsodium-dev \
                 libssl-dev \
                 libtool \
@@ -27,13 +28,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 yasm \
         && rm -rf /var/lib/apt/lists/*
 
-COPY .git /usr/src/.git
-COPY .git /usr/src/.gitmodules
-
 ENV MP_SPDZ_HOME /usr/src/MP-SPDZ
 WORKDIR $MP_SPDZ_HOME
 
-COPY MP-SPDZ .
+RUN git clone --branch \
+            random-shamir-prep-upgrade https://github.com/initc3/MP-SPDZ.git \
+            $MP_SPDZ_HOME
+
+RUN echo "USE_NTL = 1" >> CONFIG.mine
 
 RUN make clean && make mpir
 
@@ -44,11 +46,9 @@ RUN echo "MY_CFLAGS += -DDEBUG_NETWORKING" >> CONFIG.mine \
         && echo "MY_CFLAGS += -DDEBUG_FILE" >> CONFIG.mine \
         && echo "MOD = -DGFP_MOD_SZ=4" >> CONFIG.mine
 
-ENV PRIME 52435875175126190479447740508185965837690552500527637822603658699938581184513
-ENV N_PARTIES 4
-ENV THRESHOLD 1
-
-# setup keys
+#ENV PRIME 52435875175126190479447740508185965837690552500527637822603658699938581184513
+#ENV N_PARTIES 4
+#ENV THRESHOLD 1
 
 # Compile random-shamir
 FROM machines as random-shamir-shares
