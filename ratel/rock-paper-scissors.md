@@ -13,23 +13,24 @@ The game is fair (two players decide what to play simultaneously) as no one woul
 
 ### Build docker image:
 ```shell
-docker-compose -f docker-compose-dev.yml build --no-cache`
+docker-compose -f docker-compose-dev.yml build --no-cache
 ```
 
 ### Start docker container:
 ```shell
-docker-compose -f docker-compose-dev.yml up -d`
+docker-compose -f docker-compose-dev.yml up -d
 ```
 
 ### Enter docker container:
 ```shell
-docker exec -it honeybadgerswap_dev_1 bash`
+docker exec -it honeybadgerswap_dev_1 bash
 ```
 
 ### Compile ratel program:
 ```shell
 bash ratel/src/compile.sh [app_names]
-
+```
+```shell
 bash ratel/src/compile.sh rockPaperScissors
 ```
 Compile ratel programs (*.rl) in directory `ratel/src/rl` to python programs in `ratel/genfiles/python`, MP-SPDZ programs in `ratel/genfiles/mpc`, and Solidity contracts in `ratel/genfiles/contracts`.
@@ -37,7 +38,8 @@ Compile ratel programs (*.rl) in directory `ratel/src/rl` to python programs in 
 ### Start local private blockchain and deploy application contract:
 ```shell
 bash ratel/src/deploy.sh [app_name] [token_num] [MPC_server_number] [threshold]
-
+```
+```shell
 bash ratel/src/deploy.sh rockPaperScissors 0 4 1
 ```
 
