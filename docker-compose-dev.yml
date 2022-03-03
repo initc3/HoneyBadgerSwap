@@ -11,13 +11,9 @@ services:
       - NET_ADMIN
     volumes:
       - ./ratel:/usr/src/hbswap/ratel
-      - ./MP-SPDZ/compile.py:/usr/src/hbswap/compile.py
-      - ./MP-SPDZ/Compiler:/usr/src/hbswap/Compiler
       - ./scripts/chain-latest.sh:/usr/src/hbswap/chain-latest.sh
       - ./scripts/latency-control.sh:/usr/src/hbswap/latency-control.sh
       - ./poa:/opt/poa
-      - ./MP-SPDZ/Scripts/setup-ssl.sh:/usr/src/hbswap/setup-ssl.sh
-      #- ./MP-SPDZ/malicious-shamir-party.x:/usr/src/hbswap/malicious-shamir-party.x
       - ./ratel/genfiles/mpc:/usr/src/hbswap//Programs/Source
     working_dir: /usr/src/hbswap
     command: tail -F anything

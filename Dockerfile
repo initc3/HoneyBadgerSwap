@@ -42,9 +42,14 @@ COPY --from=sbellem/mpspdz:malshamiroffline-2b3b7076 \
 
 COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
-
 COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/local /usr/src/MP-SPDZ/local
+
+# MP-SPDZ compiler
+COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+                /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
+COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+                /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
 
 RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
 COPY MP-SPDZ/Scripts/setup-ssl.sh .
