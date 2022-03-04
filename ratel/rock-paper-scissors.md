@@ -12,13 +12,17 @@ Once both players are present in the game, anyone could trigger the process to p
 The game is fair (two players decide what to play simultaneously) as no one would know the other player's choice. 
 
 ### Build docker image:
+
 ```shell
-docker-compose -f docker-compose-dev.yml build --no-cache
+docker-compose build
 ```
+
+(*NOTE*: If you previously built the image but it's outdated, you may want to pass
+the build options`--no-cache` and/or `--pull`.)
 
 ### Start docker container:
 ```shell
-docker-compose -f docker-compose-dev.yml up -d
+docker-compose up -d
 ```
 
 ### Enter docker container:
