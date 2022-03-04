@@ -2,7 +2,7 @@ name: ci-build-image
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, ci, dev ]
 
   workflow_dispatch:
 
@@ -30,4 +30,4 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           tags: |
             initc3/honeybadgerswap,
-            initc3/honeybadgerswap-${{ steps.vars.outputs.short_sha }},
+            initc3/honeybadgerswap-${{ steps.vars.outputs.short_sha }}
