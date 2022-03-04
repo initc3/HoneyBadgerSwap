@@ -28,7 +28,7 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       -
-        name: Build & push docker image for linux-sgx 2.15.1
+        name: Build & push docker image for HoneyBadgerSwap
         uses: docker/build-push-action@v2
         with:
           context: .
