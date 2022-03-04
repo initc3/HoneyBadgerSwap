@@ -50,9 +50,11 @@ COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
 COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
+# ssl keys
+COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+                /usr/src/MP-SPDZ/Scripts/setup-ssl.sh /usr/src/hbswap/
 
 RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
-COPY MP-SPDZ/Scripts/setup-ssl.sh .
 RUN ./setup-ssl.sh 4
 #############################################################################
 
