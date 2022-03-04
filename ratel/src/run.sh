@@ -19,7 +19,7 @@ read -a strarr <<< "$IDs"
 
 for id in "${strarr[@]}";
 do
-  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test &
+  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test > ratel/log/server_$id.log 2>&1 &
 done
 
 sleep 3
