@@ -1,8 +1,8 @@
 # HoneyBadgerSwap
 
-`docker-compose -f docker-compose-dev.yml build --no-cache`
+`docker-compose build`
 
-`docker-compose -f docker-compose-dev.yml up -d`
+`docker-compose up -d`
 
 `docker exec -it honeybadgerswap_dev_1 bash`
 
