@@ -128,7 +128,7 @@ void initMPC() {
     mpcFile = "mpc/" + fileName + funcName + to_string(++cntMPC) + ".mpc";
     mpcFp = fopen(mpcFile.c_str(), "w");
 
-    textMpc += "bit_length = 212\n";
+    textMpc += "bit_length = 210\n";
     textMpc += "\n";
 
     textMpc += "def read_sint(idx):\n";

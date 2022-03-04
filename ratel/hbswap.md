@@ -6,26 +6,31 @@
 
 `docker exec -it honeybadgerswap_dev_1 bash`
 
-`bash ratel/src/compile.sh`
+`bash ratel/src/deploy.sh hbswap 1 4 1`
 
-Start local private blockchain and deploy application contract:
 ```
-bash ratel/src/deploy.sh [app]
+python3 -m ratel.src.python.refill server_0 0 &
+python3 -m ratel.src.python.refill server_1 0 &
+python3 -m ratel.src.python.refill server_2 0 &
+python3 -m ratel.src.python.refill server_3 0 &
+python3 -m ratel.src.python.refill client_1 0 &
+python3 -m ratel.src.python.refill client_1 1
 ```
 
-Test recovery mechanism (run the following commands one by one):
+`bash ratel/src/compile.sh hbswap`
+
+`bash ratel/src/run.sh hbswap 0,1,2,3 4 1 1 0`
+
 ```
-bash ratel/src/deploy.sh hbswap 3 1
-
-bash ratel/src/run.sh hbswap 0,1,2
-
-python3 -m ratel.src.python.hbswap.deposit 0x0000000000000000000000000000000000000000 1 
-python3 -m ratel.src.python.hbswap.deposit 0xF74Eb25Ab1785D24306CA6b3CBFf0D0b0817C5E2 1 
-
-bash ratel/src/run.sh hbswap 3
-
-python3 -m ratel.src.python.hbswap.initPool
+python3 -m ratel.src.python.hbswap.deposit 1 0 10000
+python3 -m ratel.src.python.hbswap.deposit 1 1 10000
 ```
+
+`python3 -m ratel.src.python.hbswap.initPool 1 0 1 1000 1000`
+
+`python3 -m ratel.src.python.hbswap.trade 1 0 1 0.5 -1 1`
+
+
 
 Test concurrency:
 ```
