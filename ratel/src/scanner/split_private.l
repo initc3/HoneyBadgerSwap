@@ -132,10 +132,9 @@ void initMPC() {
     textMpc += "\n";
 
     textMpc += "def read_sint(idx):\n";
-    textMpc += "    start = regint(idx * 32)\n";
-    textMpc += "    end = regint()\n";
-    textMpc += "    share = sint()\n";
-    textMpc += "    readsharesfromfile(start, end, share)\n";
+    textMpc += "    start = regint(idx)\n";
+    textMpc += "    _, shares = sint.read_from_file(start, 1)\n";
+    textMpc += "    share = shares[0]\n";
     textMpc += "    return share\n";
     textMpc += "\n";
 
