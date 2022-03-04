@@ -375,13 +375,9 @@ contract Hbswap {
             print_ln('**** totalPrice %s', totalPrice.reveal())
             print_ln('**** totalCnt %s', totalCnt.reveal())
 
-            batchPrice = sint(0).reveal()
-            print_ln('**** batchPrice %s', batchPrice)
-            print_ln('**** cond %s', totalCnt.reveal() >= batchSize)
-            if_then(totalCnt.reveal() >= batchSize)
-            batchPrice = (totalPrice / totalCnt).reveal()
-            end_if()
-            print_ln('**** batchPrice %s', batchPrice)
+            batchPrice = (totalCnt.reveal() >= batchSize).if_else(totalPrice / totalCnt, sfix(0))
+            print_ln('**** batchPrice %s', batchPrice.reveal())
+
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 
