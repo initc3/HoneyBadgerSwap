@@ -30,4 +30,5 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           tags: |
             initc3/honeybadgerswap,
+            initc3/honeybadgerswap:${{ github.head_ref }},
             initc3/honeybadgerswap:${{ steps.vars.outputs.short_sha }}
