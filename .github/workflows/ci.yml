@@ -37,6 +37,7 @@ jobs:
           push: true
           tags: |
             initc3/honeybadgerswap,
-            initc3/honeybadgerswap-${{ steps.vars.outputs.short_sha }}
+            initc3/honeybadgerswap:${GITHUB_REF##*/},
+            initc3/honeybadgerswap:${{ steps.vars.outputs.short_sha }}
           cache-from: type=registry,ref=initc3/honeybadgerswap:buildcache
           cache-to: type=registry,ref=initc3/honeybadgerswap:buildcache,mode=max
