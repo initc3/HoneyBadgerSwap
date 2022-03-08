@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source ./ratel/benchmark/src/utils.sh
+source ratel/src/utils.sh
 
 set -e
 set -x

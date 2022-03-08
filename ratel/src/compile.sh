@@ -19,7 +19,7 @@ compile_sol() {
 compile_mpc() {
   cd mpc
   for d in *; do
-    ./../../../compile.py -v -C -F 256 $d
+    ./../../../compile.py -v -C -F 128 $d
   done
   cd ..
 }
