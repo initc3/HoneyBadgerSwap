@@ -99,6 +99,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 vim \
                 nodejs \
                 npm \
+                iproute2 \
         && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g truffle@5.4.29
