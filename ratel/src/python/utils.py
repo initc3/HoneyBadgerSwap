@@ -68,11 +68,11 @@ def location_db(server_id):
     db_path = os.getenv('DB_PATH', '/opt/hbswap/db')
     return f'{db_path}/server-{server_id}'
 
-def location_inputmask(server_id):
+def location_inputmask(server_id, players):
     inputmask_shares_dir = os.getenv(
         'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
     )
-    return f'{inputmask_shares_dir}/4-MSp-255/Randoms-MSp-P{server_id}'
+    return f'{inputmask_shares_dir}/{players}-MSp-255/Randoms-MSp-P{server_id}'
 
 def openDB(location):
     return leveldb.LevelDB(location)
@@ -132,7 +132,6 @@ http_host = "0.0.0.0"
 http_port = 4000
 
 mpc_port = 5000
-# concurrency = 2
 
 spareShares = 100
 shareBatchSize = 1000

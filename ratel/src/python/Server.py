@@ -142,7 +142,7 @@ class Server:
         if stderr:
             print(f'[stderr]\n{stderr.decode()}')
 
-        file = location_inputmask(self.serverID)
+        file = location_inputmask(self.serverID, self.players)
         with open(file, 'r') as f:
             for line in f.readlines():
                 key = key_inputmask(self.input_mask_queue_tail)

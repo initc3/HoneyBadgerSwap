@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 
 import matplotlib.pyplot as plt
 import shutil
@@ -7,7 +8,7 @@ import time
 
 from ratel.src.python.utils import mpc_port, prog, blsPrime
 
-players = 4
+players = int(sys.argv[1])
 threshold = 1
 max_concurrency = 20
 output_file = 'ratel/benchmark/data/mp-spdz.txt'
@@ -23,11 +24,11 @@ async def run_mpc(server_id, port):
     cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
     proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await proc.communicate()
-    # print(f'[{cmd!r} exited with {proc.returncode}]')
-    # if stdout:
-    #     print(f'[stdout]\n{stdout.decode()}')
-    # if stderr:
-    #     print(f'[stderr]\n{stderr.decode()}')
+    print(f'[{cmd!r} exited with {proc.returncode}]')
+    if stdout:
+        print(f'[stdout]\n{stdout.decode()}')
+    if stderr:
+        print(f'[stderr]\n{stderr.decode()}')
     end_time = time.perf_counter()
     duration = end_time - start_time
     return server_id, port, start_time, end_time, duration
@@ -44,7 +45,8 @@ async def run_test(concurrency):
             port = mpc_port + i * 100
             tasks.append(run_mpc(server_id, port))
     results = await asyncio.gather(*tasks)
-    print(results)
+    for result in results:
+        print(result)
     return results
 
 async def main():
@@ -78,7 +80,7 @@ async def main():
     plt.savefig(f'ratel/benchmark/data/mp-spdz.pdf')
 
 if __name__ == '__main__':
-    asyncio.run(run_test(50))
+    asyncio.run(run_test(1))
     # asyncio.run(main())
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(main(loop))

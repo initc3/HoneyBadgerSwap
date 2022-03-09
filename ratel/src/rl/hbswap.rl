@@ -288,11 +288,14 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
+            op = 0
+
+            op += 1
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'start_trade\t'
-                        f's{server.serverID}\t'
+                f.write(f'trade\t'
                         f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
+                        f'op\t{op}\t'
+                        f'cur_time\t{time.perf_counter()}\n')
 
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
@@ -301,7 +304,12 @@ contract Hbswap {
             totalPrice = readDB(f'totalPrice_{tokenA}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
-            time_mpc_start = time.perf_counter()
+            op += 1
+            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+                f.write(f'trade\t'
+                        f'seq\t{seqTrade}\t'
+                        f'op\t{op}\t'
+                        f'cur_time\t{time.perf_counter()}\n')
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
 
@@ -323,10 +331,6 @@ contract Hbswap {
             buyA = amtA > 0
             totalB = (1 + feeRate) * amtB
             enoughB = ((-totalB)  <= balanceB)
-            tmp = -totalB
-            print_ln('**** tmp %s', tmp.reveal())
-            tmp = (tmp > balanceB)
-            print_ln('**** tmp %s', tmp.reveal())
             actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
             acceptA = actualAmtA  >= amtA
             flagBuyA = validOrder * buyA * enoughB * acceptA
@@ -375,21 +379,17 @@ contract Hbswap {
             print_ln('**** totalPrice %s', totalPrice.reveal())
             print_ln('**** totalCnt %s', totalCnt.reveal())
 
-            batchPrice = (totalCnt.reveal() >= batchSize).if_else(totalPrice / totalCnt, sfix(0))
-            print_ln('**** batchPrice %s', batchPrice.reveal())
-
+            batchPrice = ((totalCnt >= batchSize).reveal()).if_else((totalPrice / totalCnt).reveal(), cfix.from_int(0))
+            print_ln('**** batchPrice %s', batchPrice)
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 
-            time_mpc_end = time.perf_counter()
-            time_mpc = time_mpc_end - time_mpc_start
+            op += 1
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
                 f.write(f'trade\t'
-                        f's{server.serverID}\t'
                         f'seq\t{seqTrade}\t'
-                        f'start_mpc\t{time_mpc_start}\t'
-                        f'end_mpc\t{time_mpc_end}\t'
-                        f'duration_mpc\t{time_mpc}\n')
+                        f'op\t{op}\t'
+                        f'cur_time\t{time.perf_counter()}\n')
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -405,21 +405,16 @@ contract Hbswap {
             writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
 
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'wait_interval\t'
-                        f's{server.serverID}\t'
-                        f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
-
-            returnPriceInterval = 10
-            await asyncio.sleep(returnPriceInterval)
+            #returnPriceInterval = 10
+            #await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
 
+            op += 1
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'end_trade\t'
-                        f's{server.serverID}\t'
+                f.write(f'trade\t'
                         f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
+                        f'op\t{op}\t'
+                        f'cur_time\t{time.perf_counter()}\n')
         }
     }
 }
