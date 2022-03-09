@@ -7,11 +7,14 @@ from ratel.src.python.utils import replay
 
 dir = sys.argv[1]
 
-interval = 20
+interval = 1#20
 width = 0.25
 
+idx_op = 4
+idx_time = 6
+
 def trunc_time(t):
-    return float(t) // interval
+    return int(float(t) / interval)
 
 def add(map, key, num=1):
     if key not in map.keys():
@@ -34,14 +37,14 @@ with open(file, 'r') as f:
     lines = f.readlines()
     for line in lines:
         element = re.split('\t|\n', line)
-        if element[0] == 'trade-1':
-            time = trunc_time(element[4])
+        if element[idx_op] == '1':
+            time = trunc_time(element[idx_time])
             add(start, time)
-        elif element[0] == 'trade-6':
-            time = trunc_time(element[4])
+        elif element[idx_op] == '3':
+            time = trunc_time(element[idx_time])
             add(start_mpc, time)
-        elif element[0] == 'trade-12':
-            time = trunc_time(element[4])
+        elif element[idx_op] == '6':
+            time = trunc_time(element[idx_time])
             add(end, time)
 
 client = {}
