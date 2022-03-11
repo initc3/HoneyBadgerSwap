@@ -4,14 +4,17 @@ POADIR=${POADIR:-/opt/poa}
 KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/admin}
 DATADIR=${POA_DATADIR:-/opt/poa/data}
 
-pkill -f /go/src/github.com/ethereum/go-ethereum/build/bin/geth
+#pkill -f /go/src/github.com/ethereum/go-ethereum/build/bin/geth
+pkill -f geth
 
 rm -rf $DATADIR
 mkdir $DATADIR
 
-/go/src/github.com/ethereum/go-ethereum/build/bin/geth --datadir $DATADIR init $POADIR/genesis.json
+#/go/src/github.com/ethereum/go-ethereum/build/bin/geth --datadir $DATADIR init $POADIR/genesis.json
+geth --datadir $DATADIR init $POADIR/genesis.json
 
-/go/src/github.com/ethereum/go-ethereum/build/bin/geth \
+#/go/src/github.com/ethereum/go-ethereum/build/bin/geth \
+geth \
     --datadir $DATADIR \
     --keystore $KEYSTORE \
     --mine --allow-insecure-unlock --unlock 0 \
