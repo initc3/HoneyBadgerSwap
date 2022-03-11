@@ -14,7 +14,7 @@ MP-SPDZ builds used by HoneyBadgerSwap:
 * `mal-shamir-offline.x`
 * `random-shamir.x`
 
-Pre-builts available from https://hub.docker.com/repository/docker/initc3/<*.x>.
+Pre-builts available from [DockerHub](https://hub.docker.com/u/initc3):
 
 * [`initc3/malicious-shamir-party.x`](https://hub.docker.com/repository/docker/initc3/malicious-shamir-party.x)
 * [`initc3/mal-shamir-offline.x`](https://hub.docker.com/repository/docker/initc3/mal-shamir-offline.x)
