@@ -69,13 +69,13 @@ async def run_offline_phase():
     await asyncio.gather(*tasks)
 
 
-async def run_test(concurrency):
+async def run_test(func, concurrency):
     set_up_share_files(concurrency)
     tasks = []
     for server_id in range(players):
         for i in range(concurrency):
             port = mpc_port + i * 100
-            tasks.append(run_online_ONLY(server_id, port))
+            tasks.append(eval(func)(server_id, port))
     results = await asyncio.gather(*tasks)
     for result in results:
         print(result)
@@ -119,8 +119,10 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(run_offline_phase())
-    # asyncio.run(run_test(1))
+    # asyncio.run(run_offline_phase())
+    # asyncio.run(run_test('run_online', 1))
+
+    asyncio.run(run_test('run_online_ONLY', 1))
     # asyncio.run(main())
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(main(loop))
