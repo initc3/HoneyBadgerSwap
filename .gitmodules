@@ -1,4 +1,0 @@
-[submodule "MP-SPDZ"]
-	path = MP-SPDZ
-	url = https://github.com/initc3/MP-SPDZ.git
-	branch = random-shamir-prep-upgrade
