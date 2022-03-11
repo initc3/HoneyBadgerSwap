@@ -27,32 +27,41 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV HBSWAP_HOME /usr/src/hbswap
 WORKDIR $HBSWAP_HOME
 RUN mkdir -p /usr/src/MP-SPDZ
-ENV INPUTMASK_SHARES "/opt/hbswap/inputmask-shares"
-ENV PREP_DIR "/opt/hbswap/preprocessing-data"
+ENV INPUTMASK_SHARES "/opt/inputmask-shares"
+ENV PREP_DIR "/opt/preprocessing-data"
 
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
-                /usr/src/MP-SPDZ/random-shamir.x /usr/src/hbswap/
-COPY --from=sbellem/mpspdz:malshamirparty-2b3b7076 \
-                /usr/src/MP-SPDZ/malicious-shamir-party.x /usr/src/hbswap/
-COPY --from=sbellem/mpspdz:malshamirparty-2b3b7076 \
-                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0 \
-                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0
-
-COPY --from=sbellem/mal-shamir-offline.x:latest \
-                /usr/src/MP-SPDZ/mal-shamir-offline.x /usr/src/hbswap/
-
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+# malicious-shamir-party.x
+COPY --from=initc3/malicious-shamir-party.x:009d9910 \
+                /usr/src/MP-SPDZ/malicious-shamir-party.x \
+                /usr/local/bin/malicious-shamir-party.x
+#COPY --from=initc3/malicious-shamir-party.x:009d9910 \
+#                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0 \
+#                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0
+#                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.74.0 \
+#                /usr/lib/x86_64-linux-gnu/libboost_system.so.1.74.0
+COPY --from=initc3/malicious-shamir-party.x:009d9910 \
                 /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+COPY --from=initc3/malicious-shamir-party.x:009d9910 \
                 /usr/src/MP-SPDZ/local /usr/src/MP-SPDZ/local
+RUN cp /usr/local/bin/malicious-shamir-party.x /usr/src/hbswap/
+
+# mal-shamir-offline.x
+COPY --from=initc3/mal-shamir-offline.x:009d9910 \
+                /usr/src/MP-SPDZ/mal-shamir-offline.x /usr/local/bin/
+RUN cp /usr/local/bin/mal-shamir-offline.x /usr/src/hbswap/
+
+# random-shamir.x
+COPY --from=initc3/random-shamir.x:009d9910 \
+                /usr/src/MP-SPDZ/random-shamir.x /usr/local/bin/
+RUN cp /usr/local/bin/random-shamir.x /usr/src/hbswap/
 
 # MP-SPDZ compiler
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+COPY --from=initc3/mpspdz:009d9910 \
                 /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+COPY --from=initc3/mpspdz:009d9910 \
                 /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
 # ssl keys
-COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
+COPY --from=initc3/mpspdz:009d9910 \
                 /usr/src/MP-SPDZ/Scripts/setup-ssl.sh /usr/src/hbswap/
 
 RUN mkdir -p $INPUTMASK_SHARES $PREP_DIR
