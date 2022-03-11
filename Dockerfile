@@ -34,11 +34,12 @@ COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/random-shamir.x /usr/src/hbswap/
 COPY --from=sbellem/mpspdz:malshamirparty-2b3b7076 \
                 /usr/src/MP-SPDZ/malicious-shamir-party.x /usr/src/hbswap/
-COPY --from=sbellem/mpspdz:malshamiroffline-2b3b7076 \
-                /usr/src/MP-SPDZ/mal-shamir-offline.x /usr/src/hbswap/
-COPY --from=sbellem/mpspdz:malshamiroffline-2b3b7076 \
+COPY --from=sbellem/mpspdz:malshamirparty-2b3b7076 \
                 /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0 \
                 /usr/lib/x86_64-linux-gnu/libboost_system.so.1.67.0
+
+COPY --from=sbellem/mal-shamir-offline.x:latest \
+                /usr/src/MP-SPDZ/mal-shamir-offline.x /usr/src/hbswap/
 
 COPY --from=sbellem/mpspdz:shamirshares-2b3b7076 \
                 /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
