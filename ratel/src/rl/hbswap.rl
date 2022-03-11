@@ -288,14 +288,9 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
-            op = 0
+            times = []
 
-            op += 1
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'trade\t'
-                        f'seq\t{seqTrade}\t'
-                        f'op\t{op}\t'
-                        f'cur_time\t{time.perf_counter()}\n')
+            times.append(time.perf_counter())
 
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
@@ -304,12 +299,7 @@ contract Hbswap {
             totalPrice = readDB(f'totalPrice_{tokenA}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
-            op += 1
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'trade\t'
-                        f'seq\t{seqTrade}\t'
-                        f'op\t{op}\t'
-                        f'cur_time\t{time.perf_counter()}\n')
+            times.append(time.perf_counter())
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
 
@@ -384,12 +374,7 @@ contract Hbswap {
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 
-            op += 1
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'trade\t'
-                        f'seq\t{seqTrade}\t'
-                        f'op\t{op}\t'
-                        f'cur_time\t{time.perf_counter()}\n')
+            times.append(time.perf_counter())
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -409,12 +394,13 @@ contract Hbswap {
             #await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
 
-            op += 1
+            times.append(time.perf_counter())
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'trade\t'
-                        f'seq\t{seqTrade}\t'
-                        f'op\t{op}\t'
-                        f'cur_time\t{time.perf_counter()}\n')
+                for op, t in enumerate(times):
+                    f.write(f'trade\t'
+                            f'seq\t{seqTrade}\t'
+                            f'op\t{op + 1}\t'
+                            f'cur_time\t{t}\n')
         }
     }
 }
