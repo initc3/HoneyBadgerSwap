@@ -43,7 +43,7 @@ contract colAuction{
     // usr: address to receive residual collateral after the auction
     // gal: address to receive raised DAI
     // bid: amount of DAI a bidder would like to pay
-    function kick(uint tab, uint lot, address usr, address gal, uint bid) public { 
+    function kick(uint tab, uint lot, address usr, address gal, $uint bid) public { 
         address P = msg.sender;
         uint auctionId = ++auctionCnt;
 
@@ -54,7 +54,28 @@ contract colAuction{
         bids[auctionId].bid = bid;
 
         bids[auctionId].guy = msg.sender;
-        bids[auctionId].tic = col_add(uint(now),tau);
+        bids[auctionId].end = col_add(uint(now),tau);
+
+        mpc(uint auctionId, uint tab, uint lot, address usr, address gal, $uint bid) {
+//            mpcInput(sint bid)
+
+//            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
+
+//            mpcOutput(cint valid)
+
+//            print('**** valid', valid)
+//            if valid == 1:
+                auc = {
+                    'tab': tab,
+                    'lot': lot,
+                    'bid': bid,
+                }
+                print('**** new auction', auc)
+                writeDB(f'auctionBoard_{auctionId}', auc, dict)
+
+                curStatus = 1
+                set(status, uint curStatus, uint auctionId)
+        }
     }
 
 
