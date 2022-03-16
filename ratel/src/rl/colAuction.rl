@@ -38,12 +38,29 @@ contract colAuction{
         require((z=x+y) >= x);
     }
 
+    uint toyCnt = 0;
+    function toy() public { 
+        address P = msg.sender;
+        uint toyId = ++toyCnt;
+
+        mpc(uint toyId) {
+            toy = {
+                'id': toyId,
+            }
+            print('**** toy', toy)
+            writeDB(f'toyBoard_{toyId}', toy, dict)
+            curStatus = 1
+            set(status, uint curStatus, uint toyId)
+        }
+    }
+
+
     // func kick(): initiate a new auction
     // tab: amount of DAI to raise;    lot: amount of collateral for sell
     // usr: address to receive residual collateral after the auction
     // gal: address to receive raised DAI
     // bid: amount of DAI a bidder would like to pay
-    function kick(uint tab, uint lot, address usr, address gal, $uint bid) public { 
+/*    function kick(uint tab, uint lot, address usr, address gal, $uint bid) public { 
         address P = msg.sender;
         uint auctionId = ++auctionCnt;
 
@@ -77,6 +94,6 @@ contract colAuction{
                 set(status, uint curStatus, uint auctionId)
         }
     }
-
+*/
 
 }
