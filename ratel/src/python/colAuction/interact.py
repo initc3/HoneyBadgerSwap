@@ -11,11 +11,13 @@ from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime
 contract_name = 'colAuction'
 
 
-def toy(appContract,accout):
+def toy(appContract,val1,accout):
     idx = reserveInput(web3, appContract, 1, account)[0]
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
+    maskedVal1 = (val1 + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.toy(idx).buildTransaction({
+    tx = appContract.functions.toy(idx,maskedVal1).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -64,9 +66,11 @@ if __name__=='__main__':
         AuctAcc.append(account)
         AuctAddrs.append(account.address)
 
-    colId = toy(appContract,AuctAcc[0])
-    print(colId)
+    toyId1 = toy(appContract,10,AuctAcc[0])
+    print(toyId1)
 
+    toyId2 = toy(appContract,0,AuctAcc[1])
+    print(toyId2)
        
     # usr: address to receive residual collateral after the auction
     # gal: address to receive raised DAI
