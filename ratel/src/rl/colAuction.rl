@@ -39,61 +39,26 @@ contract colAuction{
     }
 
     uint toyCnt = 0;
-    function toy() public { 
+    function toy($uint value) public { 
         address P = msg.sender;
         uint toyId = ++toyCnt;
 
-        mpc(uint toyId) {
-            toy = {
-                'id': toyId,
-            }
-            print('**** toy', toy)
-            writeDB(f'toyBoard_{toyId}', toy, dict)
-            curStatus = 1
-            set(status, uint curStatus, uint toyId)
-        }
-    }
+        mpc(uint toyId, $uint value) {
+            mpcInput(sint value)
 
+            valid =  value.greater_equal(1,bit_length = bit_length)
 
-    // func kick(): initiate a new auction
-    // tab: amount of DAI to raise;    lot: amount of collateral for sell
-    // usr: address to receive residual collateral after the auction
-    // gal: address to receive raised DAI
-    // bid: amount of DAI a bidder would like to pay
-/*    function kick(uint tab, uint lot, address usr, address gal, $uint bid) public { 
-        address P = msg.sender;
-        uint auctionId = ++auctionCnt;
+            mpcOutput(cint valid)
 
-        bids[auctionId].tab = tab;
-        bids[auctionId].lot = lot;
-        bids[auctionId].usr = usr;
-        bids[auctionId].gal = gal;
-        bids[auctionId].bid = bid;
-
-        bids[auctionId].guy = msg.sender;
-        bids[auctionId].end = col_add(uint(now),tau);
-
-        mpc(uint auctionId, uint tab, uint lot, address usr, address gal, $uint bid) {
-//            mpcInput(sint bid)
-
-//            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
-
-//            mpcOutput(cint valid)
-
-//            print('**** valid', valid)
-//            if valid == 1:
-                auc = {
-                    'tab': tab,
-                    'lot': lot,
-                    'bid': bid,
+            if valid == 1:
+                toy = {
+                    'id': toyId,
                 }
-                print('**** new auction', auc)
-                writeDB(f'auctionBoard_{auctionId}', auc, dict)
-
+                print('**** toy', toy)
+                writeDB(f'toyBoard_{toyId}', toy, dict)
                 curStatus = 1
-                set(status, uint curStatus, uint auctionId)
+                set(status, uint curStatus, uint toyId)
         }
     }
-*/
 
 }
