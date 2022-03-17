@@ -1,3 +1,9 @@
+ARG mpspdz_commit=12d28da9
+FROM initc3/malicious-shamir-party.x:${mpspdz_commit} as malshamirparty
+FROM initc3/mal-shamir-offline.x:${mpspdz_commit} as malshamiroffline
+FROM initc3/random-shamir.x:${mpspdz_commit} as randomshamir
+FROM initc3/mpspdz:${mpspdz_commit} as mpspdzbase
+
 FROM python:3.8
 
 ENV PYTHONUNBUFFERED 1
@@ -8,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 build-essential \
                 libboost-dev \
                 libboost-thread-dev \
+                libntl-dev \
                 libsodium-dev \
                 libssl-dev \
                 libtool \
@@ -29,6 +36,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                 libmpc-dev \
         && rm -rf /var/lib/apt/lists/*
 
+# mpir
+COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/include/* /usr/local/include/
+COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/lib/* /usr/local/lib/
+COPY --from=initc3/mpir:55fe6a9 /usr/local/mpir/share/info/* /usr/local/share/info/
+
 ENV HBSWAP_HOME /usr/src/hbswap
 ENV DB_PATH /opt/hbswap/db
 ENV INPUTMASK_SHARES "/opt/inputmask-shares"
@@ -43,33 +55,27 @@ RUN mkdir -p \
             ${PREP_DIR}
 
 # malicious-shamir-party.x
-COPY --from=initc3/malicious-shamir-party.x:009d9910 \
-                /usr/src/MP-SPDZ/malicious-shamir-party.x \
+COPY --from=malshamirparty \
+                /usr/local/bin/malicious-shamir-party.x \
                 /usr/local/bin/malicious-shamir-party.x
-COPY --from=initc3/malicious-shamir-party.x:009d9910 \
-                /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
-COPY --from=initc3/malicious-shamir-party.x:009d9910 \
-                /usr/src/MP-SPDZ/local /usr/src/MP-SPDZ/local
+COPY --from=malshamirparty /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
+#COPY --from=malshamirparty /usr/src/MP-SPDZ/local /usr/src/MP-SPDZ/local
 RUN cp /usr/local/bin/malicious-shamir-party.x /usr/src/hbswap/
 
 # mal-shamir-offline.x
-COPY --from=initc3/mal-shamir-offline.x:009d9910 \
-                /usr/src/MP-SPDZ/mal-shamir-offline.x /usr/local/bin/
+COPY --from=malshamiroffline \
+                /usr/local/bin/mal-shamir-offline.x /usr/local/bin/
 RUN cp /usr/local/bin/mal-shamir-offline.x /usr/src/hbswap/
 
 # random-shamir.x
-COPY --from=initc3/random-shamir.x:009d9910 \
-                /usr/src/MP-SPDZ/random-shamir.x /usr/local/bin/
+COPY --from=randomshamir /usr/local/bin/random-shamir.x /usr/local/bin/
 RUN cp /usr/local/bin/random-shamir.x /usr/src/hbswap/
 
 # MP-SPDZ compiler
-COPY --from=initc3/mpspdz:009d9910 \
-                /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
-COPY --from=initc3/mpspdz:009d9910 \
-                /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
+COPY --from=mpspdzbase /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
+COPY --from=mpspdzbase /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
 # ssl keys
-COPY --from=initc3/mpspdz:009d9910 \
-                /usr/src/MP-SPDZ/Scripts/setup-ssl.sh /usr/src/hbswap/
+COPY --from=mpspdzbase /usr/src/MP-SPDZ/Scripts/setup-ssl.sh /usr/src/hbswap/
 
 # geth
 COPY --from=initc3/geth:97745ba /usr/local/bin/geth /usr/local/bin/geth
