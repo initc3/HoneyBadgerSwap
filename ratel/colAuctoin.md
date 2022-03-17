@@ -41,3 +41,33 @@ sudo docker exec -it honeybadgerswap_dev_1 bash
 ```
 bash ratel/src/compile.sh colAuction
 ```
+
+
+### Start local private blockchain and deploy application contract
+```
+bash ratel/src/deploy.sh colAuction 0 4 1
+```
+
+```
+python3 -m ratel.src.python.refill server_0 0 \
+& python3 -m ratel.src.python.refill server_1 0 \
+& python3 -m ratel.src.python.refill server_2 0 \
+& python3 -m ratel.src.python.refill server_3 0 
+```
+
+```
+python3 -m ratel.src.python.refill aucMem_0 0 \
+& python3 -m ratel.src.python.refill aucMem_1 0 \
+& python3 -m ratel.src.python.refill aucMem_2 0 \
+& python3 -m ratel.src.python.refill aucMem_3 0 \
+& python3 -m ratel.src.python.refill aucMem_4 0
+```
+
+```
+bash ratel/src/run.sh colAuction 0,1,2,3 4 1 1 0
+```
+
+```
+python3 -m ratel.src.python.colAuction.interact 
+
+```
