@@ -63,7 +63,7 @@ if __name__=='__main__':
     AuctAddrs = []
     AuctAcc = []
     for aucMemID in range(numAuct):
-        account = getAccount(web3, f'/opt/poa/keystore/aucMem_{aucMemID}/')
+        account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID}/')
         AuctAcc.append(account)
         AuctAddrs.append(account.address)
 
