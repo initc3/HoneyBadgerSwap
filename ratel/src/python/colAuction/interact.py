@@ -31,13 +31,13 @@ contract_name = 'colAuction'
 #             return toyId
 
 
-def kick(appContract,tab,lot,bid,account):
+def kick(appContract,tab,lot,account):
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedBid = (bid + mask) % blsPrime
+    maskedlot = (lot + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.kick(tab, lot, idx, maskedBid).buildTransaction({
+    tx = appContract.functions.kick(tab, idx, maskedlot).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -50,6 +50,26 @@ def kick(appContract,tab,lot,bid,account):
         if status == 1:
             return colAuctionId
 
+def tend(appContract, colAuctionId, lot, bid, account):
+    idxlot, idxbid = reserveInput(web3, appContract, 2, account)
+    maskA, maskB = asyncio.run(get_inputmasks(f'{idxlot},{idxbid}'))
+    maskedlot = (lot + maskA) % blsPrime
+    maskedbid = (bid + maskB) % blsPrime
+
+    web3.eth.defaultAccount = account.address
+    tx = appContract.functions.tend(colAuctionId, idxlot, maskedlot, idxbid, maskedbid).buildTransaction({
+        'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
+    })
+    tx_hash = sign_and_send(tx, web3, account)
+    web3.eth.wait_for_transaction_receipt(tx_hash)
+
+    while True:
+        time.sleep(1)
+        status = appContract.functions.status(colAuctionId).call()
+        if status == 2:
+            return
+
+
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -61,6 +81,7 @@ if __name__=='__main__':
 
     client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
     client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
+    client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
     
     # colId = toyGame(appContract,10,client_1)
     # print(colId)
@@ -81,8 +102,14 @@ if __name__=='__main__':
     # gal: address to receive raised DAI
     # bid: amount of DAI a bidder would like to pay
     # function kick(uint tab, uint lot, address usr, address gal, uint bid) public {
-    tab1 = 100 # tab: amount of DAI to raise; 
-    lot1 = 50 # lot: amount of collateral for sell
-    bid1 = 10
-    colAuctionId = kick(appContract, tab1,lot1,bid1, client_1)
+    tab1_0 = 100 # tab: amount of DAI to raise; 
+    lot1_0 = 50 # lot: amount of collateral for sell
+    colAuctionId = kick(appContract, tab1_0,lot1_0, client_3)
     print(colAuctionId)
+
+    bid1_1 = 10
+    lot1_1 = lot1_0
+    tend(appContract,lot1_1,bid1_1,client_1)
+
+
+
