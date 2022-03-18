@@ -85,24 +85,3 @@ if __name__=='__main__':
 
     colAuctionId1 = initAuction(appContract,client_1)
     print(colAuctionId1)
-
-    X2 = 5
-    Amt2 = 10
-    inputAuction(appContract,colAuctionId1,X2,Amt2,client_2)
-
-    X3 = 3
-    Amt3 = 6
-    inputAuction(appContract,colAuctionId1,X3,Amt3,client_3)
-    
-    X4 = 7
-    Amt4 = 7
-    inputAuction(appContract,colAuctionId1,X4,Amt4,client_4)
-
-    X5 = 2
-    Amt5 = 9
-    inputAuction(appContract,colAuctionId1,X5,Amt5,client_5)
-
-    AmtToSell1 = 20
-    StartPrice1 = 10
-    LowestPrice1 = 1 ###?
-    dutchAuctionSettle(appContract,colAuctionId1,AmtToSell1,StartPrice1,LowestPrice1,client_1)
