@@ -38,7 +38,7 @@ contract colAuction{
 
         mpc(uint colAuctionId) {
             bids = []
-            writeDB(f'bidsXBoard_{colAuctionId}', bids, list)
+            writeDB(f'bidsBoard_{colAuctionId}', bids, list)
 
             curStatus = 1
             set(status, uint curStatus, uint colAuctionId)
