@@ -10,7 +10,7 @@ contract colAuction{
 
     uint public toyCnt;
 
-    uint public auctionCnt;
+    uint public colAuctionCnt;
 
     uint public tau = 2 days;   // 2 days total auction length  [seconds]
 
@@ -46,39 +46,39 @@ contract colAuction{
         address P = msg.sender;
         address usr = msg.sender;
         address gal = msg.sender;
-        uint auctionId = ++auctionCnt;
+        uint colAuctionId = ++colAuctionCnt;
 
-        bids[auctionId].tab = tab;
-        bids[auctionId].lot = lot;
-        bids[auctionId].usr = usr;
-        bids[auctionId].gal = gal;
-//        bids[auctionId].bid = bid;
+        bids[colAuctionId].tab = tab;
+        bids[colAuctionId].lot = lot;
+        bids[colAuctionId].usr = usr;
+        bids[colAuctionId].gal = gal;
+//        bids[colAuctionId].bid = bid;
 
-        bids[auctionId].guy = msg.sender;
-        bids[auctionId].end = uint(now) + tau; ///Q2 need change?
+        bids[colAuctionId].guy = msg.sender;
+        bids[colAuctionId].end = uint(now) + tau; ///Q2 need change?
 
-        mpc(uint auctionId, uint tab, uint lot, address usr, address gal, $uint bid) {
+        mpc(uint colAuctionId, uint tab, uint lot, address usr, address gal, $uint bid) {
             mpcInput(sint bid)
 
-            valid = (value1.greater_equal(1, bit_length=bit_length)).reveal()
+            valid = (bid.greater_equal(1, bit_length=bit_length)).reveal()
 
             mpcOutput(cint valid)
 
             print('**** valid', valid)
             if valid == 1:
-                auc = {
-                    'auctionId' : auctionId,
+                colAuc = {
+                    'colAuctionId' : colAuctionId,
                     'tab': tab,
                     'lot': lot,
                     'usr': usr,
                     'gal': gal,
                     'bid': bid,
                 }
-                print('**** new auction', auc)
-                writeDB(f'auctionBoard_{auctionId}', auc, dict)
+                print('**** new colAuction', colAuc)
+                writeDB(f'colAuctionBoard_{colAuctionId}', colAuc, dict)
 
                 curStatus = 1
-                set(status, uint curStatus, uint auctionId)
+                set(status, uint curStatus, uint colAuctionId)
         }
     }
 
