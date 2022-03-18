@@ -93,7 +93,7 @@ contract colAuction{
                 amtSold += Amti
                 mpcOutput(sint curPrice, sint amtSold)
                 
-                mpcInput(sint amtSold)
+                mpcInput(sint amtSold, sint AmtToSell)
                 need_break = (amtSold.greater_equal(AmtToSell,bit_length = bit_length)).reveal()
                 mpcOutput(cint need_break)
 
