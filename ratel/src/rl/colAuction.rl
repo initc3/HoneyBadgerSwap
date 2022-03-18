@@ -11,13 +11,15 @@ contract colAuction{
     uint public colAuctionCnt;
 
     ///////////////for bids///////////
-    mapping(uint=>uint) bids_cnt;
 
-    mapping (uint => mapping (uint => address)) bids_P;  // address 
+    mapping(uint=>uint) public bids_cnt;
 
-    mapping (uint => mapping (uint => uint)) bids_Amt;  
+    mapping (uint => mapping (uint => address)) public bids_P;  // address 
+
+    mapping (uint => mapping (uint => uint)) public bids_Amt;  
     
     ///////////////for status///////////
+     
     mapping (uint => uint) public status; // init success-1 input success-2 settle success-3
 
     mapping (address => uint) public statusValue;
