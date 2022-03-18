@@ -22,6 +22,14 @@ contract colAuction{
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
 
+    mapping (uint => uint) public ret_curPrice; 
+    mapping (address => uint) public ret_curPriceValue;
+    mapping (uint => uint) public ret_curPriceCount;
+
+    mapping (uint => uint) public ret_amtSold; // init success-1 input success-2 settle success-3
+    mapping (address => uint) public ret_amtSoldValue;
+    mapping (uint => uint) public ret_amtSoldCount;
+
     constructor() public {}
 
     function initAuction() public{
@@ -65,10 +73,10 @@ contract colAuction{
         }
     }
 
-    function dutchAuctionSettle(uint colAuctionId, uint AmtToSell, uint StartPrice, uint LowestPrice) public{
+    function dutchAuctionSettle(uint colAuctionId, uint AmtToSell, $uint StartPrice, uint LowestPrice) public{
         uint n = bids_cnt[colAuctionId];
 
-        mpc(uint colAuctionId, uint n, uint AmtToSell, uint StartPrice, uint LowestPrice){
+        mpc(uint colAuctionId, uint n, uint AmtToSell, $uint StartPrice, uint LowestPrice){
             bidsX = readDB(f'bidsXBoard_{colAuctionId}', list)
             bidsP = readDB(f'bidsPBoard_{colAuctionId}',list)
             bidsAmt = readDB(f'bidsAmtBoard_{colAuctionId}',list)
@@ -93,11 +101,15 @@ contract colAuction{
                         bidsAmt[j] = tmpAmt
 
             amtSold = 0
+
+            mpcInput(sint StartPrice)
             curPrice = StartPrice
+            mpcOutput(sint curPrice)
+            
             for i in range(n):
                 mpcInput(sint bidsX[i], sint bids_Amt[i],sint curPrice, sint amtSold)
-                curPrice = bidsX[i].reveal()
-                amtSold += bids_Amt[i].reveal()
+                curPrice = bidsX[i]
+                amtSold += bids_Amt[i]
                 mpcOutput(sint curPrice, sint amtSold)
                 
                 mpcInput(sint amtSold)
@@ -114,8 +126,8 @@ contract colAuction{
 
             curStatus = 3
             set(status, uint curStatus, uint colAuctionId)
-            set(amtSold, uint amtSold, uint colAuctionId)
-            set(curPrice, uint curPrice, uint colAuctionId)
+            set(ret_amtSold, uint amtSold, uint colAuctionId)
+            set(ret_curPrice, uint curPrice, uint colAuctionId)
         }
     }
 }
