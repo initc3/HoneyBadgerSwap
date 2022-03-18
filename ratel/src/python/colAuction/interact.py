@@ -13,12 +13,12 @@ contract_name = 'colAuction'
 
 def initAuction(appContract,account):
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.kick().buildTransaction({
+    tx = appContract.functions.initAuction().buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
-    log = appContract.events.Kick().processReceipt(receipt)
+    log = appContract.events.InitAuction().processReceipt(receipt)
     colAuctionId = log[0]['args']['colAuctionId']
     while True:
         time.sleep(1)

@@ -12,9 +12,9 @@ contract colAuction{
 
     ///////////////for bids///////////
     mapping(uint=>uint) bids_cnt;
-    mapping(uint=>mapping(uint=>address)) bids_P;  // address 
-//    mapping(uint=>mapping(uint=>uint)) bids_X;  // means I'll buy up to Amt if the prices reaches $X or below
-    mapping(uint=>mapping(uint=>uint)) bids_Amt;  
+
+    mapping (uint => mapping (uint => address)) bids_P;  // address 
+    mapping (uint => mapping (uint => uint)) bids_Amt;  
     
     ///////////////for status///////////
     mapping (uint => uint) public status; // init success-1
