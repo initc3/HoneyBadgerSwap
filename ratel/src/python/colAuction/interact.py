@@ -21,7 +21,7 @@ def initAuction(appContract,account):
     log = appContract.events.InitAuction().processReceipt(receipt)
     colAuctionId = log[0]['args']['colAuctionId']
     while True:
-        time.sleep(1)
+        time.sleep(0.1)
         status = appContract.functions.status(colAuctionId).call()
         if status == 1:
             return colAuctionId
@@ -40,7 +40,7 @@ def inputAuction(appContract,colAuctionId,X,Amt,account):
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
     while True:
-        time.sleep(1)
+        time.sleep(0.1)
         status = appContract.functions.status(colAuctionId).call()
         if status == 2:
             return
@@ -64,7 +64,7 @@ def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestP
         if status == 3:
             print('amtSold:', amtSold,' curPrice:', curPrice)
             break
-        time.sleep(1)
+        time.sleep(0.1)
 
 
 if __name__=='__main__':
