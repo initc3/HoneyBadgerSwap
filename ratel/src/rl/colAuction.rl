@@ -106,18 +106,3 @@ contract colAuction{
         }
     }
 }
-/*
-pseudocode for batch dutch auction:
-bids := []
-on input Bid($X, Amt)  from P    // means I'll buy up to Amt if the prices reaches $X or below
-      append ($X, Amt, P) to bids
-on DutchAuctionSettle(AmtToSell, StartPrice, LowestPrice):
-         amtSold := 0
-         sort (bids in decreasing order by $X)
-         curPrice := StartPrice
-         for each ($X, Amt, P):
-                  curPrice := $X
-                 amtSold += amt
-                 amt amtSold >= AmtToSell: break
-        output amtSold, $X last price
-*/
