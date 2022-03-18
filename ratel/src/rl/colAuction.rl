@@ -22,7 +22,7 @@ contract colAuction{
         toyCnt = 0;
     }
 
-    function toy($uint value) public { 
+    function toyGame($uint value) public { 
         address P = msg.sender;
         uint toyId = ++toyCnt;
 
