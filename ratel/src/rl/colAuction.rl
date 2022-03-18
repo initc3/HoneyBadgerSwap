@@ -14,6 +14,7 @@ contract colAuction{
     mapping(uint=>uint) bids_cnt;
 
     mapping (uint => mapping (uint => address)) bids_P;  // address 
+
     mapping (uint => mapping (uint => uint)) bids_Amt;  
     
     ///////////////for status///////////
@@ -32,6 +33,19 @@ contract colAuction{
             writeDB(f'bidsXBoard_{colAuctionId}', X, list)
             curStatus = 1
             set(status, uint curStatus, uint colAuctionId)
+        }
+    }
+
+    function inputAuction(uint colAuctionId, $uint X, uint Amt){
+        address P = msg.sender;
+        uint cur_num = ++bids_cnt[colAuctionId];
+        bids_P[colAuctionId][cur_num] = p;
+        bids_Amt[colAuctionId][cur_num] = Amt;
+
+        mpc(uint colAuctionId, $uint X){
+            bidsX = readDB(f'bidsXBoard_{colAuctionId}', list)
+            bidsX.append(X)
+            writeDB(f'bidsXBoard_{colAuctionId}',bidsX,list)
         }
     }
 
