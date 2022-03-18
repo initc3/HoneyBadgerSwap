@@ -11,7 +11,7 @@ from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime
 contract_name = 'colAuction'
 
 
-def toy(appContract,val1,accout):
+def toy(appContract,val1,account):
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
     maskedVal1 = (val1 + mask) % blsPrime
@@ -24,12 +24,12 @@ def toy(appContract,val1,accout):
     tx_hash = sign_and_send(tx, web3, account)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
     log = appContract.events.toy().processReceipt(receipt)
-    colAuctionId = log[0]['args']['colAuctionId']
+    toyId = log[0]['args']['toyId']
     while True:
         time.sleep(1)
-        status = appContract.functions.status(colAuctionId).call()
+        status = appContract.functions.status(toyId).call()
         if status == 1:
-            return colAuctionId
+            return toyId
 
 
 # def kick(appContract,tab,lot,usr,gal,bid,account):
@@ -63,7 +63,7 @@ if __name__=='__main__':
     AuctAddrs = []
     AuctAcc = []
     for aucMemID in range(numAuct):
-        account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID}/')
+        account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
         AuctAcc.append(account)
         AuctAddrs.append(account.address)
 
