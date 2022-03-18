@@ -20,6 +20,7 @@ contract colAuction{
     mapping (uint => mapping (uint => uint)) public bids_Amt;  
     
     ///////////////for status///////////
+
      
     mapping (uint => uint) public status; // init success-1 input success-2 settle success-3
 
@@ -28,18 +29,10 @@ contract colAuction{
     mapping (uint => uint) public statusCount;
 
 
-    mapping (uint => uint) public ret_curPrice; 
     
-    mapping (address => uint) public ret_curPriceValue;
-    
-    mapping (uint => uint) public ret_curPriceCount;
-
-
-    mapping (uint => uint) public ret_amtSold; // init success-1 input success-2 settle success-3
-    
-    mapping (address => uint) public ret_amtSoldValue;
-    
-    mapping (uint => uint) public ret_amtSoldCount;
+    mapping (uint => string) public colres;
+    mapping (address => string) public colresValue;
+    mapping (string => uint) public colresCount;
 
 
 
@@ -122,10 +115,8 @@ contract colAuction{
             curPrice = curPrice.reveal()
             mpcOutput(cint amtSold, cint curPrice)
 
-            curStatus = 3
-            set(status, uint curStatus, uint colAuctionId)
-            set(ret_amtSold, uint amtSold, uint colAuctionId)
-            set(ret_curPrice, uint curPrice, uint colAuctionId)
+            res = 'amtSold: {amtSold} curPrice:{curPrice}'
+            set(colres, string memory res, uint colAuctionId)
         }
     }
 }
