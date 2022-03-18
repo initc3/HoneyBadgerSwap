@@ -16,7 +16,6 @@ def toyGame(appContract,val1,account):
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
     maskedVal1 = (val1 + mask) % blsPrime
 
-
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.toyGame(idx,maskedVal1).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
@@ -59,13 +58,6 @@ if __name__=='__main__':
     appContract = web3.eth.contract(address=app_addr, abi=abi)
 
 
-    # numAuct = 5
-    # AuctAddrs = []
-    # AuctAcc = []
-    # for aucMemID in range(numAuct):
-    #     account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
-    #     AuctAcc.append(account)
-    #     AuctAddrs.append(account.address)
 
     client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
     client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
@@ -73,9 +65,17 @@ if __name__=='__main__':
     colId = toyGame(appContract,10,client_1)
     print(colId)
 
-       
-    colId = toyGame(appContract,0,client_1)
+    colId = toyGame(appContract,1,client_1)
     print(colId)
+
+
+    # numAuct = 5
+    # AuctAddrs = []
+    # AuctAcc = []
+    # for aucMemID in range(numAuct):
+    #     account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
+    #     AuctAcc.append(account)
+    #     AuctAddrs.append(account.address)
 
     # usr: address to receive residual collateral after the auction
     # gal: address to receive raised DAI

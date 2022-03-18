@@ -24,7 +24,7 @@ contract colAuction{
         mpc(uint toyId, $uint value1) {
             mpcInput(sint value1)
 
-            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
+            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(10, bit_length=bit_length))).reveal()
 
             mpcOutput(cint valid)
 
