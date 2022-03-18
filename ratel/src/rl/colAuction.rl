@@ -8,23 +8,17 @@ contract colAuction{
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
-    uint public auctionCnt;
     uint public toyCnt;
-
 
     mapping (uint => uint) public status; // active-1, ready-2, completed-3
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
 
 
-    constructor() public {
-        auctionCnt = 0;
-        toyCnt = 0;
-    }
+    constructor() public {}
 
 
     function toyGame($uint value1) public {
-        address player1 = msg.sender;
         uint toyId = ++toyCnt;
 
         mpc(uint toyId, $uint value1) {
