@@ -52,7 +52,6 @@ contract colAuction{
         bids[colAuctionId].lot = lot;
         bids[colAuctionId].usr = usr;
         bids[colAuctionId].gal = gal;
-//        bids[colAuctionId].bid = bid;
 
         bids[colAuctionId].guy = msg.sender;
         bids[colAuctionId].end = uint(now) + tau; ///Q2 need change?
