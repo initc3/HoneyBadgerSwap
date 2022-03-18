@@ -26,6 +26,24 @@ def initAuction(appContract,account):
         if status == 1:
             return colAuctionId
 
+def inputAuction(appContract,colAuctionId,X,Amt,account):
+    idx = reserveInput(web3, appContract, 1, account)[0]
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
+    maskedX = (X + mask) % blsPrime
+
+    web3.eth.defaultAccount = account.address
+    tx = appContract.functions.inputAuction(colAuctionId, idx, maskedX, Amt).buildTransaction({
+        'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
+    })
+    tx_hash = sign_and_send(tx, web3, account)
+    web3.eth.wait_for_transaction_receipt(tx_hash)
+
+    while True:
+        time.sleep(1)
+        status = appContract.functions.status(colAuctionId).call()
+        if status == 2:
+            return
+
 
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
@@ -38,10 +56,16 @@ if __name__=='__main__':
 
     client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
     client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
-#    client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
+    client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
+    client_4 = getAccount(web3,f'/opt/poa/keystore/client_4/')
     
 
-    colAuctionId = initAuction(appContract,client_1)
-    print(colAuctionId)
+    colAuctionId1 = initAuction(appContract,client_1)
+    print(colAuctionId1)
+
+    X2 = 5
+    Amt2 = 10
+    inputAuction(appContract,colAuctionId1,X2,Amt2,client_2)# means I'll buy up to Amt if the prices reaches $X or below
+
 
 
