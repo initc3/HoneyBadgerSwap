@@ -31,7 +31,9 @@ contract colAuction{
 
     
     mapping (uint => string) public colres;
+
     mapping (address => string) public colresValue;
+    
     mapping (string => uint) public colresCount;
 
 
@@ -71,10 +73,10 @@ contract colAuction{
         }
     }
 
-    function dutchAuctionSettle(uint colAuctionId, uint AmtToSell, $uint StartPrice, uint LowestPrice) public{
+    function dutchAuctionSettle(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice) public{
         uint n = bids_cnt[colAuctionId];
         
-        mpc(uint colAuctionId, uint AmtToSell, $uint StartPrice, uint LowestPrice){
+        mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
             for i in range(n):
