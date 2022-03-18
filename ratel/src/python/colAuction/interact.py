@@ -46,16 +46,20 @@ def inputAuction(appContract,colAuctionId,X,Amt,account):
             return
 
 def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestPrice, account):
+    idx = reserveInput(web3, appContract, 1, account)[0]
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
+    maskedStartPrice = (StartPrice + mask) % blsPrime
+
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.dutchAuctionSettle(colAuctionId,AmtToSell,StartPrice,LowestPrice).buildTransaction({
+    tx = appContract.functions.dutchAuctionSettle(colAuctionId,AmtToSell,maskedStartPrice,LowestPrice).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
     while True:
-        amtSold = appContract.functions.amtSold(colAuctionId).call()
-        curPrice = appContract.functions.curPrice(colAuctionId).call()
+        amtSold = appContract.functions.ret_amtSold(colAuctionId).call()
+        curPrice = appContract.functions.ret_curPrice(colAuctionId).call()
         status = appContract.functions.status(colAuctionId).call()
         if status == 3:
             print('amtSold:', amtSold,' curPrice:', curPrice)
