@@ -10,40 +10,24 @@ contract colAuction{
 
     uint public colAuctionCnt;
 
-    ///////////////for bids///////////
 
 
     mapping(uint=>uint) public bids_cnt;
-
     mapping (uint => mapping (uint => address)) public bids_P;  // address 
-
     mapping (uint => mapping (uint => uint)) public bids_Amt;  
     
-    ///////////////for status///////////
-
      
     mapping (uint => uint) public status; // init success-1 input success-2 settle success-3
-
     mapping (address => uint) public statusValue;
-    
     mapping (uint => uint) public statusCount;
 
 
     
     mapping (uint => string) public colres;
-
     mapping (address => string) public colresValue;
-    
     mapping (string => uint) public colresCount;
 
-
-
-
     constructor() public {}
-
-
-
-
     function initAuction() public{
         uint colAuctionId = ++colAuctionCnt;
         bids_cnt[colAuctionId] = 0;
