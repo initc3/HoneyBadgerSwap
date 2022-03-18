@@ -37,7 +37,7 @@ def kick(appContract,tab,lot,bid,account):
     maskedBid = (bid + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.kick(idx, tab, lot, maskedBid).buildTransaction({
+    tx = appContract.functions.kick(tab, lot, idx, maskedBid).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -83,8 +83,6 @@ if __name__=='__main__':
     # function kick(uint tab, uint lot, address usr, address gal, uint bid) public {
     tab1 = 100 # tab: amount of DAI to raise; 
     lot1 = 50 # lot: amount of collateral for sell
-    usr1 = client_1.address # usr: address to receive residual collateral after the auction
-    gal1 = client_2.address
     bid1 = 10
     colAuctionId = kick(appContract, tab1,lot1,bid1, client_1)
     print(colAuctionId)
