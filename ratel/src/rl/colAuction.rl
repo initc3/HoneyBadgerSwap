@@ -14,21 +14,16 @@ contract colAuction{
 
     uint public tau = 2 days;   // 2 days total auction length  [seconds]
 
-    struct Bid {
-//Q1 : is guy needed?
-
-        uint bid;  // amount of DAI a bidder would like to pay
-        uint lot;  // amount of collateral for sell
-        address guy;  // high bidder address of the bidder with current highest price pay DAI receive collateral
-
-        uint  tic;  // bid expiry time          [unix epoch time]
-        uint  end;  // auction expiry time      [unix epoch time]
-        address usr; // usr: address to receive residual collateral after the auction
-        address gal; // gal: address to receive raised DAI
-        uint tab;  // total dai wanted         [rad]
-    }
-
-    mapping(uint => Bid) public bids; //storage of all bids
+    ///////////////for bids///////////
+    mapping(uint=>uint) bids_bid;  // amount of DAI a bidder would like to pay
+    mapping(uint=>uint) bids_lot;  // amount of collateral for sell
+    mapping(uint=>address) bids_guy;  // high bidder address of the bidder with current highest price pay DAI receive collateral
+    mapping(uint=>uint)  bids_tic;  // bid expiry time          [unix epoch time]
+    mapping(uint=>uint)  bids_end;  // auction expiry time      [unix epoch time]
+    mapping(uint=>address) bids_usr; // usr: address to receive residual collateral after the auction
+    mapping(uint=>address) bids_gal; // gal: address to receive raised DAI
+    mapping(uint=>uint) bids_tab;  // total dai wanted         [rad]
+    
 
     mapping (uint => uint) public status; // active-1, ready-2, completed-3
     mapping (address => uint) public statusValue;
@@ -48,13 +43,13 @@ contract colAuction{
         address gal = msg.sender;
         uint colAuctionId = ++colAuctionCnt;
 
-        bids[colAuctionId].tab = tab;
-        bids[colAuctionId].lot = lot;
-        bids[colAuctionId].usr = usr;
-        bids[colAuctionId].gal = gal;
+        bids_tab[colAuctionId].tab = tab;
+        bids_lot[colAuctionId].lot = lot;
+        bids_usr[colAuctionId].usr = usr;
+        bids_gal[colAuctionId].gal = gal;
 
-        bids[colAuctionId].guy = msg.sender;
-        bids[colAuctionId].end = uint(now) + tau; ///Q2 need change?
+        bids_guy[colAuctionId].guy = msg.sender;
+        bids_end[colAuctionId].end = uint(now) + tau; ///Q2 need change?
 
         mpc(uint colAuctionId, uint tab, uint lot, address usr, address gal, $uint bid) {
             mpcInput(sint bid)
