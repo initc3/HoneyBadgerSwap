@@ -58,11 +58,9 @@ def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestP
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
     while True:
-        amtSold = appContract.functions.ret_amtSold(colAuctionId).call()
-        curPrice = appContract.functions.ret_curPrice(colAuctionId).call()
-        status = appContract.functions.status(colAuctionId).call()
-        if status == 3:
-            print('amtSold:', amtSold,' curPrice:', curPrice)
+        res = appContract.functions.colres(colAuctionId).call()
+        if res == 3:
+            print(res)
             break
         time.sleep(0.1)
 
