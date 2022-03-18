@@ -25,9 +25,9 @@ contract colAuction{
 
     function toyGame($uint value1) public {
         address player1 = msg.sender;
-        uint gameId = ++gameCnt;
+        uint toyId = ++toyCnt;
 
-        mpc(uint gameId, address player1, $uint value1) {
+        mpc(uint toyId, address player1, $uint value1) {
             mpcInput(sint value1)
 
             valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
@@ -36,15 +36,15 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
-                game = {
+                toy = {
                     'player1': player1,
                     'value1': value1,
                 }
-                print('**** game', game)
-                writeDB(f'gameBoard_{gameId}', game, dict)
+                print('**** toy', toy)
+                writeDB(f'toyBoard_{toyId}', toy, dict)
 
                 curStatus = 1
-                set(status, uint curStatus, uint gameId)
+                set(status, uint curStatus, uint toyId)
         }
     }
 
