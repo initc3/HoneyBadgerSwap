@@ -42,8 +42,10 @@ contract colAuction{
     // usr: address to receive residual collateral after the auction
     // gal: address to receive raised DAI
     // bid: amount of DAI a bidder would like to pay
-    function kick(uint tab, uint lot, address usr, address gal, $uint bid) public {
+    function kick(uint tab, uint lot, $uint bid) public {
         address P = msg.sender;
+        address usr = msg.sender;
+        address gal = msg.sender;
         uint auctionId = ++auctionCnt;
 
         bids[auctionId].tab = tab;
