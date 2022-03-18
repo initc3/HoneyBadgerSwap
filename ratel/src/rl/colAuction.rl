@@ -4,30 +4,27 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract colAuction{
+contract colAuction {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
-    uint public auctionCnt;
-    uint public toyCnt;
-
+    uint public gameCnt;
 
     mapping (uint => uint) public status; // active-1, ready-2, completed-3
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
 
+    mapping (uint => string) public winners;
+    mapping (address => string) public winnersValue;
+    mapping (string => uint) public winnersCount;
 
-    constructor() public {
-        auctionCnt = 0;
-        toyCnt = 0;
-    }
+    constructor() public {}
 
-
-    function toyGame($uint value1) public {
+    function createGame($uint value1) public {
         address player1 = msg.sender;
-        uint toyId = ++toyCnt;
+        uint gameId = ++gameCnt;
 
-        mpc(uint toyId, address player1, $uint value1) {
+        mpc(uint gameId, address player1, $uint value1) {
             mpcInput(sint value1)
 
             valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
@@ -36,16 +33,15 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
-                toy = {
+                game = {
                     'player1': player1,
                     'value1': value1,
                 }
-                print('**** toy', toy)
-                writeDB(f'toyBoard_{toyId}', toy, dict)
+                print('**** game', game)
+                writeDB(f'gameBoard_{gameId}', game, dict)
 
                 curStatus = 1
-                set(status, uint curStatus, uint toyId)
+                set(status, uint curStatus, uint gameId)
         }
     }
-
 }

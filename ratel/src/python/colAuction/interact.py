@@ -10,46 +10,25 @@ from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime
 
 contract_name = 'colAuction'
 
-
-def toyGame(appContract,val1,account):
+def createGame(appContract, value1, account):
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedVal1 = (val1 + mask) % blsPrime
-
+    maskedValue = (value1 + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.toyGame(idx,maskedVal1).buildTransaction({
+    tx = appContract.functions.createGame(idx, maskedValue).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
-    log = appContract.events.toyGame().processReceipt(receipt)
-    toyId = log[0]['args']['toyId']
+
+    log = appContract.events.CreateGame().processReceipt(receipt)
+    gameId = log[0]['args']['gameId']
     while True:
         time.sleep(1)
-        status = appContract.functions.status(toyId).call()
+        status = appContract.functions.status(gameId).call()
         if status == 1:
-            return toyId
-
-
-# def kick(appContract,tab,lot,usr,gal,bid,account):
-#     idx = reserveInput(web3, appContract, 1, account)[0]
-# #    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-# #    maskedValue = (value1 + mask) % blsPrime
-
-#     web3.eth.defaultAccount = account.address
-#     tx = appContract.functions.kick(idx, tab, lot, usr, gal, bid).buildTransaction({
-#         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
-#     })
-#     tx_hash = sign_and_send(tx, web3, account)
-#     receipt = web3.eth.get_transaction_receipt(tx_hash)
-#     log = appContract.events.kick().processReceipt(receipt)
-#     colAuctionId = log[0]['args']['colAuctionId']
-#     while True:
-#         time.sleep(1)
-#         status = appContract.functions.status(colAuctionId).call()
-#         if status == 1:
-#             return colAuctionId
+            return gameId
 
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
@@ -58,32 +37,8 @@ if __name__=='__main__':
     abi, bytecode = parse_contract(contract_name)
     appContract = web3.eth.contract(address=app_addr, abi=abi)
 
+    client_1 = getAccount(web3, f'/opt/poa/keystore/client_1/')
+    client_2 = getAccount(web3, f'/opt/poa/keystore/client_2/')
 
-    # numAuct = 5
-    # AuctAddrs = []
-    # AuctAcc = []
-    # for aucMemID in range(numAuct):
-    #     account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
-    #     AuctAcc.append(account)
-    #     AuctAddrs.append(account.address)
-
-    client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
-    client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
-    
-    colId = toyGame(appContract,10,client_1)
-    print(colId)
-
-       
-    colId = toyGame(appContract,0,client_1)
-    print(colId)
-
-    # usr: address to receive residual collateral after the auction
-    # gal: address to receive raised DAI
-    # bid: amount of DAI a bidder would like to pay
-    # function kick(uint tab, uint lot, address usr, address gal, uint bid) public {
-    # tab1 = 100 # tab: amount of DAI to raise; 
-    # lot1 = 50 # lot: amount of collateral for sell
-    # usr1 = AuctAddrs[0].address # usr: address to receive residual collateral after the auction
-    # gal1 = AuctAddrs[1].address
-    # bid1 = 10
-    # colAuctionId = kick(appContract, tab1,lot1,usr1,gal1,bid1, AuctAcc[0])
+    gameId = createGame(appContract, 1, client_1)
+    print(gameId)
