@@ -70,11 +70,11 @@ if __name__=='__main__':
     client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
     client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
     
-    colId = toy(appContract,10,client_1)
+    colId = toyGame(appContract,10,client_1)
     print(colId)
 
        
-    colId = toy(appContract,0,client_1)
+    colId = toyGame(appContract,0,client_1)
     print(colId)
 
     # usr: address to receive residual collateral after the auction
