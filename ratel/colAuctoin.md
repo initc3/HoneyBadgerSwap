@@ -59,7 +59,8 @@ python3 -m ratel.src.python.refill server_0 0 \
 python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_2 0 \
 & python3 -m ratel.src.python.refill client_3 0 \
-& python3 -m ratel.src.python.refill client_4 0
+& python3 -m ratel.src.python.refill client_4 0 \
+& python3 -m ratel.src.python.refill client_5 0
 ```
 
 ```
