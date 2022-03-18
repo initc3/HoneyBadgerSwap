@@ -31,13 +31,13 @@ contract_name = 'colAuction'
 #             return toyId
 
 
-def kick(appContract,tab,lot,usr,gal,bid,account):
+def kick(appContract,tab,lot,bid,account):
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
     maskedBid = (bid + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.kick(idx, tab, lot, usr, gal, maskedBid).buildTransaction({
+    tx = appContract.functions.kick(idx, tab, lot, maskedBid).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -86,5 +86,5 @@ if __name__=='__main__':
     usr1 = client_1.address # usr: address to receive residual collateral after the auction
     gal1 = client_2.address
     bid1 = 10
-    colAuctionId = kick(appContract, tab1,lot1,usr1,gal1,bid1, client_1)
+    colAuctionId = kick(appContract, tab1,lot1,bid1, client_1)
     print(colAuctionId)
