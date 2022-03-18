@@ -59,19 +59,22 @@ if __name__=='__main__':
     appContract = web3.eth.contract(address=app_addr, abi=abi)
 
 
-    numAuct = 5
-    AuctAddrs = []
-    AuctAcc = []
-    for aucMemID in range(numAuct):
-        account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
-        AuctAcc.append(account)
-        AuctAddrs.append(account.address)
+    # numAuct = 5
+    # AuctAddrs = []
+    # AuctAcc = []
+    # for aucMemID in range(numAuct):
+    #     account = getAccount(web3, f'/opt/poa/keystore/client_{aucMemID+1}/')
+    #     AuctAcc.append(account)
+    #     AuctAddrs.append(account.address)
 
-    colId = toy(appContract,10,AuctAcc[0])
+    client_1 = getAccount(web3,f'/opt/poa/keystore/client_1')
+    client_2 = getAccount(web3,f'/opt/poa/keystore/client_2')
+    
+    colId = toy(appContract,10,client_1)
     print(colId)
 
        
-    colId = toy(appContract,0,AuctAcc[1])
+    colId = toy(appContract,0,client_1)
     print(colId)
 
     # usr: address to receive residual collateral after the auction
