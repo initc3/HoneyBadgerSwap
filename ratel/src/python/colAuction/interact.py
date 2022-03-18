@@ -51,7 +51,7 @@ def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestP
     maskedStartPrice = (StartPrice + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.dutchAuctionSettle(colAuctionId,AmtToSell,maskedStartPrice,LowestPrice).buildTransaction({
+    tx = appContract.functions.dutchAuctionSettle(colAuctionId,AmtToSell,idx,maskedStartPrice,LowestPrice).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)

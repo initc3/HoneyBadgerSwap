@@ -37,12 +37,8 @@ contract colAuction{
         bids_cnt[colAuctionId] = 0;
 
         mpc(uint colAuctionId) {
-            bidsX = []
-            writeDB(f'bidsXBoard_{colAuctionId}', bidsX, list)
-            bidsP = []
-            writeDB(f'bidsPBoard_{colAuctionId}', bidsP, list)
-            bidsAmt = []
-            writeDB(f'bidsAmtBoard_{colAuctionId}', bidsAmt, list)
+            bids = []
+            writeDB(f'bidsXBoard_{colAuctionId}', bids, list)
 
             curStatus = 1
             set(status, uint curStatus, uint colAuctionId)
@@ -56,17 +52,9 @@ contract colAuction{
         bids_Amt[colAuctionId][cur_num] = Amt;
 
         mpc(uint colAuctionId, $uint X, address P, uint Amt){
-            bidsX = readDB(f'bidsXBoard_{colAuctionId}', list)
-            bidsX.append(X)
-            writeDB(f'bidsXBoard_{colAuctionId}',bidsX,list)
-
-            bidsP = readDB(f'bidsPBoard_{colAuctionId}',list)
-            bidsP.append(P)
-            writeDB(f'bidsPBoard_{colAuctionId}',bidsP,list)
-
-            bidsAmt = readDB(f'bidsAmtBoard_{colAuctionId}',list)
-            bidsAmt.append(Amt)
-            writeDB(f'bidsAmtBoard_{colAuctionId}',bidsAmt,list)
+            bids = readDB(f'bidsBoard_{colAuctionId}', list)
+            bids.append((X,P,Amt))
+            writeDB(f'bidsBoard_{colAuctionId}',bids,list)
 
             curStatus = 2
             set(status, uint curStatus, uint colAuctionId)
@@ -75,30 +63,22 @@ contract colAuction{
 
     function dutchAuctionSettle(uint colAuctionId, uint AmtToSell, $uint StartPrice, uint LowestPrice) public{
         uint n = bids_cnt[colAuctionId];
+        
+        mpc(uint colAuctionId, uint AmtToSell, $uint StartPrice, uint LowestPrice){
+            bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-        mpc(uint colAuctionId, uint n, uint AmtToSell, $uint StartPrice, uint LowestPrice){
-            bidsX = readDB(f'bidsXBoard_{colAuctionId}', list)
-            bidsP = readDB(f'bidsPBoard_{colAuctionId}',list)
-            bidsAmt = readDB(f'bidsAmtBoard_{colAuctionId}',list)
-
-            for i in range(n) :
+            for i in range(n):
                 for j in range(i) :
-                    mpcInput(sint bidsX[i], sint bidsX[j])
-                    need_swap = (bidsX[i].less_equal(bidsX[j],bit_length=bit_length)).reveal()
+                    Xi,Pi,Amti = bids[i]
+                    Xj,Pj,Amtj = bids[j]
+                    mpcInput(sint Xi, sint Xj)
+                    need_swap = (Xi.less_equal(Xj,bit_length=bit_length)).reveal()
                     mpcOutput(cint need_swap)
 
                     if need_swap == 1:
-                        tmpX = bidsX[i]
-                        bidsX[i] = bidsX[j]
-                        bidsX[j] = tmpX
-
-                        tmpP = bidsP[i]
-                        bidsP[i] = bidsP[j]
-                        bidsP[j] = tmpP
-                        
-                        tmpAmt = bidsAmt[i]
-                        bidsAmt[i] = bidsAmt[j]
-                        bidsAmt[j] = tmpAmt
+                        tmp = bids[i]
+                        bids[i] = bids[j]
+                        bids[j] = tmpX
 
             amtSold = 0
 
@@ -107,9 +87,10 @@ contract colAuction{
             mpcOutput(sint curPrice)
             
             for i in range(n):
-                mpcInput(sint bidsX[i], sint bids_Amt[i],sint curPrice, sint amtSold)
-                curPrice = bidsX[i]
-                amtSold += bids_Amt[i]
+                Xi,Pi,Amti = bids[i]
+                mpcInput(sint Xi, sint Amti,sint curPrice, sint amtSold)
+                curPrice = Xi
+                amtSold += Amti
                 mpcOutput(sint curPrice, sint amtSold)
                 
                 mpcInput(sint amtSold)
