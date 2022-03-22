@@ -24,10 +24,9 @@ contract colAuction{
     constructor() public {}
     function initAuction() public{
         uint colAuctionId = ++colAuctionCnt;
-        bids_cnt[colAuctionId] = 0;
 
         mpc(uint colAuctionId) {
-            bids = []
+            bids = [(0,0,0)]
             writeDB(f'bidsBoard_{colAuctionId}', bids, list)
 
             curStatus = 1
@@ -40,8 +39,6 @@ contract colAuction{
 
         mpc(uint colAuctionId, $uint X, address P, uint Amt){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
-            bids.append((X,P,Amt))
-            writeDB(f'bidsBoard_{colAuctionId}',bids,list)
 
             curStatus = 2
             set(status, uint curStatus, uint colAuctionId)
