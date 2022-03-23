@@ -22,6 +22,7 @@ contract colAuction{
     mapping (string => uint) public colresCount;
 
     constructor() public {}
+
     function initAuction($uint val1) public{
         uint colAuctionId = ++colAuctionCnt;
 
@@ -60,7 +61,6 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
-
                 curStatus = 2
                 set(status, uint curStatus, uint colAuctionId)
         }
