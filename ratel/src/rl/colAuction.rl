@@ -36,11 +36,9 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
-                bids = {
-                    '0':0,
-                }
+                bids = [(0,0,0)]
                 print('**** bids', bids)
-                writeDB(f'bidsBoard_{colAuctionId}', bids, dict)
+                writeDB(f'bidsBoard_{colAuctionId}', bids, list)
 
                 curStatus = 1
                 set(status, uint curStatus, uint colAuctionId)
@@ -51,7 +49,7 @@ contract colAuction{
         address P = msg.sender;
 
         mpc(uint colAuctionId, $uint X, address P, uint Amt){
-            bids = readDB(f'bidsBoard_{colAuctionId}', dict)
+            bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
             mpcInput(sint X)
 
@@ -61,8 +59,9 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
-                bids['{P}'] = X
+                bids.append((X,P,Amt))
                 print('**** bids', bids)
+                writeDB(f'bidsBoard_{colAuctionId}',bids,list)
 
                 curStatus = 2
                 set(status, uint curStatus, uint colAuctionId)
