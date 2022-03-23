@@ -10,33 +10,30 @@ from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime
 
 contract_name = 'colAuction'
 
-def createGame(appContract, value1, account):
-    idx = reserveInput(web3, appContract, 1, account)[0]
-    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedValue = (value1 + mask) % blsPrime
 
+def initAuction(appContract,account):
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.createGame(idx, maskedValue).buildTransaction({
+    tx = appContract.functions.initAuction().buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
-
-    log = appContract.events.CreateGame().processReceipt(receipt)
-    gameId = log[0]['args']['gameId']
+    log = appContract.events.InitAuction().processReceipt(receipt)
+    colAuctionId = log[0]['args']['colAuctionId']
     while True:
         time.sleep(1)
-        status = appContract.functions.status(gameId).call()
+        status = appContract.functions.status(colAuctionId).call()
         if status == 1:
-            return gameId
+            return colAuctionId
 
-def joinGame(appContract, gameId, value2, account):
+# means I'll buy up to Amt if the prices reaches $X or below
+def inputAuction(appContract,colAuctionId,X,Amt,account):
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedValue = (value2 + mask) % blsPrime
+    maskedX = (X + mask) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.joinGame(gameId, idx, maskedValue).buildTransaction({
+    tx = appContract.functions.inputAuction(colAuctionId, idx, maskedX, Amt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -44,7 +41,7 @@ def joinGame(appContract, gameId, value2, account):
 
     while True:
         time.sleep(1)
-        status = appContract.functions.status(gameId).call()
+        status = appContract.functions.status(colAuctionId).call()
         if status == 2:
             return
 
@@ -55,22 +52,34 @@ if __name__=='__main__':
     abi, bytecode = parse_contract(contract_name)
     appContract = web3.eth.contract(address=app_addr, abi=abi)
 
-    client_1 = getAccount(web3, f'/opt/poa/keystore/client_1/')
-    client_2 = getAccount(web3, f'/opt/poa/keystore/client_2/')
-    client_3 = getAccount(web3, f'/opt/poa/keystore/client_3/')
-    client_4 = getAccount(web3, f'/opt/poa/keystore/client_4/')
-    client_5 = getAccount(web3, f'/opt/poa/keystore/client_5/')
 
-    gameId = createGame(appContract, 1, client_1)
-    print(gameId)
 
-    joinGame(appContract, gameId, 1, client_2)
-    print("client_2 join!")
+    client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
+    client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
+    client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
+    client_4 = getAccount(web3,f'/opt/poa/keystore/client_4/')
+    client_5 = getAccount(web3,f'/opt/poa/keystore/client_5/')
+    
 
-    joinGame(appContract, gameId, 1, client_3)
-    print("client_3 join!")
-    joinGame(appContract, gameId, 1, client_4)
-    print("client_4 join!")
-    joinGame(appContract, gameId, 1, client_5)
-    print("client_5 join!")
+    colAuctionId1 = initAuction(appContract,client_1)
+    print(colAuctionId1)
 
+    X2 = 5
+    Amt2 = 10
+    inputAuction(appContract,colAuctionId1,X2,Amt2,client_2)
+    print('finished input client_2')
+
+    X3 = 3
+    Amt3 = 6
+    inputAuction(appContract,colAuctionId1,X3,Amt3,client_3)
+    print('finished input client_3')
+    
+    X4 = 7
+    Amt4 = 7
+    inputAuction(appContract,colAuctionId1,X4,Amt4,client_4)
+    print('finished input client_4')
+
+    X5 = 2
+    Amt5 = 9
+    inputAuction(appContract,colAuctionId1,X5,Amt5,client_5)
+    print('finished input client_5')
