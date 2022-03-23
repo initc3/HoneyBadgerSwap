@@ -12,8 +12,13 @@ contract_name = 'colAuction'
 
 
 def initAuction(appContract,account):
+    value1 = 1
+    idx = reserveInput(web3, appContract, 1, account)[0]
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
+    maskedValue = (value1 + mask) % blsPrime
+
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.initAuction().buildTransaction({
+    tx = appContract.functions.initAuction(idx,maskedValue).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)

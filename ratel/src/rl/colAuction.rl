@@ -22,17 +22,27 @@ contract colAuction{
     mapping (string => uint) public colresCount;
 
     constructor() public {}
-    function initAuction() public{
+    function initAuction($uint val1) public{
         uint colAuctionId = ++colAuctionCnt;
 
-        mpc(uint colAuctionId) {
-            bids = [(0,0,0)]
-            print('**** bids', bids)
+        mpc(uint colAuctionId, $uint val1) {
+            
+            mpcInput(sint val1)
 
-            writeDB(f'bidsBoard_{colAuctionId}', bids, list)
+            valid = ((val1.greater_equal(1, bit_length=bit_length)) * (val1.less_equal(3, bit_length=bit_length))).reveal()
 
-            curStatus = 1
-            set(status, uint curStatus, uint colAuctionId)
+            mpcOutput(cint valid)
+
+            print('**** valid', valid)
+            if valid == 1:
+                bids = {
+                    '0':0,
+                }
+                print('**** bids', bids)
+                writeDB(f'bidsBoard_{colAuctionId}', bids, dict)
+
+                curStatus = 1
+                set(status, uint curStatus, uint colAuctionId)
         }
     }
 
@@ -40,10 +50,19 @@ contract colAuction{
         address P = msg.sender;
 
         mpc(uint colAuctionId, $uint X, address P, uint Amt){
-            bids = readDB(f'bidsBoard_{colAuctionId}', list)
+            bids = readDB(f'bidsBoard_{colAuctionId}', dict)
 
-            curStatus = 2
-            set(status, uint curStatus, uint colAuctionId)
+            mpcInput(sint X)
+
+            valid = ((X.greater_equal(1, bit_length=bit_length)) * (X.less_equal(100, bit_length=bit_length))).reveal()
+
+            mpcOutput(cint valid)
+
+            print('**** valid', valid)
+            if valid == 1:
+
+                curStatus = 2
+                set(status, uint curStatus, uint colAuctionId)
         }
     }
 
