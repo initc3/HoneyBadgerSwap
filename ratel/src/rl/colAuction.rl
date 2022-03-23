@@ -81,6 +81,7 @@ contract colAuction{
             mpcInput(sint StartPrice)
             curPrice = StartPrice
             mpcOutput(sint curPrice)
+
             
             mpcInput(sint amtSold, sint curPrice)
             amtSold = amtSold.reveal()
@@ -90,7 +91,7 @@ contract colAuction{
             print('**** amtSold',amtSold)
             print('**** curPrice',curPrice)
 
-            res = 'amtSold: {amtSold} curPrice:{curPrice}'
+            res = 'amtSold: '+str(amtSold)+'curPrice'+str(curPrice)
             set(colres, string memory res, uint colAuctionId)
         }
     }
