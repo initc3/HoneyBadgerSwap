@@ -101,7 +101,7 @@ bash ratel/src/run.sh colAuction 0,1,2,3 4 1 1 0
 python3 -m ratel.src.python.colAuction.interact 
 ```
 
-
+```
 bash ratel/src/compile.sh rockPaperScissors
 bash ratel/src/deploy.sh rockPaperScissors 0 4 1
 python3 -m ratel.src.python.refill server_0 0 \
@@ -115,3 +115,4 @@ python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_5 0
 bash ratel/src/run.sh rockPaperScissors 0,1,2,3 4 1 1 0
 python3 -m ratel.src.python.rockPaperScissors.interact 
+```
