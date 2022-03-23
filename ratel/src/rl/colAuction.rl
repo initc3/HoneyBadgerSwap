@@ -4,71 +4,47 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract colAuction {
+contract colAuction{
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
-    uint public gameCnt;
+    uint public colAuctionCnt;
 
-    mapping (uint => uint) public status; // active-1, ready-2, completed-3
+     
+    mapping (uint => uint) public status; // init success-1 input success-2 settle success-3
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
 
-    mapping (uint => string) public winners;
-    mapping (address => string) public winnersValue;
-    mapping (string => uint) public winnersCount;
+
+    
+    mapping (uint => string) public colres;
+    mapping (address => string) public colresValue;
+    mapping (string => uint) public colresCount;
 
     constructor() public {}
+    function initAuction() public{
+        uint colAuctionId = ++colAuctionCnt;
 
-    function createGame($uint value1) public {
-        address player1 = msg.sender;
-        uint gameId = ++gameCnt;
+        mpc(uint colAuctionId) {
+            bids = [(0,0,0)]
+            print('**** bids', bids)
 
-        mpc(uint gameId, address player1, $uint value1) {
-            mpcInput(sint value1)
+            writeDB(f'bidsBoard_{colAuctionId}', bids, list)
 
-            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
-
-            mpcOutput(cint valid)
-
-            print('**** valid', valid)
-            if valid == 1:
-                game = {
-                    'player1': player1,
-                    'value1': value1,
-                }
-                print('**** game', game)
-                writeDB(f'gameBoard_{gameId}', game, dict)
-
-                curStatus = 1
-                set(status, uint curStatus, uint gameId)
+            curStatus = 1
+            set(status, uint curStatus, uint colAuctionId)
         }
     }
 
-    function joinGame(uint gameId, $uint value2) public {
-        require(status[gameId] == 1);
-        address player2 = msg.sender;
+    function inputAuction(uint colAuctionId, $uint X, uint Amt) public {
+        address P = msg.sender;
 
-        mpc(uint gameId, address player2, $uint value2) {
-            game = readDB(f'gameBoard_{gameId}', dict)
+        mpc(uint colAuctionId, $uint X, address P, uint Amt){
+            bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            mpcInput(sint value2)
-
-            valid = ((value2.greater_equal(1, bit_length=bit_length)) * (value2.less_equal(3, bit_length=bit_length))).reveal()
-
-            mpcOutput(cint valid)
-
-            print('**** valid', valid)
-            if valid == 1:
-                game['player2'] = player2
-                game['value2'] = value2
-
-                print('**** game', game)
-
-                writeDB(f'gameBoard_{gameId}', game, dict)
-
-                curStatus = 2
-                set(status, uint curStatus, uint gameId)
+            curStatus = 2
+            set(status, uint curStatus, uint colAuctionId)
         }
     }
+
 }
