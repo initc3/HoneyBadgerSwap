@@ -61,6 +61,9 @@ contract colAuction{
 
             print('**** valid', valid)
             if valid == 1:
+                bids['{P}'] = X
+                print('**** bids', bids)
+
                 curStatus = 2
                 set(status, uint curStatus, uint colAuctionId)
         }
