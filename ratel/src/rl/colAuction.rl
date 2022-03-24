@@ -80,17 +80,22 @@ contract colAuction{
 
             curPrice = StartPrice
 
+            print_ln('**** curPrice %s', curPrice.reveal())
             mpcOutput(sint curPrice)
 
             mpcInput(sint curPrice)
 
             valid = ((curPrice.greater_equal(1, bit_length=bit_length)) * (curPrice.less_equal(100, bit_length=bit_length))).reveal()
 
+            mpcOutput(cint valid)
+            print('**** valid', valid)
+
+            mpcInput(sint curPrice)
+
             curPrice = curPrice.reveal()
 
-            mpcOutput(cint valid, cint curPrice)
+            mpcOutput(cint curPrice)
 
-            print('**** valid', valid)
             print('**** curPrice', curPrice)
             if valid == 1:
                 res = 'curPrice'+str(curPrice)
