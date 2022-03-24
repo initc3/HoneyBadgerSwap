@@ -84,9 +84,9 @@ contract colAuction{
 
             mpcInput(sint curPrice)
 
-            curPrice = curPrice.reveal()
+            valid = ((curPrice.greater_equal(1, bit_length=bit_length)) * (curPrice.less_equal(100, bit_length=bit_length))).reveal()
 
-            valid = ((StartPrice.greater_equal(1, bit_length=bit_length)) * (StartPrice.less_equal(100, bit_length=bit_length))).reveal()
+            curPrice = curPrice.reveal()
 
             mpcOutput(cint valid, cint curPrice)
 
