@@ -75,34 +75,12 @@ contract colAuction{
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
             n = len(list)
+            
+            mpcInput(sint Cnt)
 
-            for i in range(n):
-                for j in range(i) :
-                    (Xi,Pi,Amti) = bids[i]
-                    (Xj,Pj,Amtj) = bids[j]
+            Cnt = Cnt.reveal()
 
-                    mpcInput(sint Xi, sint Xj)
-                    
-                    needSwap = (Xi.less_equal(Xj,bit_length=bit_length)).reveal()
-                    
-                    mpcOutput(cint needSwap)
-
-                    print('**** needSwap',needSwap)
-                    if needSwap == 1:
-                        tmp = bids[i]
-                        bids[i] = bids[j]
-                        bids[j] = tmp
-
-            Cnt = 0
-
-            for i in range(n-1):
-                (Xi,Pi,Amti) = bids[i]
-                (Xj,Pj,Amtj) = bids[i+1]
-                mpcInput(sint Cnt, sint Xi, sint Xj)
-
-                Cnt += (Xi.greater_equal(Xj,bit_length = bit_length)).reveal()
-
-                mpcOutput(sint Cnt)
+            mpcOutput(cint Cnt)
 
             if Cnt == n-1 :
                 res = 'success'
