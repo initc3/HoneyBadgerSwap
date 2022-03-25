@@ -33,12 +33,12 @@ def initAuction(appContract,account):
 
 # means I'll buy up to Amt if the prices reaches $X or below
 def inputAuction(appContract,colAuctionId,X,Amt,account):
-    idx = reserveInput(web3, appContract, 1, account)[0]
-    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedX = (X + mask) % blsPrime
+    idx1, idx2 = reserveInput(web3, appContract, 2, account)
+    mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
+    maskedX, maskedAmt = (X + mask1) % blsPrime, (Amt + mask2) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.inputAuction(colAuctionId, idx, maskedX, Amt).buildTransaction({
+    tx = appContract.functions.inputAuction(colAuctionId, idx1, maskedX, idx2, Amt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -113,6 +113,6 @@ if __name__=='__main__':
 
     AmtToSell1 = 20
     StartPrice1 = 10
-    LowestPrice1 = 1 ###?
+    LowestPrice1 = 1 ###or?
     dutchAuctionSettle(appContract,colAuctionId1,AmtToSell1,StartPrice1,LowestPrice1,client_1)
     print('finished settle')
