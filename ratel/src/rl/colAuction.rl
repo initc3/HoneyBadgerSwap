@@ -45,15 +45,15 @@ contract colAuction{
         }
     }
 
-    function inputAuction(uint colAuctionId, $uint X, uint Amt) public {
+    function inputAuction(uint colAuctionId, $uint X, $uint Amt) public {
         address P = msg.sender;
 
-        mpc(uint colAuctionId, $uint X, address P, uint Amt){
+        mpc(uint colAuctionId, $uint X, address P, $uint Amt){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            mpcInput(sint X)
+            mpcInput(sint X, sint Amt)
 
-            valid = ((X.greater_equal(1, bit_length=bit_length)) * (X.less_equal(100, bit_length=bit_length))).reveal()
+            valid = ((X.greater_equal(1, bit_length=bit_length)) * (Amt.greater_equal(1, bit_length=bit_length))).reveal()
 
             mpcOutput(cint valid)
 
@@ -74,24 +74,41 @@ contract colAuction{
         mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            curPrice = 0
+            n = len(list)
 
-            mpcInput(sint StartPrice)
+            for i in range(n):
+                for j in range(i) :
+                    (Xi,Pi,Amti) = bids[i]
+                    (Xj,Pj,Amtj) = bids[j]
 
-            curPrice = StartPrice
+                    mpcInput(sint Xi, sint Xj)
+                    
+                    needSwap = (Xi.less_equal(Xj,bit_length=bit_length)).reveal()
+                    
+                    mpcOutput(cint needSwap)
 
-            print_ln('**** curPrice %s', curPrice.reveal())
-            mpcOutput(sint curPrice)
+                    print('**** needSwap',needSwap)
+                    if needSwap == 1:
+                        tmp = bids[i]
+                        bids[i] = bids[j]
+                        bids[j] = tmp
 
+            Cnt = 0
 
-            mpcInput(sint curPrice)
+            for i in range(n-1):
+                (Xi,Pi,Amti) = bids[i]
+                (Xj,Pj,Amtj) = bids[i+1]
+                mpcInput(sint Cnt, sint Xi, sint Xj)
 
-            curPrice = curPrice.reveal()
+                Cnt += (Xi.greater_equal(Xj,bit_length = bit_length)).reveal()
 
-            mpcOutput(cint curPrice)
+                mpcOutput(sint Cnt)
 
-            print('**** curPrice', curPrice)
-            res = 'curPrice'+str(curPrice)
+            if Cnt == n-1 :
+                res = 'success'
+            else:
+                res = 'failed'
+
             set(colres, string memory res, uint colAuctionId)
         }
     }
