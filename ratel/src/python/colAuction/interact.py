@@ -31,14 +31,14 @@ def initAuction(appContract,account):
         if status == 1:
             return colAuctionId
 
-# means I'll buy up to Amt if the prices reaches $X or below
+# means I'll buy up to $Amt if the prices reaches $X or below
 def inputAuction(appContract,colAuctionId,X,Amt,account):
     idx1, idx2 = reserveInput(web3, appContract, 2, account)
     mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
     maskedX, maskedAmt = (X + mask1) % blsPrime, (Amt + mask2) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.inputAuction(colAuctionId, idx1, maskedX, idx2, Amt).buildTransaction({
+    tx = appContract.functions.inputAuction(colAuctionId, idx1, maskedX, idx2, maskedAmt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
