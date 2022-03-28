@@ -68,7 +68,7 @@ contract colAuction{
         }
     }
 
-    function dutchAuctionSettle(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice) public{
+    function dutchAuctionSettle(uint colAuctionId, $uint AmtToSell, $uint StartPrice, $uint LowestPrice) public{
         address P = msg.sender;
         
         mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice){
