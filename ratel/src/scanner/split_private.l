@@ -177,10 +177,12 @@ void readDB() {
 
     string value = "value" + to_string(++cntValueDB);
 
-    keyReadDB.insert(args[0]);
+    string key = args[0];
+    keyReadDB.insert(key);
 
     textLine = prefix + "try:\n";
-    textLine += prefix + "    " + value + " = server.db.Get(" + args[0] + ".lower().encode())\n";
+    textLine += prefix + "    " + value + " = server.db.Get(" + key + ".lower().encode())\n";
+    textLine += prefix + "    " + "server.dbLock[" + key + "].release()\n";
     textLine += prefix + "except KeyError:\n";
     textLine += prefix + "    " + value + " = bytes(0)\n";
     if (args[1] == "int") {
@@ -472,9 +474,6 @@ SPACE [ \t\r]+
         textFuncUpper += "    await asyncio.wait(tasks)\n";
 
         textFuncUpper += "\n";
-
-        textFuncMid += "    for key in readKeys:\n";
-        textFuncMid += "        server.dbLock[key].release()\n";
 
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
 

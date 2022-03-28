@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract Hbswap {
+contract hbswap {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
@@ -320,7 +320,7 @@ contract Hbswap {
 
             buyA = amtA > 0
             totalB = (1 + feeRate) * amtB
-            enoughB = ((-totalB)  <= balanceB)
+            enoughB = (-totalB  <= balanceB)
             actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
             acceptA = actualAmtA  >= amtA
             flagBuyA = validOrder * buyA * enoughB * acceptA
