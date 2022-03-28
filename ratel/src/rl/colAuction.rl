@@ -76,6 +76,17 @@ contract colAuction{
 
             n = len(list)
             
+            Cnt = 0
+
+            for i in range(n-1):
+                (Xi,Pi,Amti) = bids[i]
+                (Xj,Pj,Amtj) = bids[i+1]
+                mpcInput(sint Cnt, sint Xi, sint Xj)
+
+                Cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
+
+                mpcOutput(sint Cnt)
+
             mpcInput(sint Cnt)
 
             Cnt = Cnt.reveal()
