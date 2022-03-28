@@ -71,20 +71,23 @@ contract colAuction{
     function dutchAuctionSettle(uint colAuctionId, $uint AmtToSell, $uint StartPrice, $uint LowestPrice) public{
         address P = msg.sender;
         
-        mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice){
+        mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, $uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
             n = len(bids)
             
             cnt = 0
 
-            (Xi,Pi,Amti) = bids[1]
-            (Xj,Pj,Amtj) = bids[2]
-            mpcInput(sint Xi, sint Xj,sint cnt)
+            for i in range(n-2): 
+                (Xi,Pi,Amti) = bids[i+1]
+                (Xj,Pj,Amtj) = bids[i+2]
+            
+                mpcInput(sint Xi, sint Xj,sint cnt)
 
-            cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
+                cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
 
-            mpcOutput(sint cnt)
+                mpcOutput(sint cnt)
+
             
             res = 'success'
 
