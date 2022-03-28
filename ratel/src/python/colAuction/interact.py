@@ -51,20 +51,18 @@ def inputAuction(appContract,colAuctionId,X,Amt,account):
             return
 
 def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestPrice, account):
-    idx1, idx2 = reserveInput(web3, appContract, 2, account)
-    mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
-    maskedAmt, maskedSP = (AmtToSell + mask1) % blsPrime, (StartPrice + mask2) % blsPrime
+    idx1, idx2, idx3= reserveInput(web3, appContract, 3, account)
+    mask1, mask2, mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
+    maskedAmt, maskedSP, maskedLP = (AmtToSell + mask1) % blsPrime, (StartPrice + mask2) % blsPrime, (LowestPrice + mask3) % blsPrime
     
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.dutchAuctionSettle(colAuctionId,idx1,maskedAmt,idx2,maskedSP,LowestPrice).buildTransaction({
+    tx = appContract.functions.dutchAuctionSettle(colAuctionId,idx1,maskedAmt,idx2,maskedSP,idx3, maskedLP).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
     web3.eth.wait_for_transaction_receipt(tx_hash)
 
     while True:
-        # amtSold = appContract.functions.ret_amtSold(colAuctionId).call()
-        # curPrice = appContract.functions.ret_curPrice(colAuctionId).call()
         res = appContract.functions.colres(colAuctionId).call()
         if res != '':
             print(res)
