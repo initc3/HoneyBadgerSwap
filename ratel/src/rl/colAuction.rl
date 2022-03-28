@@ -76,16 +76,11 @@ contract colAuction{
 
             n = len(bids)
             
-            Cnt = 0
+            mpcInput(sint AmtToSell, sint StartPrice)
+            
+            valid = (AmtToSell.greater_equal(StartPrice,bit_length=bit_length)).reveal()
 
-            for i in range(n-1): //1...n-1 compare with 
-                (Xi,Pi,Amti) = bids[i+1]
-                (Xj,Pj,Amtj) = bids[i+2]
-                mpcInput(sint Xi, sint Xj)
-
-                Cnt += (Xi.greater_equal(Xj,bit_length = bit_length)).reveal()
-
-                mpcOutput(cint Cnt)
+            mpcOutput(cint valid)
 
             if valid == 1 :
                 res = 'success'
