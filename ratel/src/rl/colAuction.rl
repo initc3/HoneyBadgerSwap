@@ -74,21 +74,20 @@ contract colAuction{
         mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            n = len(list)
+            n = len(bids)
             
             Cnt = 0
 
-            for i in range(n-1):
-                (Xi,Pi,Amti) = bids[i]
-                (Xj,Pj,Amtj) = bids[i+1]
+            for i in range(n-1): //1...n-1 compare with 
+                (Xi,Pi,Amti) = bids[i+1]
+                (Xj,Pj,Amtj) = bids[i+2]
                 mpcInput(sint Xi, sint Xj)
 
                 Cnt += (Xi.greater_equal(Xj,bit_length = bit_length)).reveal()
 
                 mpcOutput(cint Cnt)
 
-
-            if Cnt == n-1 :
+            if valid == 1 :
                 res = 'success'
             else:
                 res = 'failed'

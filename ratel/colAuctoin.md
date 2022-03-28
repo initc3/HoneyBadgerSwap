@@ -31,8 +31,9 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 ### pull docker image & enter the container
 ```
-sudo docker pull initc3/honeybadgerswap
-sudo docker tag initc3/honeybadgerswap hbswap:latest
+#sudo docker pull initc3/honeybadgerswap
+sudo docker pull initc3/honeybadgerswap:8fc1863
+sudo docker tag initc3/honeybadgerswap:8fc1863 hbswap:latest
 sudo docker-compose up -d
 
 sudo docker exec -it honeybadgerswap_dev_1 bash
@@ -103,16 +104,21 @@ python3 -m ratel.src.python.colAuction.interact
 
 ```
 bash ratel/src/compile.sh rockPaperScissors
+
 bash ratel/src/deploy.sh rockPaperScissors 0 4 1
+
 python3 -m ratel.src.python.refill server_0 0 \
 & python3 -m ratel.src.python.refill server_1 0 \
 & python3 -m ratel.src.python.refill server_2 0 \
 & python3 -m ratel.src.python.refill server_3 0 
+
 python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_2 0 \
 & python3 -m ratel.src.python.refill client_3 0 \
 & python3 -m ratel.src.python.refill client_4 0 \
 & python3 -m ratel.src.python.refill client_5 0
+
 bash ratel/src/run.sh rockPaperScissors 0,1,2,3 4 1 1 0
+
 python3 -m ratel.src.python.rockPaperScissors.interact 
 ```
