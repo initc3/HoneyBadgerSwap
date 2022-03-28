@@ -78,15 +78,16 @@ contract colAuction{
             
             cnt = 0
 
-            for i in range(n-2): 
-                (Xi,Pi,Amti) = bids[i+1]
-                (Xj,Pj,Amtj) = bids[i+2]
+            for i in range(n-1): 
+                for j in range(n-i-2): 
+                (Xi,Pi,Amti) = bids[j+1]
+                (Xj,Pj,Amtj) = bids[j+2]
             
-                mpcInput(sint Xi, sint Xj,sint cnt)
+                mpcInput(sint Xi, sint Xj)
 
-                cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
+                needSwap = (Xi.less_equal(Xj,bit_length = bit_length)).reveal()
 
-                mpcOutput(sint cnt)
+                mpcOutput(cint needSwap)
 
             
             res = 'success'
