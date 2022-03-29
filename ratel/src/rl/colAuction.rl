@@ -102,6 +102,29 @@ contract colAuction{
 
             print('*** bubble sort end')
 
+            cnt = 0
+            for i in range(n-2):
+                (Xi,Pi,Amti) = bids[i+1]
+                (Xj,Pj,Amtj) = bids[i+2]
+
+                mpcInput(sint Xi, sint Xj, sint cnt)
+
+                cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
+
+                print_ln('**** cnt %s',cnt.reveal())
+
+                mpcOutput(sint cnt)
+
+            mpcInput(sint cnt)
+
+            cntr = cnt.reveal()
+
+            mpcOutput(cint cntr)
+
+            print('**** cntr',cntr)
+
+
+
             res = 'success'
 
             set(colres, string memory res, uint colAuctionId)
