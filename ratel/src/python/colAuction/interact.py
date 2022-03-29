@@ -151,3 +151,36 @@ if __name__=='__main__':
     dutchAuctionSettle(appContract,colAuctionId2,AmtToSell2,StartPrice2,LowestPrice2,client_1)
     print('finished settle')
 
+    #auction failes
+
+    print('==================================')
+
+    colAuctionId3 = initAuction(appContract,client_1)
+    print('new Auction id:',colAuctionId3)
+
+    X2 = 5
+    Amt2 = 10
+    inputAuction(appContract,colAuctionId3,X2,Amt2,client_2)
+    print('finished input client_2')
+
+    X3 = 3
+    Amt3 = 6
+    inputAuction(appContract,colAuctionId3,X3,Amt3,client_3)
+    print('finished input client_3')
+    
+    X4 = 7
+    Amt4 = 7
+    inputAuction(appContract,colAuctionId3,X4,Amt4,client_4)
+    print('finished input client_4')
+
+    X5 = 2
+    Amt5 = 9
+    inputAuction(appContract,colAuctionId3,X5,Amt5,client_5)
+    print('finished input client_5')
+
+    AmtToSell3 = 40
+    StartPrice3 = 10
+    LowestPrice3 = 6
+    dutchAuctionSettle(appContract,colAuctionId3,AmtToSell3,StartPrice3,LowestPrice3,client_1)
+    print('finished settle')
+
