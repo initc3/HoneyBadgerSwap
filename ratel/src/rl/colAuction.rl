@@ -108,6 +108,8 @@ contract colAuction{
                 (Xj,Pj,Amtj) = bids[i+2]
 
                 mpcInput(sint Xi, sint Xj, sint cnt)
+                print_ln('**** Xi %s',Xi.reveal())
+                print_ln('**** Xj %s',Xj.reveal())
                 cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
                 print_ln('**** cnt %s',cnt.reveal())
                 mpcOutput(sint cnt)
