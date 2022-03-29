@@ -74,7 +74,7 @@ contract colAuction{
         mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, $uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            n = 4
+            n = len(bids)
             
             for i in range(n-2): 
 
@@ -95,6 +95,9 @@ contract colAuction{
                     mpcOutput(cint needSwap)
 
                     print('**** needSwap',needSwap)
+
+                    if needSwap == 1:
+                        bids[j+1], bids[j+2] = bids[j+2], bids[j+1]
 
 
             print('*** bubble sort end')
