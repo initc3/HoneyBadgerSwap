@@ -119,7 +119,7 @@ contract colAuction{
 
             if cntr != n-2:
                 print('WARNING')
-                res = 'WARNING sort doesn't work well'
+                res = 'WARNING sort failed'
                 set(colres, string memory res, uint colAuctionId)
                 return
 
