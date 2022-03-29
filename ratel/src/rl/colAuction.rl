@@ -108,24 +108,48 @@ contract colAuction{
                 (Xj,Pj,Amtj) = bids[i+2]
 
                 mpcInput(sint Xi, sint Xj, sint cnt)
-
                 cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
-
                 print_ln('**** cnt %s',cnt.reveal())
-
                 mpcOutput(sint cnt)
 
             mpcInput(sint cnt)
-
             cntr = cnt.reveal()
-
             mpcOutput(cint cntr)
-
             print('**** cntr',cntr)
 
+            if cntr != n-2:
+                print('WARNING')
+                res = 'WARNING sort doesn't work well'
+                set(colres, string memory res, uint colAuctionId)
+                return
 
+            amtSold = 0
 
-            res = 'success'
+            mpcInput(sint StartPrice)
+            curPrice = StartPrice
+            print_ln('**** curPrice %s',curPrice.reveal())
+            mpcOutput(sint curPrice)
+
+            for i in range(n-1):
+                (Xi,Pi,Amti) = bids[i+1]
+
+                mpcInput(sint Xi,sint Amti, sint curPrice, sint amtSold, sint AmtToSell)
+                curPrice = Xi
+                amtSold += Amti
+                aucDone = (amtSold.greater_equal(AmtToSell,bit_length = bit_length).reveal())
+                mpcOutput(sint curPrice,sint amtSold,cint aucDone)
+
+                if aucDone == 1:
+                    break
+
+            mpcInput(sint curPrice,sint LowestPrice)
+            aucValid = (curPrice.greater_equal(LowestPrice,bit_length=bit_length).reveal())
+            mpcOutput(cint aucValid)
+
+            if aucValid == 1 and aucDone == 1:
+                res = 'Auction success!!!'
+            else:
+                res = 'Auction failed!!!'
 
             set(colres, string memory res, uint colAuctionId)
         }
