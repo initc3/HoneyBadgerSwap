@@ -76,25 +76,28 @@ contract colAuction{
 
             n = 4
             
-            cnt = 0
-
             for i in range(n-2): 
-            
-                print('**** i',i)
 
-                mpcInput(sint AmtToSell, sint StartPrice,sint cnt)
+                for j in range(n-i-2):            
 
-                print_ln('**** cnt %s',cnt.reveal())
+                    print('**** j',j+1,j+2)
 
-                cnt += (AmtToSell.greater_equal(StartPrice,bit_length = bit_length))
+                    (Xi,Pi,Amti) = bids[j+1]
+                    (Xj,Pj,Amtj) = bids[j+2]
 
-                print_ln('**** cnt %s',cnt.reveal())
+                    mpcInput(sint Xi, sint Xj)
 
-                mpcOutput(sint cnt)
+                    print_ln('**** Xi %s',Xi.reveal())
+                    print_ln('**** Xj %s',Xj.reveal())
 
-                print('*** mpcOutput end')
+                    needSwap = (Xi.less_equal(Xj,bit_length = bit_length)).reveal()
 
-            print('set res start')
+                    mpcOutput(cint needSwap)
+
+                    print('**** needSwap',needSwap)
+
+
+            print('*** bubble sort end')
 
             res = 'success'
 
