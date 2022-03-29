@@ -86,16 +86,7 @@ contract colAuction{
 
                 mpcOutput(sint cnt)
 
-            mpcInput(sint cnt)
-
-            cntr = cnt.reveal()
-
-            mpcOutput(cint cntr)
-            
-            if cntr == n-2:
-                res = 'success'
-            else:
-                res = 'failed'
+            res = 'success'
 
             set(colres, string memory res, uint colAuctionId)
         }
