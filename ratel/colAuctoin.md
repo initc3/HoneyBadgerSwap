@@ -97,7 +97,9 @@ python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_2 0 \
 & python3 -m ratel.src.python.refill client_3 0 \
 & python3 -m ratel.src.python.refill client_4 0 \
-& python3 -m ratel.src.python.refill client_5 0
+& python3 -m ratel.src.python.refill client_5 0 \
+& python3 -m ratel.src.python.refill client_6 0 \
+& python3 -m ratel.src.python.refill client_7 0
 bash ratel/src/run.sh colAuction 0,1,2,3 4 1 1 0
 python3 -m ratel.src.python.colAuction.interact 
 ```
