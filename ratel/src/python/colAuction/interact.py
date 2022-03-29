@@ -84,6 +84,8 @@ if __name__=='__main__':
     client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
     client_4 = getAccount(web3,f'/opt/poa/keystore/client_4/')
     client_5 = getAccount(web3,f'/opt/poa/keystore/client_5/')
+    client_6 = getAccount(web3,f'/opt/poa/keystore/client_6/')
+    client_7 = getAccount(web3,f'/opt/poa/keystore/client_7/')
     
     #test auction success
 
@@ -145,13 +147,23 @@ if __name__=='__main__':
     inputAuction(appContract,colAuctionId2,X5,Amt5,client_5)
     print('finished input client_5')
 
+    X6 = 6
+    Amt6 = 1
+    inputAuction(appContract,colAuctionId2,X6,Amt6,client_6)
+    print('finished input client_6')
+
+    X7 = 2
+    Amt7 = 7
+    inputAuction(appContract,colAuctionId2,X7,Amt7,client_7)
+    print('finished input client_7')
+
     AmtToSell2 = 10
     StartPrice2 = 10
     LowestPrice2 = 6
     dutchAuctionSettle(appContract,colAuctionId2,AmtToSell2,StartPrice2,LowestPrice2,client_1)
     print('finished settle')
 
-    #auction failes
+    #auction failes (since AmtTosell > sum of all amt)
 
     print('==================================')
 
@@ -177,6 +189,13 @@ if __name__=='__main__':
     Amt5 = 9
     inputAuction(appContract,colAuctionId3,X5,Amt5,client_5)
     print('finished input client_5')
+
+    X6 = 2
+    Amt6 = 5
+    inputAuction(appContract,colAuctionId2,X6,Amt6,client_6)
+    print('finished input client_6')
+
+
 
     AmtToSell3 = 40
     StartPrice3 = 10
