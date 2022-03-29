@@ -74,15 +74,21 @@ contract colAuction{
         mpc(uint colAuctionId, $uint AmtToSell, $uint StartPrice, $uint LowestPrice){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
 
-            n = len(bids)
+            n = 4
             
             cnt = 0
 
             for i in range(n-2): 
             
+                print('**** i',i)
+
                 mpcInput(sint AmtToSell, sint StartPrice,sint cnt)
 
+                print_ln('**** cnt %s',cnt.reveal())
+
                 cnt += (AmtToSell.greater_equal(StartPrice,bit_length = bit_length))
+
+                print_ln('**** cnt %s',cnt.reveal())
 
                 mpcOutput(sint cnt)
 
