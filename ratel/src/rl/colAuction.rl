@@ -92,6 +92,10 @@ contract colAuction{
 
                 mpcOutput(sint cnt)
 
+                print('*** mpcOutput end')
+
+            print('set res start')
+
             res = 'success'
 
             set(colres, string memory res, uint colAuctionId)
