@@ -128,3 +128,21 @@ bash ratel/src/run.sh rockPaperScissors 0,1,2,3 4 1 1 0
 
 python3 -m ratel.src.python.rockPaperScissors.interact 
 ```
+
+
+#### pseudocode
+```
+bids := []
+on input Bid($X, $Amt)  from P    // means I'll buy up to $Amt if the prices reaches $X or below
+    append ($X, $Amt, P) to bids
+on DutchAuctionSettle($AmtToSell, $StartPrice, $LowestPrice):
+    amtSold := 0
+    sort (bids in decreasing order by $X)
+    curPrice := StartPrice
+    for each ($X, $Amt, P):
+        $curPrice := $X
+        $amtSold += $Amt
+        if $amtSold >= $AmtToSell:
+            break
+    return whether the auction is successful
+```
