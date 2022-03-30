@@ -8,7 +8,7 @@ from aiohttp import web
 from ratel.src.python.Client import send_requests, batch_interpolate
 from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, blsPrime, \
     location_inputmask, http_host, http_port, mpc_port, location_db, openDB, getAccount, \
-    confirmation, shareBatchSize, list_to_str, trade_key_num
+    confirmation, shareBatchSize, list_to_str, trade_key_num, INPUTMASK_SHARES_DIR
 
 
 class Server:
@@ -133,7 +133,7 @@ class Server:
     async def genInputMask(self, shareBatchSize):
         print(f'Generating new inputmasks... s-{self.serverID}')
 
-        cmd = f'./random-shamir.x -i {self.serverID} -N {players(self.contract)} -T {threshold(self.contract)} --nshares {shareBatchSize}'
+        cmd = f'./random-shamir.x -i {self.serverID} -N {players(self.contract)} -T {threshold(self.contract)} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR}'
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
         print(f'[{cmd!r} exited with {proc.returncode}]')

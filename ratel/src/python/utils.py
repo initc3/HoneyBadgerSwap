@@ -6,6 +6,10 @@ import os
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
 
+INPUTMASK_SHARES_DIR = os.getenv(
+    'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
+)
+
 def parse_contract(name):
     contract = json.load(open(f'ratel/genfiles/build/contracts/{name}.json'))
     return contract['abi'], contract['bytecode']
@@ -69,10 +73,7 @@ def location_db(server_id):
     return f'{db_path}/server-{server_id}'
 
 def location_inputmask(server_id):
-    inputmask_shares_dir = os.getenv(
-        'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
-    )
-    return f'{inputmask_shares_dir}/4-MSp-255/Randoms-MSp-P{server_id}'
+    return f'{INPUTMASK_SHARES_DIR}/4-MSp-255/Randoms-MSp-P{server_id}'
 
 def openDB(location):
     return leveldb.LevelDB(location)
