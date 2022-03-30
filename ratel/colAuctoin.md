@@ -61,7 +61,9 @@ python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_2 0 \
 & python3 -m ratel.src.python.refill client_3 0 \
 & python3 -m ratel.src.python.refill client_4 0 \
-& python3 -m ratel.src.python.refill client_5 0
+& python3 -m ratel.src.python.refill client_5 0 \
+& python3 -m ratel.src.python.refill client_6 0 \
+& python3 -m ratel.src.python.refill client_7 0
 ```
 
 ```
@@ -73,6 +75,8 @@ python3 -m ratel.src.python.colAuction.interact
 
 ```
 
+
+#### TLDR part
 
 ```
 git clone https://github.com/xmhuangzhen/HoneyBadgerSwap.git
