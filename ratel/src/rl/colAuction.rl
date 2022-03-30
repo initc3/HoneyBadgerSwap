@@ -100,7 +100,7 @@ contract colAuction{
                         bids[j+1], bids[j+2] = bids[j+2], bids[j+1]
 
 
-            print('*** bubble sort end')
+            print('***  sort end')
 
             cnt = 0
             for i in range(n-2):
