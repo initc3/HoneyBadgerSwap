@@ -110,7 +110,7 @@ contract colAuction{
                 mpcInput(sint Xi, sint Xj, sint cnt)
                 print_ln('**** Xi %s',Xi.reveal())
                 print_ln('**** Xj %s',Xj.reveal())
-                cnt += (Xi.greater_equal(Xj,bit_length = bit_length))
+                cnt += (Xj.less_equal(Xi,bit_length = bit_length))
                 print_ln('**** cnt %s',cnt.reveal())
                 mpcOutput(sint cnt)
 
@@ -119,7 +119,7 @@ contract colAuction{
             mpcOutput(cint cntr)
             print('**** cntr',cntr)
 
-            if cntr != n-2:
+            if cntr != 0:
                 print('WARNING')
                 res = 'WARNING sort failed'
                 set(colres, string memory res, uint colAuctionId)
