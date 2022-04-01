@@ -1,6 +1,5 @@
-ARG mpspdz_commit=fe5374d
-FROM initc3/malicious-shamir-party.x:${mpspdz_commit} as malshamirparty
-FROM initc3/mal-shamir-offline.x:${mpspdz_commit} as malshamiroffline
+ARG mpspdz_commit=2f27df3
+FROM initc3/mal-shamir:${mpspdz_commit} as malshamir
 FROM initc3/random-shamir.x:${mpspdz_commit} as randomshamir
 FROM initc3/mpspdz:${mpspdz_commit} as mpspdzbase
 
@@ -55,15 +54,14 @@ RUN mkdir -p \
             ${PREP_DIR}
 
 # malicious-shamir-party.x
-COPY --from=malshamirparty \
+COPY --from=malshamir \
                 /usr/local/bin/malicious-shamir-party.x \
                 /usr/local/bin/malicious-shamir-party.x
-COPY --from=malshamirparty /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
-#COPY --from=malshamirparty /usr/src/MP-SPDZ/local /usr/src/MP-SPDZ/local
+COPY --from=malshamir /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
 RUN cp /usr/local/bin/malicious-shamir-party.x /usr/src/hbswap/
 
 # mal-shamir-offline.x
-COPY --from=malshamiroffline \
+COPY --from=malshamir \
                 /usr/local/bin/mal-shamir-offline.x /usr/local/bin/
 RUN cp /usr/local/bin/mal-shamir-offline.x /usr/src/hbswap/
 
@@ -74,6 +72,7 @@ RUN cp /usr/local/bin/random-shamir.x /usr/src/hbswap/
 # MP-SPDZ compiler
 COPY --from=mpspdzbase /usr/src/MP-SPDZ/compile.py /usr/src/hbswap/
 COPY --from=mpspdzbase /usr/src/MP-SPDZ/Compiler /usr/src/hbswap/Compiler
+COPY --from=mpspdzbase /usr/src/MP-SPDZ/Programs /usr/src/hbswap/Programs
 # ssl keys
 COPY --from=mpspdzbase /usr/src/MP-SPDZ/Scripts/setup-ssl.sh /usr/src/hbswap/
 
