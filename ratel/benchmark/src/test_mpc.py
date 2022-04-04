@@ -33,6 +33,7 @@ async def run_online_ONLY(server_id, port):
     duration = end_time - start_time
     return server_id, port, start_time, end_time, duration
 
+
 async def run_online(server_id, port):
     start_time = time.perf_counter()
     cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} -F --prep-dir Player-data-port-{port} hbswapTrade1'
