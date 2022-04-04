@@ -123,10 +123,12 @@ def list_to_str(list):
         st += f"{',' if len(st) > 0 else ''}{v}"
     return st
 
+leaderHostname = 'mpcnode0'
+
 prog = './malicious-shamir-party.x'
 offline_prog = './mal-shamir-offline.x'
+
 blsPrime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
-leaderHostname = 'mpcnode0'
 R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
 inverse_R = get_inverse(R)
 fp = 2 ** 16

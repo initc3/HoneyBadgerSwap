@@ -293,7 +293,6 @@ void mpcOutput() {
     for (int i = 0; i < num; i++) {
         textFuncLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
-    textFuncLower += prefix + "server.portLock[port].release()\n";
     textFuncLower += "\n";
 }
 
@@ -479,6 +478,7 @@ SPACE [ \t\r]+
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
 
         textPythonLower += "\n";
+        textPythonLower += "    server.portLock[port].release()\n";
         textPythonLower += "    await server.dbLock['execHistory'].acquire()\n";
         textPythonLower += "    try:\n";
         textPythonLower += "        execHistory = server.db.Get(f'execHistory'.encode())\n";
@@ -534,7 +534,12 @@ SPACE [ \t\r]+
             if (funcStage == 0) {
                 textFuncUpper += textLine;
             } else if (funcStage == 1) {
-                textFuncMid += textLine;
+                if (!isReadDB) {
+                    funcStage += 1;
+                    textFuncLower += textLine;
+                } else {
+                    textFuncMid += textLine;
+                }
             } else {
                 textFuncLower += textLine;
             }

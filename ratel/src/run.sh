@@ -17,6 +17,8 @@ kill_mpc
 IFS=','
 read -a strarr <<< "$IDs"
 
+mkdir -p ratel/log
+
 for id in "${strarr[@]}";
 do
   python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test > ratel/log/server_$id.log 2>&1 &
