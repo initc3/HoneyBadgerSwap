@@ -1,27 +1,20 @@
 import asyncio
-import os
-import sys
-
 import matplotlib.pyplot as plt
 import shutil
+import sys
 import time
 
-from ratel.src.python.utils import mpc_port, prog, offline_prog, blsPrime
+from ratel.src.python.utils import mpc_port, prog, offline_prog, blsPrime, repeat_experiment
 
-threshold = 1
-max_concurrency = 3
-output_file = 'ratel/benchmark/data/mp-spdz.txt'
 
 def set_up_share_files(concurrency):
-    for server_id in range(players):
-        for i in range(concurrency):
-            port = mpc_port + i * 100
+    for i in range(concurrency):
+        port = mpc_port + i * 100
+        for server_id in range(players):
             shutil.copyfile(f'ratel/benchmark/data/sharefiles/Transactions-P{server_id}-{mpc_port}.data', f'Persistence/Transactions-P{server_id}-{port}.data')
 
 
-async def run_online_ONLY(server_id, port):
-    start_time = time.perf_counter()
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
+async def execute(cmd):
     proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await proc.communicate()
     print(f'[{cmd!r} exited with {proc.returncode}]')
@@ -29,105 +22,91 @@ async def run_online_ONLY(server_id, port):
         print(f'[stdout]\n{stdout.decode()}')
     if stderr:
         print(f'[stderr]\n{stderr.decode()}')
-    end_time = time.perf_counter()
-    duration = end_time - start_time
-    return server_id, port, start_time, end_time, duration
+
+
+async def run_online_ONLY(server_id, port):
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
+    await execute(cmd)
 
 
 async def run_online(server_id, port):
-    start_time = time.perf_counter()
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} -F --prep-dir Player-data-port-{port} hbswapTrade1'
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    print(f'[{cmd!r} exited with {proc.returncode}]')
-    if stdout:
-        print(f'[stdout]\n{stdout.decode()}')
-    if stderr:
-        print(f'[stderr]\n{stderr.decode()}')
-    end_time = time.perf_counter()
-    duration = end_time - start_time
-    return server_id, port, start_time, end_time, duration
+    dst_dir = f'Player-data-port-{port}-copy'
+    cmd = f'rm -rf {dst_dir}'
+    await execute(cmd)
+
+    src_dir = f'Player-data-port-{port}'
+    cmd = f'cp -rf {src_dir} {dst_dir}'
+    await execute(cmd)
+
+    dir = dst_dir
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} -F --prep-dir {dir} hbswapTrade1'
+    await execute(cmd)
 
 
 async def run_offline(server_id, port):
-    cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} --prep-dir Player-data-port-{port} hbswapTrade1'
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    print(f'[{cmd!r} exited with {proc.returncode}]')
-    if stdout:
-        print(f'[stdout]\n{stdout.decode()}')
-    if stderr:
-        print(f'[stderr]\n{stderr.decode()}')
+    dir = f'Player-data-port-{port}'
+    cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} --prep-dir {dir} hbswapTrade1'
+    await execute(cmd)
 
 
-async def run_offline_phase(concurrency):
-    tasks = []
-    for server_id in range(players):
-        for i in range(concurrency):
-            port = mpc_port + i * 100
-            tasks.append(run_offline(server_id, port))
-    await asyncio.gather(*tasks)
+async def test(func, server_id, port):
+    start_time = time.perf_counter()
+
+    await eval(func)(server_id, port)
+
+    end_time = time.perf_counter()
+    duration = end_time - start_time
+
+    return duration
 
 
 async def run_test(func, concurrency):
-    set_up_share_files(concurrency)
     tasks = []
-    for server_id in range(players):
-        for i in range(concurrency):
-            port = mpc_port + i * 100
-            tasks.append(eval(func)(server_id, port))
+    for i in range(concurrency):
+        port = mpc_port + i * 100
+        for server_id in range(players):
+            tasks.append(test(func, server_id, port))
     results = await asyncio.gather(*tasks)
-    print('****')
-    for result in results:
-        print(result)
-    return results
+    print(f'!!!! {func} {results}')
+    return sum(results) / (players * concurrency)
 
 
-def write_to(st):
-    with open(output_file, 'a') as f:
-        f.write(st)
+async def rep(func, concurrency):
+    sum = 0
+    for i in range(repeat_experiment):
+        sum += await run_test(func, concurrency)
+    avg = sum / repeat_experiment
+    return avg
 
 
 async def main():
-    if os.path.exists(output_file):
-            os.remove(output_file)
-    else:
-        print("Can not delete the file as it doesn't exists")
-
-    set_up_share_files(max_concurrency)
-
-    x, y = [], []
+    x, y_offline, y_online, y_online_ONLY = [], [], [], []
     for concurrency in range(1, 1 + max_concurrency):
-        await run_offline_phase(concurrency)
-        results = await run_test('run_online', concurrency)
-        sum = 0
-        for server_id, port, start_time, end_time, duration in results:
-            sum += duration
-            write_to(f'{server_id}\t{port}\t{start_time}\t{end_time}\t{duration}\n')
-        sum /= players * concurrency
-        write_to(f'\n'
-                 f'----------\n'
-                 f'{concurrency}\t{sum}\n'
-                 f'----------\n\n')
-
         x.append(concurrency)
-        y.append(sum)
+        y_offline.append(await rep('run_offline', concurrency))
+        y_online.append(await rep('run_online', concurrency))
+        y_online_ONLY.append(await rep('run_online_ONLY', concurrency))
 
-    write_to(f'{x}\n{y}\n')
+    with open('ratel/benchmark/data/mp-spdz.txt', 'w') as f:
+        f.write(str(x) + '\n')
+        f.write(str(y_offline) + '\n')
+        f.write(str(y_online) + '\n')
+        f.write(str(y_online_ONLY) + '\n')
 
     plt.figure(figsize=(13, 4))
-    plt.plot(x, y)
+    plt.scatter(x, y_offline)
+    plt.scatter(x, y_online)
+    plt.scatter(x, y_online_ONLY)
     plt.savefig(f'ratel/benchmark/data/mp-spdz.pdf')
 
 
 if __name__ == '__main__':
     players = int(sys.argv[1])
-    concurrency = int(sys.argv[2])
+    threshold = int(sys.argv[2])
+    max_concurrency = int(sys.argv[3])
 
-    # asyncio.run(run_offline_phase(concurrency))
-    # asyncio.run(run_test('run_online', concurrency))
-
-    asyncio.run(run_test('run_online_ONLY', concurrency))
+    set_up_share_files(max_concurrency)
+    asyncio.run(main())
 
 
 

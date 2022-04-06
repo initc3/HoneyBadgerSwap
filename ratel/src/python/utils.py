@@ -148,3 +148,5 @@ confirmation = 2
 replay = 1
 
 trade_key_num = 7
+
+repeat_experiment = 10

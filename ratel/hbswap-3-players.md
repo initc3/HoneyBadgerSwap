@@ -1,4 +1,5 @@
 
+
 `docker-compose build`
 
 `docker-compose up -d`
@@ -21,4 +22,4 @@
 
 `./latency-control.sh start 200 50`
 
-`python3 -m ratel.benchmark.src.test_mpc 3 10`
+`python3 -m ratel.benchmark.src.test_mpc 3 1 10`
