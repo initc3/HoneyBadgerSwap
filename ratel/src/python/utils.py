@@ -6,13 +6,16 @@ import os
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
 
+
 INPUTMASK_SHARES_DIR = os.getenv(
     'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
 )
 
+
 def parse_contract(name):
     contract = json.load(open(f'ratel/genfiles/build/contracts/{name}.json'))
     return contract['abi'], contract['bytecode']
+
 
 def sign_and_send(tx, web3, account):
     signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
@@ -20,12 +23,14 @@ def sign_and_send(tx, web3, account):
     web3.eth.wait_for_transaction_receipt(signedTx.hash)
     return signedTx.hash
 
+
 def getAccount(web3, keystoreDir):
     for filename in os.listdir(keystoreDir):
         with open(keystoreDir + filename) as keyfile:
             encryptedKey = keyfile.read()
             privateKey = web3.eth.account.decrypt(encryptedKey, '')
             return web3.eth.account.privateKeyToAccount(privateKey)
+
 
 class MultiAcquire(asyncio.Task):
     _check_lock = asyncio.Lock()  # to suspend for creating task that acquires objects
@@ -38,6 +43,7 @@ class MultiAcquire(asyncio.Task):
         # _release_event would be set in this case:
         for l in self._locks:
             l.release = self._notify(l.release)
+
 
     async def _task_coro(self):
         while True:
@@ -52,6 +58,7 @@ class MultiAcquire(asyncio.Task):
         # Wait for task:
         return await task
 
+
     def _notify(self, func):
         def wrapper(*args, **kwargs):
             type(self)._release_event.set()
@@ -59,18 +66,23 @@ class MultiAcquire(asyncio.Task):
             return func(*args, **kwargs)
         return wrapper
 
+
 def mpcPort(seq, concurrency):
     return mpc_port + seq % concurrency * 100
+
 
 def key_inputmask(idx):
     return f'inputmask_{idx}'.encode()
 
+
 def location_sharefile(server_id, base_port):
     return f'Persistence/Transactions-P{server_id}-{base_port}.data'
+
 
 def location_db(server_id):
     db_path = os.getenv('DB_PATH', '/opt/hbswap/db')
     return f'{db_path}/server-{server_id}'
+
 
 def location_inputmask(server_id, players):
     inputmask_shares_dir = os.getenv(
@@ -78,11 +90,14 @@ def location_inputmask(server_id, players):
     )
     return f'{inputmask_shares_dir}/{players}-MSp-255/Randoms-MSp-P{server_id}'
 
+
 def openDB(location):
     return leveldb.LevelDB(location)
 
+
 def hex_to_int(x):
     return int((mpz_from_old_binary(x) * inverse_R) % blsPrime)
+
 
 def int_to_hex(x):
     x = mpz(x)
@@ -90,6 +105,7 @@ def int_to_hex(x):
     x = binary(int(x))
     x += b'\x00' * (32 - len(x))
     return x
+
 
 def get_inverse(a):
     ret = 1
@@ -101,6 +117,7 @@ def get_inverse(a):
         a = (a * a) % blsPrime
     return ret
 
+
 def recover_input(db, masked_value, idx): # return: int
     try:
         input_mask_share = db.Get(key_inputmask(idx))
@@ -109,19 +126,33 @@ def recover_input(db, masked_value, idx): # return: int
     input_mask_share = int.from_bytes(input_mask_share, 'big')
     return (masked_value - input_mask_share) % blsPrime
 
+
 def players(contract):
     players = contract.functions.N().call()
     return players
 
+
 def threshold(contract):
     threshold = contract.functions.T().call()
     return threshold
+
 
 def list_to_str(list):
     st = ''
     for v in list:
         st += f"{',' if len(st) > 0 else ''}{v}"
     return st
+
+
+async def execute_cmd(cmd):
+    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
+    print(f'[{cmd!r} exited with {proc.returncode}]')
+    if stdout:
+        print(f'[stdout]\n{stdout.decode()}')
+    if stderr:
+        print(f'[stderr]\n{stderr.decode()}')
+
 
 leaderHostname = 'mpcnode0'
 

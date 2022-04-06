@@ -10,11 +10,19 @@
 
 `bash ratel/src/compile.sh hbswap`
 
-`./ratel/benchmark/src/test_concurrent_trade_start.sh 3 1 1`
-`./ratel/benchmark/src/test_concurrent_trade_start.sh 3 10 10`
+```
+./ratel/benchmark/src/test_concurrent_trade_start.sh [players] [client_num] [concurrency]
 
-`./ratel/benchmark/src/test_concurrent_trade_run.sh 3 1 1 1`
-`./ratel/benchmark/src/test_concurrent_trade_run.sh 3 10 10 10`
+./ratel/benchmark/src/test_concurrent_trade_start.sh 3 1 1
+./ratel/benchmark/src/test_concurrent_trade_start.sh 3 10 10
+```
+
+```
+./ratel/benchmark/src/test_concurrent_trade_run.sh [players] [client_num] [concurrency] [rep]
+
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 1 1 1
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 10 10 10
+```
 
 `python3 -m ratel.benchmark.src.plot ratel/benchmark/data`
 

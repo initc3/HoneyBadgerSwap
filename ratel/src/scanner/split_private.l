@@ -182,7 +182,6 @@ void readDB() {
 
     textLine = prefix + "try:\n";
     textLine += prefix + "    " + value + " = server.db.Get(" + key + ".lower().encode())\n";
-    textLine += prefix + "    " + "server.dbLock[" + key + "].release()\n";
     textLine += prefix + "except KeyError:\n";
     textLine += prefix + "    " + value + " = bytes(0)\n";
     if (args[1] == "int") {
@@ -535,6 +534,11 @@ SPACE [ \t\r]+
             } else if (funcStage == 1) {
                 if (!isReadDB) {
                     funcStage += 1;
+
+                    textFuncMid += "    for key in readKeys:\n";
+                    textFuncMid += "        server.dbLock[key].release()\n";
+                    textFuncMid += "\n";
+
                     textFuncLower += textLine;
                 } else {
                     textFuncMid += textLine;

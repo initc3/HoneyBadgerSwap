@@ -19,6 +19,8 @@ client_num=$2
 concurrency=$3
 rep=$4
 
+python3 -m ratel.benchmark.src.set_up_offline_data $players $threshold $concurrency
+
 ids=$(create_ids $players)
 bash ratel/src/run.sh hbswap $ids $players $threshold $concurrency $test
 
