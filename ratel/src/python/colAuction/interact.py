@@ -1,4 +1,5 @@
 import asyncio
+from curses.ascii import SP
 import time
 
 from web3 import Web3
@@ -11,14 +12,13 @@ from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime
 contract_name = 'colAuction'
 
 
-def initAuction(appContract,account):
-    value1 = 1
-    idx = reserveInput(web3, appContract, 1, account)[0]
-    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedValue = (value1 + mask) % blsPrime
+def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
+    idx1,idx2,idx3 = reserveInput(web3, appContract, 3, account)
+    mask1,mask2,mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
+    maskedSP, maskedFP, maskedTM = (StartPrice + mask1) % blsPrime, (FloorPrice + mask2) % blsPrime, (totalAmt + mask3) % blsPrime 
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.initAuction(idx,maskedValue).buildTransaction({
+    tx = appContract.functions.createAuction(idx1,maskedSP,idx2,maskedFP,idx3,maskedTM).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -31,14 +31,18 @@ def initAuction(appContract,account):
         if status == 1:
             return colAuctionId
 
-# means I'll buy up to $Amt if the prices reaches $X or below
-def inputAuction(appContract,colAuctionId,X,Amt,account):
+# means I'll buy up to $amt if the prices reaches $price or below
+def submitBids(appContract,colAuctionId,price,amt,account):
+    status = appContract.functions.status(colAuctionId).call()
+    if status == 3:
+        return
+
     idx1, idx2 = reserveInput(web3, appContract, 2, account)
     mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
-    maskedX, maskedAmt = (X + mask1) % blsPrime, (Amt + mask2) % blsPrime
+    maskedP, maskedAmt = (price + mask1) % blsPrime, (amt + mask2) % blsPrime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.inputAuction(colAuctionId, idx1, maskedX, idx2, maskedAmt).buildTransaction({
+    tx = appContract.functions.submitBids(colAuctionId, idx1, maskedP, idx2, maskedAmt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -47,16 +51,46 @@ def inputAuction(appContract,colAuctionId,X,Amt,account):
     while True:
         time.sleep(1)
         status = appContract.functions.status(colAuctionId).call()
-        if status == 2:
+        if status >= 2:
             return
 
-def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestPrice, account):
-    idx1, idx2, idx3= reserveInput(web3, appContract, 3, account)
-    mask1, mask2, mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
-    maskedAmt, maskedSP, maskedLP = (AmtToSell + mask1) % blsPrime, (StartPrice + mask2) % blsPrime, (LowestPrice + mask3) % blsPrime
+def scheduleCheck(appContract, colAuctionId, StartPrice, FloorPrice, totalAmt, account):
+    curPrice = StartPrice
+
+    while True:
+        if curPrice < FloorPrice:
+            print('auction failed!!!')
+            return
+
+        idx1 = reserveInput(web3, appContract, 1, account)[0]
+        mask1 = asyncio.run(get_inputmasks(players(appContract), f'{idx1}'))[0]
+        maskedCP = (curPrice + mask1) % blsPrime
+    
+        web3.eth.defaultAccount = account.address
+        tx = appContract.functions.scheduleCheck(colAuctionId,idx1,maskedCP).buildTransaction({
+            'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
+        })
+        tx_hash = sign_and_send(tx, web3, account)
+        web3.eth.wait_for_transaction_receipt(tx_hash)
+
+        for i in range(10):
+            res = appContract.functions.colres(colAuctionId).call()
+            if res != '':
+                print(res)
+                return
+            time.sleep(1)
+        
+        curPrice = curPrice*0.99
+        
+
+
+def closeAuction(appContract, colAuctionId, account):
+    # idx1, idx2, idx3= reserveInput(web3, appContract, 3, account)
+    # mask1, mask2, mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
+    # maskedAmt, maskedSP, maskedLP = (AmtToSell + mask1) % blsPrime, (StartPrice + mask2) % blsPrime, (LowestPrice + mask3) % blsPrime
     
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.dutchAuctionSettle(colAuctionId,idx1,maskedAmt,idx2,maskedSP,idx3, maskedLP).buildTransaction({
+    tx = appContract.functions.closeAuction(colAuctionId).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -68,6 +102,7 @@ def dutchAuctionSettle(appContract, colAuctionId, AmtToSell, StartPrice, LowestP
             print(res)
             break
         time.sleep(1)
+
 
 
 if __name__=='__main__':
@@ -91,8 +126,16 @@ if __name__=='__main__':
 
     print('==================================')
 
-    colAuctionId1 = initAuction(appContract,client_1)
+    
+    totalAmt1 = 20
+    StartPrice1 = 10
+    FloorPrice1 = 1 
+
+    colAuctionId1 = createAuction(appContract,StartPrice1,FloorPrice1,totalAmt1,client_1)
+    scheduleCheck(appContract,StartPrice1,FloorPrice1,totalAmt1,client_1)
     print('new Auction id:',colAuctionId1)
+
+    time.sleep(1)
 
     X2 = 5
     Amt2 = 10
@@ -114,9 +157,6 @@ if __name__=='__main__':
     inputAuction(appContract,colAuctionId1,X5,Amt5,client_5)
     print('finished input client_5')
 
-    AmtToSell1 = 20
-    StartPrice1 = 10
-    LowestPrice1 = 1 ###or?
     dutchAuctionSettle(appContract,colAuctionId1,AmtToSell1,StartPrice1,LowestPrice1,client_1)
     print('finished settle')
 
