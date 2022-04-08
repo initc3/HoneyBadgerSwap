@@ -85,7 +85,7 @@ contract colAuction{
 
                         mpcInput(sint Amti, sint amtSold, sint totalAmt)
                         amtSold += Amti
-                        aucDone = (amtSold.greater_equal(AmtToSell,bit_length = bit_length).reveal())
+                        aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
                         mpcOutput(sint amtSold,cint aucDone)
 
                         if aucDone == 1:
@@ -145,8 +145,8 @@ contract colAuction{
 
 
     
-    function closeAuction(uint colAuctionId){
-        mpc(uint colAuctionId, $uint curPrice){
+    function closeAuction(uint colAuctionId) public{
+        mpc(uint colAuctionId){
             res = 'Auction failed!!!'
             set(colres, string memory res, uint colAuctionId)
             curStatus = 3
