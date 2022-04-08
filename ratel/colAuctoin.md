@@ -149,9 +149,9 @@ on DutchAuctionSettle($AmtToSell, $StartPrice, $LowestPrice):
 
 
 a. createAuction($totalAmt, $startPrice, $floorPrice)
-	should determine how price decreases as time goes by
+    create the auction & periodically check
+    currently, price decreases 1% every 10 seconds(is it reasonable?)
 b. submitBid($amt, $price)
 	check(price >= floorPrice)
-	cuz we don’t know the exact price and cannot pop the bid with highest price from a priority set, MPC servers must do periodically check (by running a MPC program) to determine whether the total amt of qualified bids (price >= curPrice) covers totalAmt
-c. closeAuction
-	close all bids(from price high to low) with curPrice 
+c. closeAuction()
+
