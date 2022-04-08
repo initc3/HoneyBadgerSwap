@@ -3,18 +3,13 @@ import numpy as np
 import re
 import sys
 
-from ratel.src.python.utils import replay
+from ratel.benchmark.src.calc import idx_op, idx_time, op_start_mpc_chain, op_start_mpc, op_end_mpc, \
+    op_end_mpc_chain, op_lock_acquired
 
-dir = sys.argv[1]
 
-interval = 1#20
-width = 0.25
+interval = 60
+width = 0.1
 
-idx_op = 4
-idx_time = 6
-
-def trunc_time(t):
-    return int(float(t) / interval)
 
 def add(map, key, num=1):
     if key not in map.keys():
@@ -22,49 +17,103 @@ def add(map, key, num=1):
     else:
         map[key] += num
 
+
+def deal(x):
+    x = np.array(x)
+    x -= min(x)
+    x //= interval
+
+    y = {}
+    for v in x:
+        add(y, v)
+
+    return y
+
+
+def scan():
+    send_request = []
+    start_mpc_chain = []
+    lock_acquired = []
+    start_mpc = []
+    end_mpc = []
+    end_mpc_chain = []
+
+    serverID = 0
+
+    file = f'{dir}/latency_{serverID}.csv'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            element = re.split('\t|\n', line)
+
+            op = element[idx_op]
+            time = float(element[idx_time])
+
+            if op == op_start_mpc_chain:
+                start_mpc_chain.append(time)
+            elif op == op_lock_acquired:
+                lock_acquired.append(time)
+            elif op == op_start_mpc:
+                start_mpc.append(time)
+            elif op == op_end_mpc:
+                end_mpc.append(time)
+            elif op == op_end_mpc_chain:
+                end_mpc_chain.append(time)
+
+    file = f'{dir}/gas.csv'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            element = re.split('\t|\n', line)
+            time = float(element[10])
+            send_request.append(time)
+
+    send_request = deal(send_request)
+    start_mpc_chain = deal(start_mpc_chain)
+    lock_acquired = deal(lock_acquired)
+    start_mpc = deal(start_mpc)
+    end_mpc = deal(end_mpc)
+    end_mpc_chain = deal(end_mpc_chain)
+
+    return send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_mpc_chain
+
+
 def plot(plt, map, offset, label):
     lists = sorted(map.items())
     x, y = zip(*lists)
     x, y = np.array(x), np.array(y)
     plt.bar(x + width * offset, y, width=width, label=label)
 
-start = {}
-start_mpc = {}
-end = {}
 
-file = f'{dir}/latency_0.csv'
-with open(file, 'r') as f:
-    lines = f.readlines()
-    for line in lines:
-        element = re.split('\t|\n', line)
-        if element[idx_op] == '1':
-            time = trunc_time(element[idx_time])
-            add(start, time)
-        elif element[idx_op] == '3':
-            time = trunc_time(element[idx_time])
-            add(start_mpc, time)
-        elif element[idx_op] == '6':
-            time = trunc_time(element[idx_time])
-            add(end, time)
+def draw(send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_mpc_chain):
+    plt.figure(figsize=(13, 4))
 
-client = {}
+    cnt = 0
+    plot(plt, send_request, cnt, 'send_request')
 
-file = f'{dir}/gas.csv'
-with open(file, 'r') as f:
-    lines = f.readlines()
-    for line in lines:
-        element = re.split('\t|\n', line)
-        time = trunc_time(element[10])
-        add(client, time, replay)
+    cnt += 1
+    plot(plt, start_mpc_chain, cnt, 'start_mpc_chain')
 
-plt.figure(figsize=(13, 4))
+    cnt += 1
+    plot(plt, lock_acquired, cnt, 'lock_acquired')
 
-plot(plt, client, 0, 'client')
-plot(plt, start, 1, 'start')
-plot(plt, start_mpc, 2, 'start_mpc')
-plot(plt, end, 3, 'end')
+    cnt += 1
+    plot(plt, start_mpc, cnt, 'start_mpc')
 
-plt.xlabel(f"time(/{interval}secs)")
-plt.ylabel("count")
-plt.legend()
-plt.savefig(f"{dir}/fig.pdf")
+    cnt += 1
+    plot(plt, end_mpc, cnt, 'end_mpc')
+
+    cnt += 1
+    plot(plt, end_mpc_chain, cnt, 'end_mpc_chain')
+
+    plt.xlabel(f"time(/{interval}secs)")
+    plt.ylabel("count")
+    plt.legend()
+    plt.savefig(f"{dir}/fig.pdf")
+
+
+if __name__ == '__main__':
+    dir = sys.argv[1]
+
+    send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_mpc_chain = scan()
+    draw(send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_mpc_chain)

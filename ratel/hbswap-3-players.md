@@ -26,6 +26,11 @@
 
 `python3 -m ratel.benchmark.src.plot ratel/benchmark/data`
 
+```
+python3 -m ratel.benchmark.src.calc [players] [dir]
+python3 -m ratel.benchmark.src.calc 3 ratel/benchmark/data
+```
+
 `./latency-control.sh stop`
 
 `./latency-control.sh start 200 50`

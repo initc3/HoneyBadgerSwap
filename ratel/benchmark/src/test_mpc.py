@@ -20,13 +20,15 @@ async def run_online_ONLY(server_id, port, players, threshold):
 
 
 async def run_online(server_id, port, players, threshold):
-    dst_dir = f'Player-data-port-{port}-copy'
-    cmd = f'rm -rf {dst_dir}'
-    await execute_cmd(cmd)
-
     src_dir = f'Player-data-port-{port}'
-    cmd = f'cp -rf {src_dir} {dst_dir}'
-    await execute_cmd(cmd)
+    dst_dir = f'Player-data-port-{port}-copy'
+
+    if server_id == 0:
+        cmd = f'rm -rf {dst_dir}'
+        await execute_cmd(cmd)
+
+        cmd = f'cp -rf {src_dir} {dst_dir}'
+        await execute_cmd(cmd)
 
     dir = dst_dir
     cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} -F --prep-dir {dir} hbswapTrade1'

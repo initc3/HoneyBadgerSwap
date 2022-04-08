@@ -300,13 +300,14 @@ contract hbswap {
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
             times.append(time.perf_counter())
+            print(f'**** seqTrade {seqTrade} start')
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
 
-            #print_ln('**** balanceA %s', balanceA.reveal())
-            #print_ln('**** balanceB %s', balanceB.reveal())
-            #print_ln('**** poolA %s', poolA.reveal())
-            #print_ln('**** poolB %s', poolB.reveal())
+            print_ln('**** balanceA %s', balanceA.reveal())
+            print_ln('**** balanceB %s', balanceB.reveal())
+            print_ln('**** poolA %s', poolA.reveal())
+            print_ln('**** poolB %s', poolB.reveal())
             #print_ln('**** amtA %s', amtA.reveal())
             #print_ln('**** amtB %s', amtB.reveal())
             #print_ln('**** totalPrice %s', totalPrice.reveal())
@@ -395,6 +396,7 @@ contract hbswap {
             writeDB(f'price_{seqTrade}', price, int)
 
             times.append(time.perf_counter())
+            print(f'**** seqTrade {seqTrade} finish')
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
                 for op, t in enumerate(times):
                     f.write(f'trade\t'
