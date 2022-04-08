@@ -3,6 +3,7 @@ import numpy as np
 import re
 import sys
 
+from matplotlib.ticker import MultipleLocator
 from ratel.benchmark.src.calc import idx_op, idx_time, op_start_mpc_chain, op_start_mpc, op_end_mpc, \
     op_end_mpc_chain, op_lock_acquired
 
@@ -108,6 +109,9 @@ def draw(send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_m
 
     plt.xlabel(f"time(/{interval}secs)")
     plt.ylabel("count")
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(10))
     plt.legend()
     plt.savefig(f"{dir}/fig.pdf")
 

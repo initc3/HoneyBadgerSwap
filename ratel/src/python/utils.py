@@ -152,6 +152,7 @@ async def execute_cmd(cmd):
         print(f'[stdout]\n{stdout.decode()}')
     if stderr:
         print(f'[stderr]\n{stderr.decode()}')
+    return proc.returncode
 
 
 leaderHostname = 'mpcnode0'
@@ -176,8 +177,8 @@ shareBatchSize = 1000
 
 confirmation = 2
 
-replay = 1
+replay = 10
 
 trade_key_num = 7
 
-repeat_experiment = 10
+repeat_experiment = 5
