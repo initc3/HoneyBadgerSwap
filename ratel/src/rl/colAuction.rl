@@ -96,12 +96,23 @@ contract colAuction{
                     set(colres, string memory res, uint colAuctionId)
                     curStatus = 3
                     set(status, uint curStatus, uint colAuctionId)
-                    break
+                    return
 
                 time.sleep(10)
                 mpcInput(sfix curPrice)
                 curPrice = curPrice*0.99
                 mpcOutput(sfix curPrice)
+
+                mpcInput(sfix curPrice, sint FloorPrice)
+                valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
+                mpcOutput(cint valid)
+
+                if valid == 0:
+                    res = 'Auction failed!!!'
+                    set(colres, string memory res, uint colAuctionId)
+                    curStatus = 3
+                    set(status, uint curStatus, uint colAuctionId)
+                    return
 
         }
     }
