@@ -177,10 +177,11 @@ void readDB() {
 
     string value = "value" + to_string(++cntValueDB);
 
-    keyReadDB.insert(args[0]);
+    string key = args[0];
+    keyReadDB.insert(key);
 
     textLine = prefix + "try:\n";
-    textLine += prefix + "    " + value + " = server.db.Get(" + args[0] + ".lower().encode())\n";
+    textLine += prefix + "    " + value + " = server.db.Get(" + key + ".lower().encode())\n";
     textLine += prefix + "except KeyError:\n";
     textLine += prefix + "    " + value + " = bytes(0)\n";
     if (args[1] == "int") {
@@ -472,9 +473,6 @@ SPACE [ \t\r]+
 
         textFuncUpper += "\n";
 
-        textFuncMid += "    for key in readKeys:\n";
-        textFuncMid += "        server.dbLock[key].release()\n";
-
         textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
 
         textPythonLower += "\n";
@@ -536,6 +534,11 @@ SPACE [ \t\r]+
             } else if (funcStage == 1) {
                 if (!isReadDB) {
                     funcStage += 1;
+
+                    textFuncMid += "    for key in readKeys:\n";
+                    textFuncMid += "        server.dbLock[key].release()\n";
+                    textFuncMid += "\n";
+
                     textFuncLower += textLine;
                 } else {
                     textFuncMid += textLine;
@@ -575,5 +578,5 @@ int main(int argc, char **argv) {
     fprintf(recoverFp, "%s", textRecover.c_str());
     fclose(recoverFp);
 
-	return 0;
+    return 0;
 }
