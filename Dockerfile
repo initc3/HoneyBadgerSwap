@@ -93,7 +93,10 @@ RUN pip3 install \
             toml \
             fastapi \
             pydantic \
-            uvicorn[standard]
+            uvicorn[standard] \
+            # dev
+            ipython \
+            ipdb
 
 WORKDIR $HBSWAP_HOME
 
