@@ -75,6 +75,7 @@ def scan():
     start_mpc = deal(start_mpc)
     end_mpc = deal(end_mpc)
     end_mpc_chain = deal(end_mpc_chain)
+    print(lock_acquired)
 
     return send_request, start_mpc_chain, lock_acquired, start_mpc, end_mpc, end_mpc_chain
 
