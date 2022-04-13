@@ -6,7 +6,7 @@ import time
 
 from aiohttp import web
 from ratel.src.python.Client import send_requests, batch_interpolate
-from ratel.src.python.utils import key_inputmask, spareShares, players, threshold, blsPrime, \
+from ratel.src.python.utils import key_inputmask, spareShares, blsPrime, \
     location_inputmask, http_host, http_port, mpc_port, location_db, openDB, getAccount, \
     confirmation, shareBatchSize, list_to_str, trade_key_num, INPUTMASK_SHARES_DIR
 
@@ -41,8 +41,8 @@ class Server:
             self.portLock[mpc_port + i * 100] = asyncio.Lock()
 
         self.dbLock  = {}
-        self.dbLock['access'] = asyncio.Lock()
-        self.dbLock['execHistory'] = asyncio.Lock()
+        self.dbLockCnt = {}
+
 
     async def http_server(self):
 
@@ -133,7 +133,7 @@ class Server:
     async def genInputMask(self, shareBatchSize):
         print(f'Generating new inputmasks... s-{self.serverID}')
 
-        cmd = f'./random-shamir.x -i {self.serverID} -N {players(self.contract)} -T {threshold(self.contract)} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR}'
+        cmd = f'./random-shamir.x -i {self.serverID} -N {self.players} -T {self.threshold} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR}'
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
         print(f'[{cmd!r} exited with {proc.returncode}]')
@@ -142,7 +142,7 @@ class Server:
         if stderr:
             print(f'[stderr]\n{stderr.decode()}')
 
-        file = location_inputmask(self.serverID)
+        file = location_inputmask(self.serverID, self.players)
         with open(file, 'r') as f:
             for line in f.readlines():
                 key = key_inputmask(self.input_mask_queue_tail)
@@ -231,7 +231,7 @@ class Server:
         #TODO: test below
         seq_num_list = self.check_missing_tasks()
         request = f'recoverdb/{list_to_str(seq_num_list)}'
-        masked_shares = await send_requests(players(self.contract), request)
+        masked_shares = await send_requests(self.players, request)
         for i in range(len(masked_shares)):
             masked_shares[i] = re.split(",", masked_shares[i]["values"])
         keys = self.collect_keys(seq_num_list)
