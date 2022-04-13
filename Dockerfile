@@ -1,4 +1,4 @@
-ARG mpspdz_commit=2f27df3
+ARG mpspdz_commit=073a2a8
 FROM initc3/mal-shamir:${mpspdz_commit} as malshamir
 FROM initc3/random-shamir.x:${mpspdz_commit} as randomshamir
 FROM initc3/mpspdz:${mpspdz_commit} as mpspdzbase
@@ -93,7 +93,10 @@ RUN pip3 install \
             toml \
             fastapi \
             pydantic \
-            uvicorn[standard]
+            uvicorn[standard] \
+            # dev
+            ipython \
+            ipdb
 
 WORKDIR $HBSWAP_HOME
 
