@@ -56,7 +56,7 @@ contract colAuction{
         }
     }
 
-    pureMpc scheduleCheck(curPrice):
+    pureMpc scheduleCheck(curPrice, FloorPrice):
         mpcInput(sfix curPrice, sint FloorPrice)
         valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
         mpcOutput(cint valid)
