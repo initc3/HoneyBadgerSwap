@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract Hbswap {
+contract hbswap {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
@@ -100,7 +100,6 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, uint amtA, uint amtB) {
-            #print('**** begin initPool')
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             balanceLT = readDB(f'balance_{tokenA}+{tokenB}_{user}', int)
@@ -154,7 +153,6 @@ contract Hbswap {
                 print('**** initPrice', initPrice, tokenA, tokenB)
                 set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
 
-            #print('**** end initPool')
         }
     }
 
@@ -171,38 +169,38 @@ contract Hbswap {
             totalSupplyLT = readDB(f'total_supply_{tokenA}_{tokenB}', int)
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix totalSupplyLT, sfix balanceLT, sfix poolA, sfix poolB)
-            print_ln('**** poolA %s', poolA.reveal())
-            print_ln('**** poolB %s', poolB.reveal())
-            print_ln('**** balanceA %s', balanceA.reveal())
-            print_ln('**** balanceB %s', balanceB.reveal())
-            print_ln('**** balanceLT %s', balanceLT.reveal())
-            print_ln('**** totalSupplyLT %s', totalSupplyLT.reveal())
-            print_ln('**** amtA %s', amtA.reveal())
-            print_ln('**** amtB %s', amtB.reveal())
+            #print_ln('**** poolA %s', poolA.reveal())
+            #print_ln('**** poolB %s', poolB.reveal())
+            #print_ln('**** balanceA %s', balanceA.reveal())
+            #print_ln('**** balanceB %s', balanceB.reveal())
+            #print_ln('**** balanceLT %s', balanceLT.reveal())
+            #print_ln('**** totalSupplyLT %s', totalSupplyLT.reveal())
+            #print_ln('**** amtA %s', amtA.reveal())
+            #print_ln('**** amtB %s', amtB.reveal())
 
             enoughA = balanceA >= amtA
             positiveA = amtA > 0
             enoughB = balanceB >= amtB
             positiveB = amtB > 0
             positiveTotalLT = totalSupplyLT > 0
-            validOrder = (enoughA * positiveA * enoughB * positiveB * positiveTotalLT).reveal()
-            print_ln('**** enoughA %s', enoughA.reveal())
-            print_ln('**** positiveA %s', positiveA.reveal())
-            print_ln('**** enoughB %s', enoughB.reveal())
-            print_ln('**** positiveB %s', positiveB.reveal())
-            print_ln('**** positiveTotalLT %s', positiveTotalLT.reveal())
-            print_ln('**** validOrder %s', validOrder.reveal())
+            validOrder = enoughA * positiveA * enoughB * positiveB * positiveTotalLT
+            #print_ln('**** enoughA %s', enoughA.reveal())
+            #print_ln('**** positiveA %s', positiveA.reveal())
+            #print_ln('**** enoughB %s', enoughB.reveal())
+            #print_ln('**** positiveB %s', positiveB.reveal())
+            #print_ln('**** positiveTotalLT %s', positiveTotalLT.reveal())
+            #print_ln('**** validOrder %s', validOrder.reveal())
 
             surplusA = (amtA * poolB) > (amtB * poolA)
             nonSurplusA = 1 - surplusA
             changeA = validOrder * (surplusA * amtB * poolA / poolB + nonSurplusA * amtA)
             changeB = validOrder * (surplusA * amtB + nonSurplusA * amtA * poolB / poolA)
             changeLT = changeA * totalSupplyLT / poolA
-            print_ln('**** surplusA %s', surplusA.reveal())
-            print_ln('**** nonSurplusA %s', nonSurplusA.reveal())
-            print_ln('**** changeA %s', changeA.reveal())
-            print_ln('**** changeB %s', changeB.reveal())
-            print_ln('**** changeLT %s', changeLT.reveal())
+            #print_ln('**** surplusA %s', surplusA.reveal())
+            #print_ln('**** nonSurplusA %s', nonSurplusA.reveal())
+            #print_ln('**** changeA %s', changeA.reveal())
+            #print_ln('**** changeB %s', changeB.reveal())
+            #print_ln('**** changeLT %s', changeLT.reveal())
 
             balanceA -= changeA
             balanceB -= changeB
@@ -211,12 +209,12 @@ contract Hbswap {
             poolB += changeB
             totalSupplyLT += changeLT
 
-            print_ln('**** poolA %s', poolA.reveal())
-            print_ln('**** poolB %s', poolB.reveal())
-            print_ln('**** balanceA %s', balanceA.reveal())
-            print_ln('**** balanceB %s', balanceB.reveal())
-            print_ln('**** balanceLT %s', balanceLT.reveal())
-            print_ln('**** totalSupplyLT %s', totalSupplyLT.reveal())
+            #print_ln('**** poolA %s', poolA.reveal())
+            #print_ln('**** poolB %s', poolB.reveal())
+            #print_ln('**** balanceA %s', balanceA.reveal())
+            #print_ln('**** balanceB %s', balanceB.reveal())
+            #print_ln('**** balanceLT %s', balanceLT.reveal())
+            #print_ln('**** totalSupplyLT %s', totalSupplyLT.reveal())
             mpcOutput(sfix balanceA, sfix balanceB, sfix balanceLT, sfix poolA, sfix poolB, sfix totalSupplyLT)
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
@@ -288,11 +286,10 @@ contract Hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'start_trade\t'
-                        f's{server.serverID}\t'
-                        f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
+            times = []
+
+            import time
+            times.append(time.perf_counter())
 
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
@@ -301,7 +298,9 @@ contract Hbswap {
             totalPrice = readDB(f'totalPrice_{tokenA}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
-            time_mpc_start = time.perf_counter()
+            times.append(time.perf_counter())
+
+            print(f'**** seqTrade {seqTrade} start')
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
 
@@ -309,51 +308,47 @@ contract Hbswap {
             print_ln('**** balanceB %s', balanceB.reveal())
             print_ln('**** poolA %s', poolA.reveal())
             print_ln('**** poolB %s', poolB.reveal())
-            print_ln('**** amtA %s', amtA.reveal())
-            print_ln('**** amtB %s', amtB.reveal())
-            print_ln('**** totalPrice %s', totalPrice.reveal())
-            print_ln('**** totalCnt %s', totalCnt.reveal())
+            #print_ln('**** amtA %s', amtA.reveal())
+            #print_ln('**** amtB %s', amtB.reveal())
+            #print_ln('**** totalPrice %s', totalPrice.reveal())
+            #print_ln('**** totalCnt %s', totalCnt.reveal())
 
             feeRate = 0.003
             batchSize = 1000
 
             validOrder = (amtA * amtB) < 0
-            print_ln('**** validOrder %s', validOrder.reveal())
+            #print_ln('**** validOrder %s', validOrder.reveal())
 
             buyA = amtA > 0
             totalB = (1 + feeRate) * amtB
-            enoughB = ((-totalB)  <= balanceB)
-            tmp = -totalB
-            print_ln('**** tmp %s', tmp.reveal())
-            tmp = (tmp > balanceB)
-            print_ln('**** tmp %s', tmp.reveal())
+            enoughB = (-totalB)  <= balanceB
             actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
             acceptA = actualAmtA  >= amtA
             flagBuyA = validOrder * buyA * enoughB * acceptA
-            print_ln('**** buyA %s', buyA.reveal())
-            print_ln('**** totalB %s', totalB.reveal())
-            print_ln('**** enoughB %s', enoughB.reveal())
-            print_ln('**** actualAmtA %s', actualAmtA.reveal())
-            print_ln('**** acceptA %s', acceptA.reveal())
-            print_ln('**** flagBuyA %s', flagBuyA.reveal())
+            #print_ln('**** buyA %s', buyA.reveal())
+            #print_ln('**** totalB %s', totalB.reveal())
+            #print_ln('**** enoughB %s', enoughB.reveal())
+            #print_ln('**** actualAmtA %s', actualAmtA.reveal())
+            #print_ln('**** acceptA %s', acceptA.reveal())
+            #print_ln('**** flagBuyA %s', flagBuyA.reveal())
 
             buyB = 1 - buyA
             totalA = (1 + feeRate) * amtA
-            enoughA = (-totalA <= balanceA)
+            enoughA = (-totalA) <= balanceA
             actualAmtB = poolB  - poolA * poolB / (poolA  - amtA)
             acceptB = actualAmtB  >= amtB
             flagBuyB = validOrder * buyB * enoughA * acceptB
-            print_ln('**** buyB %s', buyB.reveal())
-            print_ln('**** totalA %s', totalA.reveal())
-            print_ln('**** enoughA %s', enoughA.reveal())
-            print_ln('**** actualAmtB %s', actualAmtB.reveal())
-            print_ln('**** acceptB %s', acceptB.reveal())
-            print_ln('**** flagBuyB %s', flagBuyB.reveal())
+            #print_ln('**** buyB %s', buyB.reveal())
+            #print_ln('**** totalA %s', totalA.reveal())
+            #print_ln('**** enoughA %s', enoughA.reveal())
+            #print_ln('**** actualAmtB %s', actualAmtB.reveal())
+            #print_ln('**** acceptB %s', acceptB.reveal())
+            #print_ln('**** flagBuyB %s', flagBuyB.reveal())
 
             changeA = flagBuyA * actualAmtA + flagBuyB * totalA
             changeB = flagBuyA * totalB + flagBuyB * actualAmtB
-            print_ln('**** changeA %s', changeA.reveal())
-            print_ln('**** changeB %s', changeB.reveal())
+            #print_ln('**** changeA %s', changeA.reveal())
+            #print_ln('**** changeB %s', changeB.reveal())
 
             poolA -= changeA
             poolB -= changeB
@@ -365,35 +360,22 @@ contract Hbswap {
             print_ln('**** poolA %s', poolA.reveal())
             print_ln('**** poolB %s', poolB.reveal())
 
-            orderSucceed = (flagBuyA + flagBuyB).reveal()
-            print_ln('**** orderSucceed %s', orderSucceed.reveal())
+            orderSucceed = flagBuyA + flagBuyB
+            #print_ln('**** orderSucceed %s', orderSucceed.reveal())
 
             price = - changeB / (changeA + 1 - orderSucceed)
-            print_ln('**** price %s', price.reveal())
+            #print_ln('**** price %s', price.reveal())
             totalPrice += price
             totalCnt += orderSucceed
-            print_ln('**** totalPrice %s', totalPrice.reveal())
-            print_ln('**** totalCnt %s', totalCnt.reveal())
+            #print_ln('**** totalPrice %s', totalPrice.reveal())
+            #print_ln('**** totalCnt %s', totalCnt.reveal())
 
-            batchPrice = sint(0).reveal()
-            print_ln('**** batchPrice %s', batchPrice)
-            print_ln('**** cond %s', totalCnt.reveal() >= batchSize)
-            if_then(totalCnt.reveal() >= batchSize)
-            batchPrice = (totalPrice / totalCnt).reveal()
-            end_if()
-            print_ln('**** batchPrice %s', batchPrice)
+            batchPrice = ((totalCnt >= batchSize).reveal()).if_else((totalPrice / totalCnt).reveal(), cfix.from_int(0))
+            #print_ln('**** batchPrice %s', batchPrice)
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 
-            time_mpc_end = time.perf_counter()
-            time_mpc = time_mpc_end - time_mpc_start
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'trade\t'
-                        f's{server.serverID}\t'
-                        f'seq\t{seqTrade}\t'
-                        f'start_mpc\t{time_mpc_start}\t'
-                        f'end_mpc\t{time_mpc_end}\t'
-                        f'duration_mpc\t{time_mpc}\n')
+            times.append(time.perf_counter())
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -406,24 +388,21 @@ contract Hbswap {
                 set(estimatedPrice, string memory batchPrice, address tokenA, address tokenB)
                 totalPrice = 0
                 totalCnt = 0
+
             writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
-
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'wait_interval\t'
-                        f's{server.serverID}\t'
-                        f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
-
-            returnPriceInterval = 10
-            await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
 
+            times.append(time.perf_counter())
+
+            print(f'**** seqTrade {seqTrade} finish')
+
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
-                f.write(f'end_trade\t'
-                        f's{server.serverID}\t'
-                        f'seq\t{seqTrade}\t'
-                        f'{time.perf_counter()}\n')
+                for op, t in enumerate(times):
+                    f.write(f'trade\t'
+                            f'seq\t{seqTrade}\t'
+                            f'op\t{op + 1}\t'
+                            f'cur_time\t{t}\n')
         }
     }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source ./ratel/benchmark/src/utils.sh
+source ratel/src/utils.sh
 
 set -e
 set -x
@@ -17,9 +17,13 @@ kill_mpc
 IFS=','
 read -a strarr <<< "$IDs"
 
+log_dir='ratel/log'
+rm -rf $log_dir
+mkdir -p $log_dir
+
 for id in "${strarr[@]}";
 do
-  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test > ratel/log/server_$id.log 2>&1 &
+  python3 -m ratel.src.python.$app.run $id $players $threshold $concurrency $test > $log_dir/server_$id.log 2>&1 &
 done
 
 sleep 3
