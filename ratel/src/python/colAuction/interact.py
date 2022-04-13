@@ -56,27 +56,6 @@ def submitBids(appContract,colAuctionId,price,amt,account):
 
 
 
-def closeAuction(appContract, colAuctionId, account):
-    # idx1, idx2, idx3= reserveInput(web3, appContract, 3, account)
-    # mask1, mask2, mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
-    # maskedAmt, maskedSP, maskedLP = (AmtToSell + mask1) % blsPrime, (StartPrice + mask2) % blsPrime, (LowestPrice + mask3) % blsPrime
-    
-    web3.eth.defaultAccount = account.address
-    tx = appContract.functions.closeAuction(colAuctionId).buildTransaction({
-        'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
-    })
-    tx_hash = sign_and_send(tx, web3, account)
-    web3.eth.wait_for_transaction_receipt(tx_hash)
-
-    while True:
-        res = appContract.functions.colres(colAuctionId).call()
-        if res != '':
-            print(res)
-            break
-        time.sleep(1)
-
-
-
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -128,5 +107,4 @@ if __name__=='__main__':
     submitBids(appContract,colAuctionId1,price5,Amt5,client_5)
     print('finished input client_5')
 
-    closeAuction(appContract,colAuctionId1,client_1)
-    print('finished settle')
+
