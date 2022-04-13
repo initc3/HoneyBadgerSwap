@@ -100,7 +100,6 @@ contract hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, uint amtA, uint amtB) {
-            #print('**** begin initPool')
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             balanceLT = readDB(f'balance_{tokenA}+{tokenB}_{user}', int)
@@ -154,7 +153,6 @@ contract hbswap {
                 print('**** initPrice', initPrice, tokenA, tokenB)
                 set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
 
-            #print('**** end initPool')
         }
     }
 
@@ -290,6 +288,7 @@ contract hbswap {
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
             times = []
 
+            import time
             times.append(time.perf_counter())
 
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
@@ -300,6 +299,7 @@ contract hbswap {
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
 
             times.append(time.perf_counter())
+
             print(f'**** seqTrade {seqTrade} start')
 
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
@@ -388,15 +388,15 @@ contract hbswap {
                 set(estimatedPrice, string memory batchPrice, address tokenA, address tokenB)
                 totalPrice = 0
                 totalCnt = 0
+
             writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
-
-            #returnPriceInterval = 10
-            #await asyncio.sleep(returnPriceInterval)
             writeDB(f'price_{seqTrade}', price, int)
 
             times.append(time.perf_counter())
+
             print(f'**** seqTrade {seqTrade} finish')
+
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
                 for op, t in enumerate(times):
                     f.write(f'trade\t'

@@ -1,3 +1,4 @@
+import ast
 import asyncio
 import json
 import leveldb
@@ -153,6 +154,74 @@ async def execute_cmd(cmd):
     if stderr:
         print(f'[stderr]\n{stderr.decode()}')
     return proc.returncode
+
+
+def mark_finish(server, seq):
+    key = 'execHistory'
+    execHistory = read_db(server, key)
+    execHistory = bytes_to_dict(execHistory)
+
+    execHistory[seq] = True
+
+    execHistory = dict_to_bytes(execHistory)
+    write_db(server, key, execHistory)
+
+
+def read_db(server, key):
+    try:
+        value = server.db.Get(key.lower().encode())
+    except KeyError:
+        value = bytes(0)
+
+    if key in server.dbLock.keys():
+        server.dbLockCnt[key] -= 1
+        if server.dbLockCnt[key] == 0:
+            server.dbLock[key].release()
+
+    return value
+
+
+def write_db(server, key, value):
+    server.db.Put(key.lower().encode(), value)
+
+    if key in server.dbLock.keys():
+        server.dbLockCnt[key] -= 1
+        if server.dbLockCnt[key] == 0:
+            server.dbLock[key].release()
+
+
+def bytes_to_int(value):
+    return int.from_bytes(value, 'big')
+
+
+def bytes_to_list(value):
+    try:
+        value = value.decode(encoding='utf-8')
+        value = list(ast.literal_eval(value))
+    except:
+        value = []
+    return value
+
+
+def bytes_to_dict(value):
+    try:
+        value = value.decode(encoding='utf-8')
+        value = dict(ast.literal_eval(value))
+    except:
+        value = {}
+    return value
+
+
+def int_to_bytes(value):
+    return value.to_bytes((value.bit_length() + 7) // 8, 'big')
+
+
+def list_to_bytes(value):
+    return bytes(str(value), encoding='utf-8')
+
+
+def dict_to_bytes(value):
+    return bytes(str(value), encoding='utf-8')
 
 
 leaderHostname = 'mpcnode0'

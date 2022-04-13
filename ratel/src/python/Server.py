@@ -41,8 +41,8 @@ class Server:
             self.portLock[mpc_port + i * 100] = asyncio.Lock()
 
         self.dbLock  = {}
-        self.dbLock['access'] = asyncio.Lock()
-        self.dbLock['execHistory'] = asyncio.Lock()
+        self.dbLockCnt = {}
+
 
     async def http_server(self):
 
