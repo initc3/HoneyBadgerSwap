@@ -45,6 +45,7 @@ init() {
   rm -rf ratel/genfiles
   mkdir -p ratel/genfiles
   mkdir -p ratel/genfiles/python
+  mkdir -p ratel/log
   mkdir -p ../../../Programs/Source
   cp -r ratel/src/mpc ratel/genfiles/
   cp -r ratel/src/contracts ratel/genfiles/

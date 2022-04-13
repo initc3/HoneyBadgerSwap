@@ -53,69 +53,62 @@ contract colAuction{
 
                 curStatus = 1
                 set(status, uint curStatus, uint colAuctionId)
-            
-
-
-
-            mpcInput(sint StartPrice)
-            curPrice = sfix(StartPrice)
-            mpcOutput(sfix curPrice)
-
-
-            while True:
-                bids = readDB(f'bidsBoard_{colAuctionId}', list)
-                auc = readDB(f'aucBoard_{colAuctionId}',dict)
-            
-                totalAmt = auc['totalAmt']
-
-                n = len(bids)
-            
-                amtSold = 0
-
-                for i in range(n-1):
-                    (Xi,Pi,Amti) = bids[i+1]
-
-                    mpcInput(sint Xi, sfix curPrice)
-
-                    valid = ((sint(curPrice)).less_equal(Xi,bit_length = bit_length)).reveal()
-
-                    mpcOutput(cint valid)
-
-                    if valid == 1:
-
-                        mpcInput(sint Amti, sint amtSold, sint totalAmt)
-                        amtSold += Amti
-                        aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-                        mpcOutput(sint amtSold,cint aucDone)
-
-                        if aucDone == 1:
-                            break
-
-                if aucDone == 1:
-                    res = 'Auction success!!!'
-                    set(colres, string memory res, uint colAuctionId)
-                    curStatus = 3
-                    set(status, uint curStatus, uint colAuctionId)
-                    return
-
-                time.sleep(10)
-                mpcInput(sfix curPrice)
-                curPrice = curPrice*0.99
-                mpcOutput(sfix curPrice)
-
-                mpcInput(sfix curPrice, sint FloorPrice)
-                valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
-                mpcOutput(cint valid)
-
-                if valid == 0:
-                    res = 'Auction failed!!!'
-                    set(colres, string memory res, uint colAuctionId)
-                    curStatus = 3
-                    set(status, uint curStatus, uint colAuctionId)
-                    return
-
         }
     }
+
+    pureMpc scheduleCheck(curPrice):
+        mpcInput(sfix curPrice, sint FloorPrice)
+        valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
+        mpcOutput(cint valid)
+
+        if valid == 0:
+            res = 'Auction failed!!!'
+            set(colres, string memory res, uint colAuctionId)
+            curStatus = 3
+            set(status, uint curStatus, uint colAuctionId)
+            return
+
+        bids = readDB(f'bidsBoard_{colAuctionId}', list)
+        auc = readDB(f'aucBoard_{colAuctionId}',dict)
+            
+        totalAmt = auc['totalAmt']
+
+        n = len(bids)
+            
+        amtSold = 0
+
+        for i in range(n-1):
+            (Xi,Pi,Amti) = bids[i+1]
+
+            mpcInput(sint Xi, sfix curPrice)
+
+            valid = ((sint(curPrice)).less_equal(Xi,bit_length = bit_length)).reveal()
+
+            mpcOutput(cint valid)
+
+            if valid == 1:
+                mpcInput(sint Amti, sint amtSold, sint totalAmt)
+                amtSold += Amti
+                aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+                mpcOutput(sint amtSold,cint aucDone)
+
+                if aucDone == 1:
+                    break
+
+        mpcInput(sint amtSold, sint totalAmt)
+        aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+        mpcOutput(cint aucDone)
+
+        if aucDone == 1:
+            res = 'Auction success!!!'
+            set(colres, string memory res, uint colAuctionId)
+            curStatus = 3
+            set(status, uint curStatus, uint colAuctionId)
+            return
+
+        mpcInput(sfix curPrice)
+        curPrice = curPrice*0.99
+        mpcOutput(sfix curPrice)
 
     function submitBids(uint colAuctionId, $uint price, $uint Amt) public {
         address P = msg.sender;
@@ -142,16 +135,4 @@ contract colAuction{
                 set(status, uint curStatus, uint colAuctionId)
         }
     }
-
-
-    
-    function closeAuction(uint colAuctionId) public{
-        mpc(uint colAuctionId){
-            res = 'Auction failed!!!'
-            set(colres, string memory res, uint colAuctionId)
-            curStatus = 3
-            set(status, uint curStatus, uint colAuctionId)
-        }
-    }
-
 }
