@@ -39,12 +39,20 @@ contract colAuction{
             mpcOutput(cint valid)
 
             print('**** valid', valid)
+
+            mpcInput(sint StartPrice)
+
+            curPrice = sfix(StartPrice)
+
+            mpcOutput(sfix curPrice)
+
             if valid == 1:
                 bids = [(0,0,0)]
                 writeDB(f'bidsBoard_{colAuctionId}', bids, list)
                 
                 auc = {
                     'StartPrice': StartPrice,
+                    'curPrice': curPrice,
                     'FloorPrice': FloorPrice,
                     'totalAmt': totalAmt,
                 }
@@ -56,7 +64,15 @@ contract colAuction{
         }
     }
 
-    pureMpc scheduleCheck(curPrice, FloorPrice):
+    pureMpc scheduleCheck(colAuctionId){
+
+        bids = readDB(f'bidsBoard_{colAuctionId}', list)
+        auc = readDB(f'aucBoard_{colAuctionId}',dict)
+
+        curPrice = auc['curPrice']
+        FloorPrice = auc['FloorPrice']
+        totalAmt = auc['totalAmt']
+
         mpcInput(sfix curPrice, sint FloorPrice)
         valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
         mpcOutput(cint valid)
@@ -67,11 +83,7 @@ contract colAuction{
             curStatus = 3
             set(status, uint curStatus, uint colAuctionId)
             return
-
-        bids = readDB(f'bidsBoard_{colAuctionId}', list)
-        auc = readDB(f'aucBoard_{colAuctionId}',dict)
             
-        totalAmt = auc['totalAmt']
 
         n = len(bids)
             
@@ -109,6 +121,11 @@ contract colAuction{
         mpcInput(sfix curPrice)
         curPrice = curPrice*0.99
         mpcOutput(sfix curPrice)
+
+        auc['curPrice'] = curPrice
+
+        writeDB(f'aucBoard_{colAuctionId}', auc, dict)
+    }
 
     function submitBids(uint colAuctionId, $uint price, $uint Amt) public {
         address P = msg.sender;
