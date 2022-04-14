@@ -179,6 +179,9 @@ void processPureMpc() {
 
     textFuncUpper += "    seq" + funcName + " = -1\n";
     textFuncUpper += "\n";
+
+    textRecover += "def recover" + funcName + "():\n";
+    textRecover += "    return [";
 }
 
 
