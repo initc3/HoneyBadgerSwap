@@ -23,7 +23,7 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
     })
     tx_hash = sign_and_send(tx, web3, account)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
-    log = appContract.events.InitAuction().processReceipt(receipt)
+    log = appContract.events.CreateAuction().processReceipt(receipt)
     colAuctionId = log[0]['args']['colAuctionId']
     while True:
         time.sleep(1)
