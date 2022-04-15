@@ -37,7 +37,7 @@ class Server:
         print('**** input_mask_queue_tail', self.input_mask_queue_tail)
 
         self.portLock = {}
-        for i in range(concurrency):
+        for i in range(-1, concurrency):
             self.portLock[mpc_port + i * 100] = asyncio.Lock()
 
         self.dbLock  = {}

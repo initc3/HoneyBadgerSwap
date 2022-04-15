@@ -128,9 +128,10 @@ void finalizePython() {
     textPythonUpper += "\n";
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
-    textPythonUpper += "            for log in logs:\n";
-    textPythonUpper += "                for _ in range((1 if log[2] != 'Trade' else replay)):\n";
-    textPythonUpper += "                    loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+    textPythonUpper += "            for i in range(replay):\n";
+    textPythonUpper += "                for log in logs:\n";
+    textPythonUpper += "                    if i == 1 or log[2] == 'Trade':\n";
+    textPythonUpper += "                        loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
     textPythonUpper += "            await asyncio.sleep(1)\n";

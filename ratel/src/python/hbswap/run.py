@@ -3,6 +3,7 @@ import sys
 
 from ratel.genfiles.python import hbswap
 ### recover function
+from ratel.genfiles.python.hbswap import runUpdateBatchPrice
 from ratel.genfiles.python.hbswapRecover import recover
 ###
 from ratel.src.python.Server import Server
@@ -10,6 +11,14 @@ from ratel.src.python.deploy import parse_contract, url, app_addr
 from web3 import Web3
 
 contract_name = 'hbswap'
+
+
+async def check(server):
+    checkPeriod = 60 * 20
+    while True:
+        await runUpdateBatchPrice(server)
+        await asyncio.sleep(checkPeriod)
+
 
 if __name__ == '__main__':
     serverID = int(sys.argv[1])
@@ -37,4 +46,5 @@ if __name__ == '__main__':
     )
 
     loop = asyncio.get_event_loop()
+    loop.create_task(check(server))
     loop.run_until_complete(server.init(hbswap.monitor(server, loop)))

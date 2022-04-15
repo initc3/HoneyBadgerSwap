@@ -69,7 +69,10 @@ class MultiAcquire(asyncio.Task):
 
 
 def mpcPort(seq, concurrency):
-    return mpc_port + seq % concurrency * 100
+    if seq > 0:
+        return mpc_port + seq % concurrency * 100
+    else:
+        return mpc_port + seq * 100
 
 
 def key_inputmask(idx):
