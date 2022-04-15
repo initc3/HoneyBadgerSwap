@@ -308,47 +308,30 @@ contract hbswap {
             print_ln('**** balanceB %s', balanceB.reveal())
             print_ln('**** poolA %s', poolA.reveal())
             print_ln('**** poolB %s', poolB.reveal())
-            #print_ln('**** amtA %s', amtA.reveal())
-            #print_ln('**** amtB %s', amtB.reveal())
-            #print_ln('**** totalPrice %s', totalPrice.reveal())
-            #print_ln('**** totalCnt %s', totalCnt.reveal())
 
             feeRate = 0.003
             batchSize = 1000
 
             validOrder = (amtA * amtB) < 0
-            #print_ln('**** validOrder %s', validOrder.reveal())
+
+            poolProduct = poolA * poolB
 
             buyA = amtA > 0
             totalB = (1 + feeRate) * amtB
-            enoughB = (-totalB)  <= balanceB
-            actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
-            acceptA = actualAmtA  >= amtA
+            enoughB = (-totalB) <= balanceB
+            actualAmtA = poolA - poolProduct / (poolB - amtB)
+            acceptA = actualAmtA >= amtA
             flagBuyA = validOrder * buyA * enoughB * acceptA
-            #print_ln('**** buyA %s', buyA.reveal())
-            #print_ln('**** totalB %s', totalB.reveal())
-            #print_ln('**** enoughB %s', enoughB.reveal())
-            #print_ln('**** actualAmtA %s', actualAmtA.reveal())
-            #print_ln('**** acceptA %s', acceptA.reveal())
-            #print_ln('**** flagBuyA %s', flagBuyA.reveal())
 
             buyB = 1 - buyA
             totalA = (1 + feeRate) * amtA
             enoughA = (-totalA) <= balanceA
-            actualAmtB = poolB  - poolA * poolB / (poolA  - amtA)
-            acceptB = actualAmtB  >= amtB
+            actualAmtB = poolB - poolProduct / (poolA - amtA)
+            acceptB = actualAmtB >= amtB
             flagBuyB = validOrder * buyB * enoughA * acceptB
-            #print_ln('**** buyB %s', buyB.reveal())
-            #print_ln('**** totalA %s', totalA.reveal())
-            #print_ln('**** enoughA %s', enoughA.reveal())
-            #print_ln('**** actualAmtB %s', actualAmtB.reveal())
-            #print_ln('**** acceptB %s', acceptB.reveal())
-            #print_ln('**** flagBuyB %s', flagBuyB.reveal())
 
             changeA = flagBuyA * actualAmtA + flagBuyB * totalA
             changeB = flagBuyA * totalB + flagBuyB * actualAmtB
-            #print_ln('**** changeA %s', changeA.reveal())
-            #print_ln('**** changeB %s', changeB.reveal())
 
             poolA -= changeA
             poolB -= changeB
@@ -361,17 +344,12 @@ contract hbswap {
             print_ln('**** poolB %s', poolB.reveal())
 
             orderSucceed = flagBuyA + flagBuyB
-            #print_ln('**** orderSucceed %s', orderSucceed.reveal())
 
             price = - changeB / (changeA + 1 - orderSucceed)
-            #print_ln('**** price %s', price.reveal())
             totalPrice += price
             totalCnt += orderSucceed
-            #print_ln('**** totalPrice %s', totalPrice.reveal())
-            #print_ln('**** totalCnt %s', totalCnt.reveal())
 
             batchPrice = ((totalCnt >= batchSize).reveal()).if_else((totalPrice / totalCnt).reveal(), cfix.from_int(0))
-            #print_ln('**** batchPrice %s', batchPrice)
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
 

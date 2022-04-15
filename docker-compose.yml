@@ -14,6 +14,6 @@ services:
       - ./scripts/chain-latest.sh:/usr/src/hbswap/chain-latest.sh
       - ./scripts/latency-control.sh:/usr/src/hbswap/latency-control.sh
       - ./poa:/opt/poa
-      - ./ratel/genfiles/mpc:/usr/src/hbswap//Programs/Source
+      - ./ratel/genfiles/mpc:/usr/src/hbswap/Programs/Source
     working_dir: /usr/src/hbswap
     command: tail -F anything

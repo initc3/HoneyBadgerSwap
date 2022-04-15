@@ -35,7 +35,10 @@ python3 -m ratel.benchmark.src.calc 3 ratel/benchmark/data
 
 `./latency-control.sh start 200 50`
 
-`python3 -m ratel.benchmark.src.test_mpc 3 1 10`
+```
+./compile.py -v -C -F 128 ratel/genfiles/mpc/hbswapTrade1.mpc
+python3 -m ratel.benchmark.src.test_mpc 3 1 10
+```
 
 ```
 ./ratel/benchmark/src/test_inputmask_generation_run.sh

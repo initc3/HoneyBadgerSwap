@@ -10,7 +10,9 @@
 
 using namespace std;
 
-bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput;
+bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput; /* see keyword in the current line */
+bool inPureMpc; /* in pureMpc block */
+bool inFunc; /* in function block */
 
 int braces;
 
@@ -26,6 +28,7 @@ int numInput;
 string textLine;
 
 string textFuncUpper; /* read from log, recover private input, acquire locks */
+string textFuncMid; /* code til last mpcOutput */
 string textFuncLower;
 
 string textPythonUpper; /* only used for monitor function */
@@ -34,6 +37,8 @@ string textPythonLower;
 string textMpc;
 
 string textRecover;
+
+string returnLine;
 
 bool isArg;
 string arg;
@@ -269,51 +274,71 @@ void unmaskInput() {
 
 
 void collectKeys() {
-    textFuncUpper += "    readKeys = [";
-    string tmp;
-    for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
-        tmp += *it + ", ";
+    bool flag;
+
+    if (readKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    readKeys = [";
+        string tmp;
+        for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
+            tmp += *it + ", ";
+        }
+
+        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+        textFuncUpper += tmp + "]\n";
     }
 
-    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-    textFuncUpper += tmp + "]\n";
-
-    textFuncUpper += "    writeKeys = [";
-    tmp = "";
-    for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
-        tmp += *it + ", ";
+    if (writeKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    writeKeys = [";
+        string tmp;
+        for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
+            tmp += *it + ", ";
+        }
+        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+        textFuncUpper += tmp + "]\n";
     }
-    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-    textFuncUpper += tmp + "]\n";
 
-    textFuncUpper += "\n";
+    if (flag) textFuncUpper += "\n";
 }
 
 
 void createLocks() {
-    textFuncUpper += "    for key in readKeys:\n";
-    textFuncUpper += "        if key not in server.dbLock.keys():\n";
-    textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
-    textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    bool flag;
 
-    textFuncUpper += "    for key in writeKeys:\n";
-    textFuncUpper += "        if key not in server.dbLock.keys():\n";
-    textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
-    textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    if (readKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+        textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    }
 
-    textFuncUpper += "\n";
+    if (writeKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+        textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    }
+
+    if (flag) textFuncUpper += "\n";
 }
 
 
 void acquireLocks() {
     textFuncUpper += "    tasks = []\n";
 
-    textFuncUpper += "    for key in readKeys:\n";
-    textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
+    if (readKeySet.size() > 0) {
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
+    }
 
-    textFuncUpper += "    for key in writeKeys:\n";
-    textFuncUpper += "        if key not in readKeys:\n";
-    textFuncUpper += "            tasks.append(server.dbLock[key].acquire())\n";
+    if (writeKeySet.size() > 0) {
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        if key not in readKeys:\n";
+        textFuncUpper += "            tasks.append(server.dbLock[key].acquire())\n";
+    }
 
     textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
     textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
@@ -322,12 +347,21 @@ void acquireLocks() {
 
     textFuncUpper += "\n";
 
-    textFuncUpper += "    for key in readKeys:\n";
-    textFuncUpper += "        server.dbLockCnt[key] += 1\n";
-    textFuncUpper += "    for key in writeKeys:\n";
-    textFuncUpper += "        server.dbLockCnt[key] += 1\n";
+    bool flag;
 
-    textFuncUpper += "\n";
+    if (readKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        server.dbLockCnt[key] += 1\n";
+    }
+
+    if (writeKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        server.dbLockCnt[key] += 1\n";
+    }
+
+    if (flag) textFuncUpper += "\n";
 }
 
 
@@ -443,6 +477,9 @@ void mpcOutput() {
     for (int i = 0; i < num; i++) {
         textFuncLower += indent + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
+
+    textFuncMid += textFuncLower;
+    textFuncLower = "";
 }
 
 
@@ -451,7 +488,9 @@ void addText(char *yytext) {
 
     if (isArg) {
         arg += text;
-    } else {
+    } else if (returnLine.length() > 0) {
+        returnLine += text;
+    }else {
         textLine += text;
     }
 }
@@ -478,11 +517,13 @@ SPACE [ \t\r]+
 
 
 ^pureMpc{SPACE} {
+    inPureMpc = true;
     isPureMpc = true;
     isArg = true;
     cntMPC = 0;
     cntReadDB = 0;
     textFuncUpper = "";
+    textFuncMid = "";
     textFuncLower = "";
     readKeySet.clear();
     writeKeySet.clear();
@@ -490,11 +531,13 @@ SPACE [ \t\r]+
 
 
 ^mpc{SPACE} {
+    inFunc = true;
     isEvent = true;
     isArg = true;
     cntMPC = 0;
     cntReadDB = 0;
     textFuncUpper = "";
+    textFuncMid = "";
     textFuncLower = "";
     readKeySet.clear();
     writeKeySet.clear();
@@ -531,6 +574,10 @@ SPACE [ \t\r]+
 ^.*mpcOutput\( {
     isMpcOutput = true;
     isArg = true;
+}
+
+^.*return {
+    returnLine = string(yytext);
 }
 
 
@@ -590,12 +637,20 @@ SPACE [ \t\r]+
         createLocks();
         acquireLocks();
 
-        textPythonLower += textFuncUpper + textFuncLower;
+        textPythonLower += textFuncUpper + textFuncMid;
 
         textPythonLower += "\n";
         textPythonLower += "    server.portLock[port].release()\n";
-        textPythonLower += "    mark_finish(server, seq" + funcName + ")\n";
-        textPythonLower += "\n";
+
+        textPythonLower += textFuncLower;
+
+        if (!inPureMpc) textPythonLower += "    mark_finish(server, seq" + funcName + ")";
+
+        textPythonLower += returnLine;
+
+        inPureMpc = false;
+        inFunc = false;
+        returnLine = "";
     }
 }
 
@@ -603,7 +658,7 @@ SPACE [ \t\r]+
 \n {
     textLine += "\n";
 
-//    printf("textLine:%s", textLine.c_str());
+//    printf("-textLine:%s", textLine.c_str());
 
     if (isPureMpc) {
         processPureMpc();
@@ -632,11 +687,13 @@ SPACE [ \t\r]+
         textFuncLower += textLine;
 
         isWriteDB = false;
-    } else {
+    } else if (returnLine.length() == 0) {
         if (isMPC) {
             textMpc += tab(1) + removeIndent(textLine);
-        } else {
+        } else if (inFunc || inPureMpc) {
             textFuncLower += textLine;
+        } else {
+            textPythonLower += textLine;
         }
     }
 
