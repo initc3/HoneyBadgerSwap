@@ -40,11 +40,11 @@ contract colAuction{
 
     function createAuction(uint StartPrice, uint FloorPrice, $uint totalAmt) public{
         uint colAuctionId = ++colAuctionCnt;
-        curPriceList[colAuctionId] = StartPrice * Fp;
+        curPriceList[colAuctionId] = StartPrice;
         floorPriceList[colAuctionId] = FloorPrice;
         startPriceList[colAuctionId] = StartPrice;
 
-        checkTime[colAuctionId] = block.timestamp;
+        checkTime[colAuctionId] = block.number;
         checkCnt[colAuctionId] = 0;
 
         biddersCnt[colAuctionId] = 0;
@@ -71,9 +71,9 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
-        require(block.timestamp < lastTime + 10 seconds);
+        require(block.number < lastTime + 10 );
         
-        checkTime[colAuctionId] = block.timestamp;
+        checkTime[colAuctionId] = block.number;
 
         uint curPrice = curPriceList[colAuctionId]*100/99;
         curPriceList[colAuctionId] = curPrice;
@@ -90,10 +90,11 @@ contract colAuction{
 
             totalAmt = auc['totalAmt']
 
-            if curPrice/fp < FloorPrice:
+            if curPrice < FloorPrice:
                 res = 'Auction failed!!!'
+                print(colAuctionId,'Auction failed!!!!!!!!!')
+
                 set(colres, string memory res, uint colAuctionId)
-                
                 set(checkNum, uint curCheckNum, uint colAuctionId)
 
                 curStatus = 1
@@ -108,9 +109,10 @@ contract colAuction{
             for i in range(n-1):
                 (Xi,Pi,Amti) = bids[i+1]
 
-                mpcInput(sint Xi, sfix curPrice)
+                
+                mpcInput(sint Xi, sint curPrice)
 
-                valid = ((sint(curPrice/65536)).less_equal(Xi,bit_length = bit_length)).reveal()
+                valid = (curPrice.less_equal(Xi,bit_length = bit_length)).reveal()
 
                 mpcOutput(cint valid)
 
@@ -128,6 +130,7 @@ contract colAuction{
             mpcOutput(cint aucDone)
 
             if aucDone == 1:
+                print(colAuctionId,'Auction success!!!!!!!!!')
                 res = 'Auction success!!!'
                 set(colres, string memory res, uint colAuctionId)
                 set(checkNum, uint curCheckNum, uint colAuctionId)

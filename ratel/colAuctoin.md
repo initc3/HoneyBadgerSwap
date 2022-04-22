@@ -87,6 +87,7 @@ sudo docker exec -it honeybadgerswap_dev_1 bash
 
 
 ```
+bash setup-ssl.sh 4
 bash ratel/src/compile.sh colAuction
 bash ratel/src/deploy.sh colAuction 0 4 1
 python3 -m ratel.src.python.refill server_0 0 \
