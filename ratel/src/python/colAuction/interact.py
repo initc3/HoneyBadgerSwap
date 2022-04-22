@@ -11,14 +11,18 @@ from ratel.src.python.utils import fp,parse_contract, getAccount, players, blsPr
 
 contract_name = 'colAuction'
 
+bids_cnt = []
 
 def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
-    idx1,idx2,idx3 = reserveInput(web3, appContract, 3, account)
-    mask1,mask2,mask3 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2},{idx3}'))
-    maskedSP, maskedFP, maskedTM = (StartPrice + mask1) % blsPrime, (FloorPrice + mask2) % blsPrime, (totalAmt + mask3) % blsPrime
+
+    bids_cnt.append(0)
+
+    idx1 = reserveInput(web3, appContract, 1, account)[0]
+    mask1 = asyncio.run(get_inputmasks(players(appContract), f'{idx1}'))[0]
+    maskedTM = (totalAmt + mask1) % blsPrime
     
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.createAuction(idx1,maskedSP,idx2,maskedFP,idx3,maskedTM).buildTransaction({
+    tx = appContract.functions.createAuction(StartPrice,FloorPrice,idx1,maskedTM).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     tx_hash = sign_and_send(tx, web3, account)
@@ -28,14 +32,16 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
     while True:
         time.sleep(1)
         status = appContract.functions.status(colAuctionId).call()
-        if status == 1:
+        if status == 2:
             return colAuctionId
 
 # means I'll buy up to $amt if the prices reaches $price or below
 def submitBids(appContract,colAuctionId,price,amt,account):
     status = appContract.functions.status(colAuctionId).call()
-    if status == 3:
+    if status == 1:
         return
+
+    cur_bidcnt = bids_cnt[colAuctionId+1]
 
     idx1, idx2 = reserveInput(web3, appContract, 2, account)
     mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
@@ -51,7 +57,10 @@ def submitBids(appContract,colAuctionId,price,amt,account):
     while True:
         time.sleep(1)
         status = appContract.functions.status(colAuctionId).call()
-        if status >= 2:
+        if status > cur_bidcnt:
+            bids_cnt[colAuctionId+1] = status
+            return
+        if status == 1:
             return
 
 
@@ -65,13 +74,13 @@ if __name__=='__main__':
 
 
 
-    client_1 = getAccount(web3,f'/opt/poa/keystore/client_1/')
-    client_2 = getAccount(web3,f'/opt/poa/keystore/client_2/')
-    client_3 = getAccount(web3,f'/opt/poa/keystore/client_3/')
-    client_4 = getAccount(web3,f'/opt/poa/keystore/client_4/')
-    client_5 = getAccount(web3,f'/opt/poa/keystore/client_5/')
-    client_6 = getAccount(web3,f'/opt/poa/keystore/client_6/')
-    client_7 = getAccount(web3,f'/opt/poa/keystore/client_7/')
+    client_1 = getAccount(web3,f'/opt/poa/keystore/client_2/')
+    client_2 = getAccount(web3,f'/opt/poa/keystore/client_3/')
+    client_3 = getAccount(web3,f'/opt/poa/keystore/client_4/')
+    client_4 = getAccount(web3,f'/opt/poa/keystore/client_5/')
+    client_5 = getAccount(web3,f'/opt/poa/keystore/client_6/')
+    client_6 = getAccount(web3,f'/opt/poa/keystore/client_7/')
+    client_7 = getAccount(web3,f'/opt/poa/keystore/client_8/')
     
     #test auction success
 
@@ -91,20 +100,24 @@ if __name__=='__main__':
     Amt2 = 10
     submitBids(appContract,colAuctionId1,price2,Amt2,client_2)
     print('finished input client_2')
+    time.sleep(20)
 
     price3 = 3
     Amt3 = 6
     submitBids(appContract,colAuctionId1,price3,Amt3,client_3)
     print('finished input client_3')
-    
+    time.sleep(20)
+
     price4 = 7
     Amt4 = 7
     submitBids(appContract,colAuctionId1,price4,Amt4,client_4)
     print('finished input client_4')
+    time.sleep(20)
 
     price5 = 2
     Amt5 = 9
     submitBids(appContract,colAuctionId1,price5,Amt5,client_5)
     print('finished input client_5')
+    time.sleep(20)
 
 
