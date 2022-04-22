@@ -83,10 +83,6 @@ git clone https://github.com/xmhuangzhen/HoneyBadgerSwap.git
 cd HoneyBadgerSwap
 sudo docker-compose up -d
 sudo docker exec -it honeybadgerswap_dev_1 bash
-cd ratel
-mkdir log
-cd ..
-
 ```
 
 
