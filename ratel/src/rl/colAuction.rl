@@ -13,9 +13,20 @@ contract colAuction{
 
     uint public colAuctionCnt;
 
+    mapping (uint => uint) public biddersCnt;
 
+    mapping (uint => uint) public curPriceList;
+    mapping (uint => uint) public floorPriceList;
+    mapping (uint => uint) public startPriceList;
     
-    mapping (uint => uint) public status; // created-1 submitted-2 closed-3
+    mapping (uint => uint) public checkTime;
+
+    mapping (uint => uint) public checkCnt;
+    mapping (uint => uint) public checkNum; // closed-1 created-2 submitted --- bidders_num+2 
+    mapping (address => uint) public checkNumValue;
+    mapping (uint => uint) public checkNumCount;
+
+    mapping (uint => uint) public status; // closed-1 created-2 submitted --- bidders_num+2 
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
 
@@ -27,116 +38,121 @@ contract colAuction{
 
     constructor() public {}
 
-    function createAuction($uint StartPrice, $uint FloorPrice, $uint totalAmt) public{
+    function createAuction(uint StartPrice, uint FloorPrice, $uint totalAmt) public{
         uint colAuctionId = ++colAuctionCnt;
+        curPriceList[colAuctionId] = StartPrice * Fp;
+        floorPriceList[colAuctionId] = FloorPrice;
+        startPriceList[colAuctionId] = StartPrice;
 
-        mpc(uint colAuctionId, $uint StartPrice, $uint FloorPrice, $uint totalAmt) {
-            
-            mpcInput(sint StartPrice, sint FloorPrice)
+        checkTime[colAuctionId] = block.timestamp;
+        checkCnt[colAuctionId] = 0;
 
-            valid = ((StartPrice.greater_equal(FloorPrice, bit_length=bit_length))).reveal()
+        biddersCnt[colAuctionId] = 0;
 
-            mpcOutput(cint valid)
-
-            print('**** valid', valid)
-
-            mpcInput(sint StartPrice)
-
-            curPrice = sfix(StartPrice)
-
-            mpcOutput(sfix curPrice)
-
-            if valid == 1:
-                bids = [(0,0,0)]
-                writeDB(f'bidsBoard_{colAuctionId}', bids, list)
+        mpc(uint colAuctionId, uint StartPrice, uint FloorPrice, $uint totalAmt) {
                 
-                auc = {
-                    'StartPrice': StartPrice,
-                    'curPrice': curPrice,
-                    'FloorPrice': FloorPrice,
-                    'totalAmt': totalAmt,
-                }
-                print('**** auc', auc)
-                writeDB(f'aucBoard_{colAuctionId}', auc, dict)
+            bids = [(0,0,0)]
+            writeDB(f'bidsBoard_{colAuctionId}', bids, list)
+            
+            auc = {
+                'totalAmt': totalAmt,
+                'StartPrice': StartPrice,
+                'FloorPrice': FloorPrice,
+            }
+            print('**** auc', auc)
+            writeDB(f'aucBoard_{colAuctionId}', auc, dict)
 
-                curStatus = 1
-                set(status, uint curStatus, uint colAuctionId)
+            curStatus = 2
+            set(status, uint curStatus, uint colAuctionId)
         }
     }
 
-    pureMpc scheduleCheck(colAuctionId){
+    function scheduleCheck(uint colAuctionId){
+        
+        uint lastTime = checkTime[colAuctionId];
 
-        bids = readDB(f'bidsBoard_{colAuctionId}', list)
-        auc = readDB(f'aucBoard_{colAuctionId}',dict)
+        while(block.timestamp < lastTime + 10 seconds){
+            ;
+        }
+        
+        checkTime[colAuctionId] = block.timestamp;
 
-        curPrice = auc['curPrice']
-        FloorPrice = auc['FloorPrice']
-        totalAmt = auc['totalAmt']
+        uint curPrice = curPriceList[colAuctionId]*0.99;
+        curPriceList[colAuctionId] = curPrice;
 
-        mpcInput(sfix curPrice, sint FloorPrice)
-        valid = ((sint(curPrice)).greater_equal(FloorPrice,bit_length = bit_length)).reveal()
-        mpcOutput(cint valid)
+        uint FloorPrice = floorPriceList[colAuctionId];
 
-        if valid == 0:
-            res = 'Auction failed!!!'
-            set(colres, string memory res, uint colAuctionId)
-            curStatus = 3
-            set(status, uint curStatus, uint colAuctionId)
-            return
+        curCheckNum = checkCnt[colAuctionId]+1;
+        checkCnt[colAuctionId] = curCheckNum;
+
+        mpc scheduleCheck(uint colAuctionId, uint curcheckNum, uint curPrice, uint FloorPrice){
+
+            bids = readDB(f'bidsBoard_{colAuctionId}', list)
+            auc = readDB(f'aucBoard_{colAuctionId}',dict)
+
+            totalAmt = auc['totalAmt']
+
+            if curPrice/fp < FloorPrice:
+                res = 'Auction failed!!!'
+                set(colres, string memory res, uint colAuctionId)
+                
+                set(checkNum, uint curCheckNum, uint colAuctionId)
+
+                curStatus = 1
+                set(status, uint curStatus, uint colAuctionId)
+                return
             
 
-        n = len(bids)
-            
-        amtSold = 0
+            n = len(bids)
 
-        for i in range(n-1):
-            (Xi,Pi,Amti) = bids[i+1]
+            amtSold = 0
 
-            mpcInput(sint Xi, sfix curPrice)
+            for i in range(n-1):
+                (Xi,Pi,Amti) = bids[i+1]
 
-            valid = ((sint(curPrice)).less_equal(Xi,bit_length = bit_length)).reveal()
+                mpcInput(sint Xi, cfix curPrice)
 
-            mpcOutput(cint valid)
+                valid = ((sint(curPrice/fp)).less_equal(Xi,bit_length = bit_length)).reveal()
 
-            if valid == 1:
-                mpcInput(sint Amti, sint amtSold, sint totalAmt)
-                amtSold += Amti
-                aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-                mpcOutput(sint amtSold,cint aucDone)
+                mpcOutput(cint valid)
 
-                if aucDone == 1:
-                    break
+                if valid == 1:
+                    mpcInput(sint Amti, sint amtSold, sint totalAmt)
+                    amtSold += Amti
+                    aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+                    mpcOutput(sint amtSold,cint aucDone)
 
-        mpcInput(sint amtSold, sint totalAmt)
-        aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-        mpcOutput(cint aucDone)
+                    if aucDone == 1:
+                        break
 
-        if aucDone == 1:
-            res = 'Auction success!!!'
-            set(colres, string memory res, uint colAuctionId)
-            curStatus = 3
-            set(status, uint curStatus, uint colAuctionId)
-            return
+            mpcInput(sint amtSold, sint totalAmt)
+            aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+            mpcOutput(cint aucDone)
 
-        mpcInput(sfix curPrice)
-        curPrice = curPrice*0.99
-        mpcOutput(sfix curPrice)
+            if aucDone == 1:
+                res = 'Auction success!!!'
+                set(colres, string memory res, uint colAuctionId)
+                set(checkNum, uint curCheckNum, uint colAuctionId)
+                curStatus = 1
+                set(status, uint curStatus, uint colAuctionId)
+                return
 
-        auc['curPrice'] = curPrice
-
-        writeDB(f'aucBoard_{colAuctionId}', auc, dict)
+        }
     }
 
     function submitBids(uint colAuctionId, $uint price, $uint Amt) public {
         address P = msg.sender;
 
-        mpc(uint colAuctionId, $uint price, address P, $uint Amt){
+        uint bidders_id = biddersCnt[colAuctionId]+1;
+        biddersCnt[colAuctionId] = bidders_id;
+
+        uint FloorPrice = floorPriceList[colAuctionId];
+
+        mpc(uint colAuctionId, uint bidders_id, uint FloorPrice, $uint price, address P, $uint Amt){
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}', dict)
 
-            FloorPrice = auc['FloorPrice']
-
-            mpcInput(sint price, sint FloorPrice)
+            mpcInput(sint price, cint FloorPrice)
 
             valid = (price.greater_equal(FloorPrice, bit_length=bit_length)).reveal()
 
@@ -148,7 +164,7 @@ contract colAuction{
                 print('**** bids', bids)
                 writeDB(f'bidsBoard_{colAuctionId}',bids,list)
 
-                curStatus = 2
+                curStatus = bidders_id+2
                 set(status, uint curStatus, uint colAuctionId)
         }
     }
