@@ -71,7 +71,7 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
-        requre(block.timestamp < lastTime + 10 seconds);
+        require(block.timestamp < lastTime + 10 seconds);
         
         checkTime[colAuctionId] = block.timestamp;
 
