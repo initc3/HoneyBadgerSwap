@@ -110,9 +110,9 @@ contract colAuction{
             for i in range(n-1):
                 (Xi,Pi,Amti) = bids[i+1]
 
-                mpcInput(sint Xi, cfix curPrice)
+                mpcInput(sint Xi, sfix curPrice)
 
-                valid = ((sint(curPrice/fp)).less_equal(Xi,bit_length = bit_length)).reveal()
+                valid = ((sint(curPrice/65536)).less_equal(Xi,bit_length = bit_length)).reveal()
 
                 mpcOutput(cint valid)
 
@@ -152,7 +152,7 @@ contract colAuction{
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}', dict)
 
-            mpcInput(sint price, cint FloorPrice)
+            mpcInput(sint price, sint FloorPrice)
 
             valid = (price.greater_equal(FloorPrice, bit_length=bit_length)).reveal()
 
