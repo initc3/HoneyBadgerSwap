@@ -41,7 +41,7 @@ def submitBids(appContract,colAuctionId,price,amt,account):
     if status == 1:
         return
 
-    cur_bidcnt = bids_cnt[colAuctionId+1]
+    cur_bidcnt = bids_cnt[colAuctionId-1]
 
     idx1, idx2 = reserveInput(web3, appContract, 2, account)
     mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
@@ -58,7 +58,7 @@ def submitBids(appContract,colAuctionId,price,amt,account):
         time.sleep(1)
         status = appContract.functions.status(colAuctionId).call()
         if status > cur_bidcnt:
-            bids_cnt[colAuctionId+1] = status
+            bids_cnt[colAuctionId-1] = status
             return
         if status == 1:
             return
