@@ -67,7 +67,7 @@ contract colAuction{
         }
     }
 
-    function scheduleCheck(uint colAuctionId){
+    function scheduleCheck(uint colAuctionId) public {
         
         uint lastTime = checkTime[colAuctionId];
 
@@ -77,15 +77,15 @@ contract colAuction{
         
         checkTime[colAuctionId] = block.timestamp;
 
-        uint curPrice = curPriceList[colAuctionId]*0.99;
+        uint curPrice = curPriceList[colAuctionId]*100/99;
         curPriceList[colAuctionId] = curPrice;
 
         uint FloorPrice = floorPriceList[colAuctionId];
 
-        curCheckNum = checkCnt[colAuctionId]+1;
+        uint curCheckNum = checkCnt[colAuctionId]+1;
         checkCnt[colAuctionId] = curCheckNum;
 
-        mpc scheduleCheck(uint colAuctionId, uint curcheckNum, uint curPrice, uint FloorPrice){
+        mpc(uint colAuctionId, uint curCheckNum, uint curPrice, uint FloorPrice){
 
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}',dict)
