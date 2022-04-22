@@ -107,6 +107,7 @@ python3 -m ratel.src.python.colAuction.check
 ```
 
 ```
+bash setup-ssl.sh 4
 bash ratel/src/compile.sh rockPaperScissors
 
 bash ratel/src/deploy.sh rockPaperScissors 0 4 1
