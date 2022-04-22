@@ -47,7 +47,7 @@ if __name__=='__main__':
     while True:
         #refresh liveAuct[]
         while True:
-            status = appContract.functions.status(cur_n+1).call()#####Q1
+            status = appContract.functions.status(cur_n+1).call()
             if status >= 1:
                 cur_n += 1
                 liveAuct.append(cur_n)
