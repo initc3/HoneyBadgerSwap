@@ -44,6 +44,8 @@ if __name__=='__main__':
 
     cur_n = 0
 
+    ccnt = 0
+
     while True:
         #refresh liveAuct[]
         while True:
@@ -60,12 +62,15 @@ if __name__=='__main__':
             if status == 1:
                 liveAuct.remove(aucId)
         
-        print("curLiveAuctionId:",liveAuct)
+        if ccnt == 10000:
+            ccnt = 0
+            print("curLiveAuctionId:",liveAuct)
 
         for aucId in liveAuct:
             scheduleCheck(appContract,aucId,client_1)
 
         time.sleep(5)
+        ccnt = ccnt+1
 
 
         
