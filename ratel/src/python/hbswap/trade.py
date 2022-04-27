@@ -18,8 +18,7 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
     tx = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    receipt = web3.eth.get_transaction_receipt(tx_hash)
+    receipt = sign_and_send(tx, web3, account)
     log = appContract.events.Trade().processReceipt(receipt)[0]
     print(log['args'])
     seqTrade = log['args']['seqTrade']

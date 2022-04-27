@@ -344,7 +344,7 @@ contract hbswap {
             actualAmtA = poolA - poolProduct / (poolB - amtB)
             actualAmtB = poolB - poolProduct / (poolA - amtA)
 
-            buyA = amtA > 0
+            buyA = amtA > 0 ### TODO: could also be replaced by ZKP
             acceptA = actualAmtA >= amtA
             acceptB = actualAmtB >= amtB
             buyB = 1 - buyA

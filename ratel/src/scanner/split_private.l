@@ -130,7 +130,7 @@ void finalizePython() {
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
     textPythonUpper += "            for i in range(replay):\n";
     textPythonUpper += "                for log in logs:\n";
-    textPythonUpper += "                    if i == 1 or log[2] == 'Trade':\n";
+    textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
     textPythonUpper += "                        loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
@@ -275,32 +275,25 @@ void unmaskInput() {
 
 
 void collectKeys() {
-    bool flag;
+    string tmp;
 
-    if (readKeySet.size() > 0) {
-        flag = true;
-        textFuncUpper += "    readKeys = [";
-        string tmp;
-        for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
-            tmp += *it + ", ";
-        }
-
-        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-        textFuncUpper += tmp + "]\n";
+    textFuncUpper += "    readKeys = [";
+    for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
+        tmp += *it + ", ";
     }
 
-    if (writeKeySet.size() > 0) {
-        flag = true;
-        textFuncUpper += "    writeKeys = [";
-        string tmp;
-        for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
-            tmp += *it + ", ";
-        }
-        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-        textFuncUpper += tmp + "]\n";
-    }
+    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+    textFuncUpper += tmp + "]\n";
 
-    if (flag) textFuncUpper += "\n";
+    tmp = "";
+    textFuncUpper += "    writeKeys = [";
+    for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
+        tmp += *it + ", ";
+    }
+    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+    textFuncUpper += tmp + "]\n";
+
+    textFuncUpper += "\n";
 }
 
 

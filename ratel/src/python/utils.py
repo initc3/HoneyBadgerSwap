@@ -21,8 +21,7 @@ def parse_contract(name):
 def sign_and_send(tx, web3, account):
     signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
     web3.eth.send_raw_transaction(signedTx.rawTransaction)
-    web3.eth.wait_for_transaction_receipt(signedTx.hash)
-    return signedTx.hash
+    return web3.eth.wait_for_transaction_receipt(signedTx.hash)
 
 
 def getAccount(web3, keystoreDir):

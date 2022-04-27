@@ -54,7 +54,6 @@ async def send_requests(players, request):
     return results
 
 async def get_inputmasks(players, inputmask_idxes):
-
     request = f"inputmasks/{inputmask_idxes}"
     results = await send_requests(players, request)
     for i in range(len(results)):

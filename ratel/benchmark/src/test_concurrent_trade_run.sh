@@ -14,6 +14,8 @@ token_A_id=0
 test=0
 #####
 
+mkdir -p ratel/benchmark/data
+
 players=$1
 client_num=$2
 concurrency=$3
