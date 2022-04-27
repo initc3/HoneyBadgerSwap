@@ -43,6 +43,8 @@ class Server:
         self.dbLock  = {}
         self.dbLockCnt = {}
 
+        self.loop = asyncio.get_event_loop()
+
 
     async def http_server(self):
 

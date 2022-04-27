@@ -45,3 +45,7 @@ python3 -m ratel.benchmark.src.test_mpc 3 1 10
 ```
 ./ratel/benchmark/src/test_inputmask_generation_run.sh
 ```
+
+```
+python3 -m ratel.src.python.hbswap.updateBatchPrice
+```

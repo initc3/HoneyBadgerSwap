@@ -397,16 +397,22 @@ contract hbswap {
     }
 
 
-    pureMpc updateBatchPrice(server) {
-        tradePair = readDB(f'trade_pair', dict)
-        print(f'**** tradePair {tradePair}')
+    function updateBatchPrice() public {
+        mpc() {
+            tradePair = readDB(f'trade_pair', dict)
+            print(f'**** tradePair {tradePair}')
 
-        for tokenA in tradePair.keys():
-            for tokenB in tradePair[tokenA].keys():
-                if (await runCheckBatchFull(server, tokenA, tokenB)):
-                    totalPrice, totalCnt = await runCalculateBatchPrice(server, tokenA, tokenB)
-                    await runUploadBatchPrice(server, totalPrice, totalCnt, tokenA, tokenB)
+            for tokenA in tradePair.keys():
+                for tokenB in tradePair[tokenA].keys():
+                    server.loop.create_task(runCheckAndUpdate(server, tokenA, tokenB))
+        }
+    }
 
+
+    pureMpc checkAndUpdate(server, tokenA, tokenB) {
+        if (await runCheckBatchFull(server, tokenA, tokenB)):
+            totalPrice, totalCnt = await runCalculateBatchPrice(server, tokenA, tokenB)
+            await runUploadBatchPrice(server, totalPrice, totalCnt, tokenA, tokenB)
     }
 
 

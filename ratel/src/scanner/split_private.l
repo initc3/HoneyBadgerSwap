@@ -37,6 +37,7 @@ string textPythonLower;
 string textMpc;
 
 string textRecover;
+bool hasRecoverFunc;
 
 string returnLine;
 
@@ -103,7 +104,7 @@ void initPython() {
     textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp, replay, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes\n";
     textPythonUpper += "\n";
 
-    textPythonUpper += "async def monitor(server, loop):\n";
+    textPythonUpper += "async def monitor(server):\n";
     textPythonUpper += "    blkNum = server.web3.eth.get_block_number()\n";
     textPythonUpper += "    while True:\n";
     textPythonUpper += "        curBlkNum = server.web3.eth.get_block_number()\n";
@@ -131,7 +132,7 @@ void finalizePython() {
     textPythonUpper += "            for i in range(replay):\n";
     textPythonUpper += "                for log in logs:\n";
     textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
-    textPythonUpper += "                        loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+    textPythonUpper += "                        server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
     textPythonUpper += "            await asyncio.sleep(1)\n";
@@ -186,8 +187,6 @@ void processPureMpc() {
     textFuncUpper += "    seq" + funcName + " = -1\n";
     textFuncUpper += "\n";
 
-    textRecover += "def recover" + funcName + "():\n";
-    textRecover += "    return [";
 }
 
 
@@ -234,28 +233,32 @@ void monitorEvent() {
     }
     textFuncUpper += "\n";
 
-    textRecover += "def recover" + funcName + "(seq" + funcName;
-    for (int i = 0; i < num; i++) {
-        string arg = args[i];
+    if (args.size()) {
+        textRecover += "def recover" + funcName + "(seq" + funcName;
+        for (int i = 0; i < num; i++) {
+            string arg = args[i];
 
-        string type = getType(arg);
-        string varName = removeType(arg);
+            string type = getType(arg);
+            string varName = removeType(arg);
 
-        if (type[0] == '$') {
-            varName[0] = toupper(varName[0]);
+            if (type[0] == '$') {
+                varName[0] = toupper(varName[0]);
 
-            string idxVarName = "idx" + varName;
-            textRecover += ", " + idxVarName;
+                string idxVarName = "idx" + varName;
+                textRecover += ", " + idxVarName;
 
-            string maskedVarName = "masked" + varName;
-            textRecover += ", " + maskedVarName;
+                string maskedVarName = "masked" + varName;
+                textRecover += ", " + maskedVarName;
 
-        } else {
-            textRecover += ", " + varName;
+            } else {
+                textRecover += ", " + varName;
+            }
         }
+        textRecover += "):\n";
+        textRecover += "    return [";
+
+        hasRecoverFunc = true;
     }
-    textRecover += "):\n";
-    textRecover += "    return [";
 }
 
 
@@ -401,7 +404,7 @@ void writeDB() {
 
     textLine += indent + "write_db(server, " + key + ", " + value + ")";
 
-    textRecover += key + ", ";
+    if (hasRecoverFunc) textRecover += key + ", ";
 }
 
 
@@ -587,8 +590,10 @@ SPACE [ \t\r]+
 
 \) {
     if (isArg) {
-        args.push_back(arg);
-        arg = "";
+        if (arg.length()) {
+            args.push_back(arg);
+            arg = "";
+        }
 
         if (isReadDB) {
             assert(args.size() == 2);
@@ -625,7 +630,10 @@ SPACE [ \t\r]+
     braces--;
     if (braces > 0) addText(yytext);
     else {
-        textRecover += "]\n\n";
+        if (hasRecoverFunc) {
+            textRecover += "]\n\n";
+            hasRecoverFunc = false;
+        }
 
         collectKeys();
         createLocks();
