@@ -54,6 +54,7 @@ if __name__=='__main__':
                 cur_n += 1
                 liveAuct.append(cur_n)
                 checkCnt.append(0)
+                print("cur Live Auct Id(adding):",liveAuct)
             else:
                 break
         
@@ -61,6 +62,7 @@ if __name__=='__main__':
             status = appContract.functions.status(cur_n+1).call()
             if status == 1:
                 liveAuct.remove(aucId)
+                print("cur Live Auct Id(removing):",liveAuct)
         
         if ccnt == 10000:
             ccnt = 0
