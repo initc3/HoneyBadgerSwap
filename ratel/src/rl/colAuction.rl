@@ -71,12 +71,11 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
-        if(lastTime + 1 > block.number)
-            return
-        
+        uint curTime = block.number;
 
-        if(block.number < lastTime + 10)
+        if(curTime < lastTime + 10){
             return;
+        }
 
         checkTime[colAuctionId] = block.number;
 
