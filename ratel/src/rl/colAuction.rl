@@ -71,6 +71,11 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
+        console.log("Lasttime: ",lastTime);
+
+        console.log("block.num: ",block.number);
+        
+
         if(block.number < lastTime + 10)
             return;
 
