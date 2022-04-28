@@ -95,10 +95,6 @@ contract colAuction{
             totalAmt = auc['totalAmt']
 
 
-            print("curTime: ",curTime)
-
-            print("lastTime: ",lastTime)
-
             if curPrice < FloorPrice:
                 res = 'Auction failed!!!'
                 print(colAuctionId,'Auction failed!!!!!!!!!')
@@ -138,11 +134,12 @@ contract colAuction{
             aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
             mpcOutput(cint aucDone)
 
+            set(checkNum, uint curCheckNum, uint colAuctionId)
+            
             if aucDone == 1:
                 print(colAuctionId,'Auction success!!!!!!!!!')
                 res = 'Auction success!!!'
                 set(colres, string memory res, uint colAuctionId)
-                set(checkNum, uint curCheckNum, uint colAuctionId)
                 curStatus = 1
                 set(status, uint curStatus, uint colAuctionId)
                 return
