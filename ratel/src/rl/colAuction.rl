@@ -87,12 +87,17 @@ contract colAuction{
         uint curCheckNum = checkCnt[colAuctionId]+1;
         checkCnt[colAuctionId] = curCheckNum;
 
-        mpc(uint colAuctionId, uint curCheckNum, uint curPrice, uint FloorPrice){
+        mpc(uint colAuctionId, uint curCheckNum, uint curPrice, uint FloorPrice, uint curTime, uint lastTime){
 
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}',dict)
 
             totalAmt = auc['totalAmt']
+
+
+            print("curTime: ",curTime)
+
+            print("lastTime: ",lastTime)
 
             if curPrice < FloorPrice:
                 res = 'Auction failed!!!'
