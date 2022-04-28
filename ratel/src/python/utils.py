@@ -91,7 +91,7 @@ def location_inputmask(server_id, players):
     inputmask_shares_dir = os.getenv(
         'INPUTMASK_SHARES', '/opt/hbswap/inputmask-shares',
     )
-    return f'{inputmask_shares_dir}/{players}-MSp-255/Randoms-MSp-P{server_id}'
+    return f'{inputmask_shares_dir}/{players}-MSp-{prime_bit_length}/Randoms-MSp-P{server_id}'
 
 
 def openDB(location):
@@ -99,12 +99,13 @@ def openDB(location):
 
 
 def hex_to_int(x):
-    return int((mpz_from_old_binary(x) * inverse_R) % blsPrime)
+    x = mpz_from_old_binary(x)
+    return int((x * inverse_R) % prime)
 
 
 def int_to_hex(x):
     x = mpz(x)
-    x = (x * R) % blsPrime
+    x = (x * R) % prime
     x = binary(int(x))
     x += b'\x00' * (32 - len(x))
     return x
@@ -112,12 +113,12 @@ def int_to_hex(x):
 
 def get_inverse(a):
     ret = 1
-    b = blsPrime - 2
+    b = prime - 2
     while b:
         if b % 2 == 1:
-            ret = (ret * a) % blsPrime
+            ret = (ret * a) % prime
         b //= 2
-        a = (a * a) % blsPrime
+        a = (a * a) % prime
     return ret
 
 
@@ -127,7 +128,7 @@ def recover_input(db, masked_value, idx): # return: int
     except KeyError:
         input_mask_share = bytes(0)
     input_mask_share = int.from_bytes(input_mask_share, 'big')
-    return (masked_value - input_mask_share) % blsPrime
+    return (masked_value - input_mask_share) % prime
 
 
 def players(contract):
@@ -231,9 +232,17 @@ leaderHostname = 'mpcnode0'
 prog = './malicious-shamir-party.x'
 offline_prog = './mal-shamir-offline.x'
 
-blsPrime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
-R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
+### blsPrime
+# prime = 52435875175126190479447740508185965837690552500527637822603658699938581184513
+# R = 10920338887063814464675503992315976177888879664585288394250266608035967270910
+# prime_bit_length = 255
+
+### Ristretto group order
+prime = 7237005577332262213973186563042994240857116359379907606001950938285454250989
+R = 7237005577332262213973186563042994240413239274941949949428319933631315875101
+prime_bit_length = 253
 inverse_R = get_inverse(R)
+
 fp = 2 ** 16
 decimal = 10 ** 15
 sz = 32

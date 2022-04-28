@@ -53,7 +53,7 @@ def infinite_precision(balanceA, balanceB, poolA, poolB, amtA, amtB, repetition)
 
 
 async def mp_spdz_calc(server_id, balanceA, amtA, balanceB, amtB, poolA, poolB, repetition):
-    from ratel.src.python.utils import location_sharefile, mpc_port, int_to_hex, sz, hex_to_int, prog, blsPrime
+    from ratel.src.python.utils import location_sharefile, mpc_port, int_to_hex, sz, hex_to_int, prog, prime
 
     players = 3
     threshold = 1
@@ -75,7 +75,7 @@ async def mp_spdz_calc(server_id, balanceA, amtA, balanceB, amtB, poolA, poolB, 
                 + int_to_hex(totalCnt)
             )
 
-        cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
+        cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} hbswapTrade1'
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
         if stdout:
