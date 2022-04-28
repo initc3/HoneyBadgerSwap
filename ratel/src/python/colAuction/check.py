@@ -17,6 +17,7 @@ checkCnt = []
 # means I'll buy up to $amt if the prices reaches $price or below
 def scheduleCheck(appContract,colAuctionId,account):
     cur_check = checkCnt[colAuctionId-1]
+    print("schedule check aucId:",colAuctionId,"checkCnt:",cur_check)
 
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.scheduleCheck(colAuctionId).buildTransaction({
