@@ -41,7 +41,7 @@ def submitBids(appContract,colAuctionId,price,amt,account):
     if status == 1:
         return
 
-    print( colAuctionId-1)
+#    print( colAuctionId-1)
     cur_bidcnt = bids_cnt[colAuctionId-1]
     
 
