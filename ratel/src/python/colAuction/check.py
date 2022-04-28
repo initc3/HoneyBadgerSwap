@@ -65,11 +65,12 @@ if __name__=='__main__':
                 liveAuct.remove(aucId)
                 print("cur Live Auct Id(removing):",liveAuct)
         
-        if ccnt == 10000:
+        if ccnt == 1000:
             ccnt = 0
             print("curLiveAuctionId:",liveAuct)
 
         for aucId in liveAuct:
+            print("start check:",aucId)
             scheduleCheck(appContract,aucId,client_1)
 
         time.sleep(5)
