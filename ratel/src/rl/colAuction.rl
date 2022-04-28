@@ -79,7 +79,7 @@ contract colAuction{
 
         checkTime[colAuctionId] = block.number;
 
-        uint curPrice = curPriceList[colAuctionId]*10/9;
+        uint curPrice = curPriceList[colAuctionId]*99/100;
         curPriceList[colAuctionId] = curPrice;
 
         uint FloorPrice = floorPriceList[colAuctionId];

@@ -86,40 +86,92 @@ if __name__=='__main__':
     
     #test auction success
 
-    print('==================================')
+#    print('==================================')
 
     
     totalAmt1 = 20
     StartPrice1 = 10
     FloorPrice1 = 1 
-
     colAuctionId1 = createAuction(appContract,StartPrice1,FloorPrice1,totalAmt1,client_1)
     print('new Auction id:',colAuctionId1)
+    time.sleep(10)
 
-    time.sleep(1)
+    totalAmt2 = 40
+    StartPrice2 = 10
+    FloorPrice2 = 1 
+    colAuctionId2 = createAuction(appContract,StartPrice2,FloorPrice2,totalAmt2,client_1)
+    print('new Auction id:',colAuctionId2)
+    time.sleep(10)
 
-    price2 = 5
-    Amt2 = 10
-    submitBids(appContract,colAuctionId1,price2,Amt2,client_2)
-    print('finished input client_2')
+
+
+    price11 = 6
+    Amt11 = 2
+    submitBids(appContract,colAuctionId1,price11,Amt11,client_1)
+    print('finished input client_1 AuctionId:',colAuctionId1)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId2,price11,Amt11,client_1)
+    print('finished input client_1 AuctionId:',colAuctionId2)
     time.sleep(20)
 
-    price3 = 3
-    Amt3 = 6
-    submitBids(appContract,colAuctionId1,price3,Amt3,client_3)
-    print('finished input client_3')
+    price12 = 5
+    Amt12 = 10
+    submitBids(appContract,colAuctionId1,price12,Amt12,client_2)
+    print('finished input client_2 AuctionId:',colAuctionId1)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId2,price12,Amt12,client_2)
+    print('finished input client_2 AuctionId:',colAuctionId2)
     time.sleep(20)
 
-    price4 = 7
-    Amt4 = 7
-    submitBids(appContract,colAuctionId1,price4,Amt4,client_4)
-    print('finished input client_4')
+    totalAmt3 = 20
+    StartPrice3 = 10
+    FloorPrice3 = 5 
+    colAuctionId3 = createAuction(appContract,StartPrice3,FloorPrice3,totalAmt3,client_1)
+    print('new Auction id:',colAuctionId3)
+    time.sleep(10)
+    submitBids(appContract,colAuctionId3,price11,Amt11,client_1)
+    print('finished input client_1 AuctionId:',colAuctionId3)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId3,price12,Amt12,client_2)
+    print('finished input client_2 AuctionId:',colAuctionId3)
     time.sleep(20)
 
-    price5 = 2
-    Amt5 = 9
-    submitBids(appContract,colAuctionId1,price5,Amt5,client_5)
-    print('finished input client_5')
+
+    price13 = 3
+    Amt13 = 6
+    submitBids(appContract,colAuctionId1,price13,Amt13,client_3)
+    print('finished input client_3 AuctionId:',colAuctionId1)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId2,price13,Amt13,client_3)
+    print('finished input client_3 AuctionId:',colAuctionId2)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId3,price13,Amt13,client_3)
+    print('finished input client_3 AuctionId:',colAuctionId3)
+    time.sleep(20)
+
+
+    price14 = 7
+    Amt14 = 7
+    submitBids(appContract,colAuctionId1,price14,Amt14,client_4)
+    print('finished input client_4 AuctionId:',colAuctionId1)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId2,price14,Amt14,client_4)
+    print('finished input client_4 AuctionId:',colAuctionId2)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId3,price14,Amt14,client_4)
+    print('finished input client_4 AuctionId:',colAuctionId3)
+    time.sleep(20)
+
+    price15 = 2
+    Amt15 = 9
+    submitBids(appContract,colAuctionId1,price15,Amt15,client_5)
+    print('finished input client_5 AuctionId:',colAuctionId1)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId2,price15,Amt15,client_5)
+    print('finished input client_5 AuctionId:',colAuctionId2)
+    time.sleep(20)
+    submitBids(appContract,colAuctionId3,price15,Amt15,client_5)
+    print('finished input client_5 AuctionId:',colAuctionId3)
     time.sleep(20)
 
 
