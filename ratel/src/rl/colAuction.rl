@@ -71,8 +71,9 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
-        require(block.number >= lastTime + 10, "wait!" );
-        
+        if(block.number < lastTime + 10)
+            return;
+
         checkTime[colAuctionId] = block.number;
 
         uint curPrice = curPriceList[colAuctionId]*100/99;
