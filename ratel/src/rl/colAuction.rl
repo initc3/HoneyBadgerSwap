@@ -71,7 +71,7 @@ contract colAuction{
         
         uint lastTime = checkTime[colAuctionId];
 
-        require(block.number >= lastTime + 10 );
+        require(block.number >= lastTime + 10, "wait!" );
         
         checkTime[colAuctionId] = block.number;
 
