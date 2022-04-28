@@ -172,8 +172,9 @@ contract colAuction{
                 print('**** bids', bids)
                 writeDB(f'bidsBoard_{colAuctionId}',bids,list)
 
-                curStatus = bidders_id+2
-                set(status, uint curStatus, uint colAuctionId)
+            curStatus = bidders_id+2
+            set(status, uint curStatus, uint colAuctionId)
+            
         }
     }
 }
