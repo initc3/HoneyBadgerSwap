@@ -90,22 +90,22 @@ if __name__=='__main__':
 
     
     totalAmt1 = 20
-    StartPrice1 = 10
-    FloorPrice1 = 1 
+    StartPrice1 = 100
+    FloorPrice1 = 10 
     colAuctionId1 = createAuction(appContract,StartPrice1,FloorPrice1,totalAmt1,client_1)
     print('new Auction id:',colAuctionId1)
     time.sleep(10)
 
     totalAmt2 = 40
-    StartPrice2 = 10
-    FloorPrice2 = 1 
+    StartPrice2 = 100
+    FloorPrice2 = 10 
     colAuctionId2 = createAuction(appContract,StartPrice2,FloorPrice2,totalAmt2,client_1)
     print('new Auction id:',colAuctionId2)
     time.sleep(10)
 
 
 
-    price11 = 6
+    price11 = 60
     Amt11 = 2
     submitBids(appContract,colAuctionId1,price11,Amt11,client_1)
     print('finished input client_1 AuctionId:',colAuctionId1)
@@ -114,7 +114,7 @@ if __name__=='__main__':
     print('finished input client_1 AuctionId:',colAuctionId2)
     time.sleep(20)
 
-    price12 = 5
+    price12 = 50
     Amt12 = 10
     submitBids(appContract,colAuctionId1,price12,Amt12,client_2)
     print('finished input client_2 AuctionId:',colAuctionId1)
@@ -124,8 +124,8 @@ if __name__=='__main__':
     time.sleep(20)
 
     totalAmt3 = 20
-    StartPrice3 = 10
-    FloorPrice3 = 5 
+    StartPrice3 = 100
+    FloorPrice3 = 50 
     colAuctionId3 = createAuction(appContract,StartPrice3,FloorPrice3,totalAmt3,client_1)
     print('new Auction id:',colAuctionId3)
     time.sleep(10)
@@ -137,7 +137,7 @@ if __name__=='__main__':
     time.sleep(20)
 
 
-    price13 = 3
+    price13 = 30
     Amt13 = 6
     submitBids(appContract,colAuctionId1,price13,Amt13,client_3)
     print('finished input client_3 AuctionId:',colAuctionId1)
@@ -150,7 +150,7 @@ if __name__=='__main__':
     time.sleep(20)
 
 
-    price14 = 7
+    price14 = 70
     Amt14 = 7
     submitBids(appContract,colAuctionId1,price14,Amt14,client_4)
     print('finished input client_4 AuctionId:',colAuctionId1)
@@ -162,7 +162,7 @@ if __name__=='__main__':
     print('finished input client_4 AuctionId:',colAuctionId3)
     time.sleep(20)
 
-    price15 = 2
+    price15 = 20
     Amt15 = 9
     submitBids(appContract,colAuctionId1,price15,Amt15,client_5)
     print('finished input client_5 AuctionId:',colAuctionId1)
