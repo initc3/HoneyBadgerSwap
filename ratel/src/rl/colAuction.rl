@@ -79,7 +79,7 @@ contract colAuction{
 
         checkTime[colAuctionId] = block.number;
 
-        uint curPrice = curPriceList[colAuctionId]*100/99;
+        uint curPrice = curPriceList[colAuctionId]*10/9;
         curPriceList[colAuctionId] = curPrice;
 
         uint FloorPrice = floorPriceList[colAuctionId];
@@ -94,6 +94,7 @@ contract colAuction{
 
             totalAmt = auc['totalAmt']
 
+            print("curPrice:",curPrice)
 
             if curPrice < FloorPrice:
                 res = 'Auction failed!!!'
