@@ -142,7 +142,7 @@ contract colAuction{
                     set(colres, string memory res, uint colAuctionId)
                     curStatus = 1
                     set(status, uint curStatus, uint colAuctionId)
-                    return
+                    
 
         }
     }
