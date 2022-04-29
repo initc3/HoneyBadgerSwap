@@ -81,9 +81,9 @@ string getFuncName(string st) {
 
 
 void addEventDeclare() {
-    textPublicEvents += "    event " + funcName + "(uint seq" + funcName + ", ";
+    textPublicEvents += "    event " + funcName + "(uint seq" + funcName;
     for (int i = 0; i < args.size(); i++) {
-        if (i > 0) textPublicEvents += ", ";
+        textPublicEvents += ", ";
         if (args[i][0] == '$') {
             string varType = getType(args[i]).substr(1);
             string postVarName = removeType(args[i]);
@@ -100,40 +100,44 @@ void addEventDeclare() {
 void addEventEmit() {
     textRecover += "    if opEvent == \'" + funcName + "\':\n";
     textRecover += "        ";
-    for (int i = 0; i < args.size(); i++) {
-        if (i > 0) textRecover += ", ";
-        if (args[i][0] == '$') {
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textRecover += "idx" + postVarName + ", masked" + postVarName;
-        } else {
-            textRecover += removeType(args[i]);
+    if (!args.size()) {
+        textRecover += "pass\n\n";
+    } else {
+        for (int i = 0; i < args.size(); i++) {
+            if (i > 0) textRecover += ", ";
+            if (args[i][0] == '$') {
+                string postVarName = removeType(args[i]);
+                postVarName[0] = toupper(postVarName[0]);
+                textRecover += "idx" + postVarName + ", masked" + postVarName;
+            } else {
+                textRecover += removeType(args[i]);
+            }
         }
-    }
-    textRecover += " = decode_single(\'(";
-    for (int i = 0; i < args.size(); i++) {
-        if (i > 0) textRecover += ",";
-        if (args[i][0] == '$') {
-            string varType = getType(args[i]).substr(1);
-            textRecover += "uint256," + varType;
-        } else {
-            textRecover += getType(args[i]);
+        textRecover += " = decode_single(\'(";
+        for (int i = 0; i < args.size(); i++) {
+            if (i > 0) textRecover += ",";
+            if (args[i][0] == '$') {
+                string varType = getType(args[i]).substr(1);
+                textRecover += "uint256," + varType;
+            } else {
+                textRecover += getType(args[i]);
+            }
         }
-    }
-    textRecover += ")\', opContent)\n";
-    textRecover += "        return recover" + funcName + "(opSeq";
-    for (int i = 0; i < args.size(); i++) {
-        textRecover += ", ";
-        if (args[i][0] == '$') {
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textRecover += "idx" + postVarName + ", masked" + postVarName;
-        } else {
-            textRecover += removeType(args[i]);
+        textRecover += ")\', opContent)\n";
+        textRecover += "        return recover" + funcName + "(opSeq";
+        for (int i = 0; i < args.size(); i++) {
+            textRecover += ", ";
+            if (args[i][0] == '$') {
+                string postVarName = removeType(args[i]);
+                postVarName[0] = toupper(postVarName[0]);
+                textRecover += "idx" + postVarName + ", masked" + postVarName;
+            } else {
+                textRecover += removeType(args[i]);
+            }
         }
+        textRecover += ")\n";
+        textRecover += "\n";
     }
-    textRecover += ")\n";
-    textRecover += "\n";
 
     textPublic += "        uint seq" + funcName + " = opCnt++;\n";
     textPublic += "        opEvent[seq" + funcName + "] = \"" + funcName + "\";\n";
@@ -151,9 +155,9 @@ void addEventEmit() {
     textPublic += ");\n";
     textPublic += "\n";
 
-    textPublic += "        emit " + funcName + "(seq" + funcName + ", ";
+    textPublic += "        emit " + funcName + "(seq" + funcName ;
     for (int i = 0; i < args.size(); i++) {
-        if (i > 0) textPublic += ", ";
+        textPublic += ", ";
         if (args[i][0] == '$') {
             string postVarName = removeType(args[i]);
             postVarName[0] = toupper(postVarName[0]);

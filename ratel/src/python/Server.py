@@ -6,7 +6,7 @@ import time
 
 from aiohttp import web
 from ratel.src.python.Client import send_requests, batch_interpolate
-from ratel.src.python.utils import key_inputmask, spareShares, blsPrime, \
+from ratel.src.python.utils import key_inputmask, spareShares, prime, \
     location_inputmask, http_host, http_port, mpc_port, location_db, openDB, getAccount, \
     confirmation, shareBatchSize, list_to_str, trade_key_num, INPUTMASK_SHARES_DIR
 
@@ -37,11 +37,13 @@ class Server:
         print('**** input_mask_queue_tail', self.input_mask_queue_tail)
 
         self.portLock = {}
-        for i in range(concurrency):
+        for i in range(-1, concurrency):
             self.portLock[mpc_port + i * 100] = asyncio.Lock()
 
         self.dbLock  = {}
         self.dbLockCnt = {}
+
+        self.loop = asyncio.get_event_loop()
 
 
     async def http_server(self):
@@ -133,7 +135,7 @@ class Server:
     async def genInputMask(self, shareBatchSize):
         print(f'Generating new inputmasks... s-{self.serverID}')
 
-        cmd = f'./random-shamir.x -i {self.serverID} -N {self.players} -T {self.threshold} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR}'
+        cmd = f'./random-shamir.x -i {self.serverID} -N {self.players} -T {self.threshold} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR} -P {prime}'
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
         print(f'[{cmd!r} exited with {proc.returncode}]')
@@ -146,7 +148,7 @@ class Server:
         with open(file, 'r') as f:
             for line in f.readlines():
                 key = key_inputmask(self.input_mask_queue_tail)
-                share = int(line) % blsPrime
+                share = int(line) % prime
                 self.db.Put(key, share.to_bytes((share.bit_length() + 7) // 8, 'big'))
                 self.input_mask_queue_tail += 1
 
@@ -296,7 +298,7 @@ class Server:
 
                 input_mask_share = int.from_bytes(bytes(self.db.Get(key_inputmask(self.input_mask_queue_tail - 1))), 'big')
                 self.input_mask_queue_tail -= 1
-                masked_state_share = (secret + input_mask_share) % blsPrime
+                masked_state_share = (secret + input_mask_share) % prime
 
             except KeyError:
                 print(f'Do not have the state {key}')
@@ -313,7 +315,7 @@ class Server:
         for masked_state in masked_states:
             input_mask = int.from_bytes(bytes(self.db.Get(key_inputmask(self.input_mask_queue_tail - 1))), 'big')
             self.input_mask_queue_tail -= 1
-            state_share = (masked_state - input_mask) % blsPrime
+            state_share = (masked_state - input_mask) % prime
             state_shares.append(state_share)
 
         self.db.Put(f'input_mask_queue_tail'.encode(), self.input_mask_queue_tail.to_bytes((self.input_mask_queue_tail.bit_length() + 7) // 8, 'big'))
