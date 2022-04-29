@@ -6,7 +6,7 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks, reserveInput
 from ratel.src.python.deploy import url, parse_contract, appAddress
-from ratel.src.python.utils import fp, blsPrime, getAccount
+from ratel.src.python.utils import fp, prime, getAccount
 
 
 # def addLiquidity(appContract, tokenA, tokenB, amtA, amtB, account):
@@ -23,7 +23,7 @@ def addLiquidity(appContract, tokenA, tokenB, amtA, amtB, account):
     amtB = int(amtB * fp)
     idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(appContract, f'{idxAmtA},{idxAmtB}'))
-    maskedAmtA, maskedAmtB = (amtA + maskA) % blsPrime, (amtB + maskB) % blsPrime
+    maskedAmtA, maskedAmtB = (amtA + maskA) % prime, (amtB + maskB) % prime
     tx_hash = appContract.functions.addLiquidity(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
     receipt = web3.eth.get_transaction_receipt(tx_hash)

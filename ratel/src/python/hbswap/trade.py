@@ -6,7 +6,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from ratel.src.python.Client import get_inputmasks, reserveInput
 from ratel.src.python.deploy import url, app_addr, token_addrs
-from ratel.src.python.utils import fp, blsPrime, getAccount, sign_and_send, parse_contract, players
+from ratel.src.python.utils import fp, prime, getAccount, sign_and_send, parse_contract, players
 
 
 def trade(appContract, tokenA, tokenB, amtA, amtB, account):
@@ -14,12 +14,11 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
     amtB = int(amtB * fp)
     idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
     maskA, maskB = asyncio.run(get_inputmasks(players(appContract), f'{idxAmtA},{idxAmtB}'))
-    maskedAmtA, maskedAmtB = (amtA + maskA) % blsPrime, (amtB + maskB) % blsPrime
+    maskedAmtA, maskedAmtB = (amtA + maskA) % prime, (amtB + maskB) % prime
     tx = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    receipt = web3.eth.get_transaction_receipt(tx_hash)
+    receipt = sign_and_send(tx, web3, account)
     log = appContract.events.Trade().processReceipt(receipt)[0]
     print(log['args'])
     seqTrade = log['args']['seqTrade']
@@ -30,6 +29,7 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
                 f"tokenB\t{tokenB}\t"
                 f"gasUsed\t{receipt['gasUsed']}\t"
                 f"{time.perf_counter()}\n")
+
 
 if __name__=='__main__':
     client_id = int(sys.argv[1])

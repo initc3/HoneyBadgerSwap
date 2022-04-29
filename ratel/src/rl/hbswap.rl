@@ -8,6 +8,7 @@ contract hbswap {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
+
     uint constant public Decimals = 10**15;
     uint constant public Fp = 2**16;
 
@@ -22,7 +23,9 @@ contract hbswap {
     mapping (uint => bool) public secretWithdrawFinish;
     mapping (uint => mapping (uint => uint)) public secretWithdrawCount;
 
+
     constructor() public {}
+
 
     function publicDeposit(address token, uint amt) payable public {
         address user = msg.sender;
@@ -34,6 +37,7 @@ contract hbswap {
         }
         publicBalance[token][user] += amt;
     }
+
 
     function secretDeposit(address token, uint amt) public {
         address user = msg.sender;
@@ -59,6 +63,7 @@ contract hbswap {
         }
     }
 
+
     function publicWithdraw(address token, uint amt) public {
         address payable user = msg.sender;
         require(amt > 0 && publicBalance[token][user] >= amt);
@@ -70,6 +75,7 @@ contract hbswap {
         }
         publicBalance[token][user] -= amt;
     }
+
 
     function secretWithdraw(address token, uint amt) public {
         address user = msg.sender;
@@ -94,6 +100,7 @@ contract hbswap {
                 writeDB(f'balance_{token}_{user}', balance, int)
         }
     }
+
 
     function initPool(address tokenA, address tokenB, uint amtA, uint amtB) public {
         require(tokenA < tokenB && amtA > 0 && amtB > 0);
@@ -152,9 +159,9 @@ contract hbswap {
                 initPrice = str(1. * amtB / amtA)
                 print('**** initPrice', initPrice, tokenA, tokenB)
                 set(estimatedPrice, string memory initPrice, address tokenA, address tokenB)
-
         }
     }
+
 
     function addLiquidity(address tokenA, address tokenB, $uint amtA, $uint amtB) public {
         require(tokenA < tokenB);
@@ -226,6 +233,7 @@ contract hbswap {
         }
     }
 
+
     function removeLiquidity(address tokenA, address tokenB, $uint amt) public {
         require(tokenA < tokenB);
         address user = msg.sender;
@@ -281,6 +289,7 @@ contract hbswap {
         }
     }
 
+
     function trade(address tokenA, address tokenB, $uint amtA, $uint amtB) public {
         require(tokenA < tokenB);
         address user = msg.sender;
@@ -291,89 +300,67 @@ contract hbswap {
             import time
             times.append(time.perf_counter())
 
+            tradePair = readDB(f'trade_pair', dict)
+            if tokenA not in tradePair.keys():
+                tradePair[tokenA] = {}
+            tradePair[tokenA][tokenB] = True
+            writeDB(f'trade_pair', tradePair, dict)
+
+            tradeList = readDB(f'trade_list_{tokenA}_{tokenB}', list)
+            tradeList.append(seqTrade)
+            writeDB(f'trade_list_{tokenA}_{tokenB}', tradeList, list)
+
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             poolA = readDB(f'pool_{tokenA}_{tokenB}_{tokenA}', int)
             poolB = readDB(f'pool_{tokenA}_{tokenB}_{tokenB}', int)
-            totalPrice = readDB(f'totalPrice_{tokenA}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
-
             times.append(time.perf_counter())
 
-            print(f'**** seqTrade {seqTrade} start')
-
-            mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sfix totalPrice, sint totalCnt)
-
-            print_ln('**** balanceA %s', balanceA.reveal())
-            print_ln('**** balanceB %s', balanceB.reveal())
-            print_ln('**** poolA %s', poolA.reveal())
-            print_ln('**** poolB %s', poolB.reveal())
-            #print_ln('**** amtA %s', amtA.reveal())
-            #print_ln('**** amtB %s', amtB.reveal())
-            #print_ln('**** totalPrice %s', totalPrice.reveal())
-            #print_ln('**** totalCnt %s', totalCnt.reveal())
+            mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sint totalCnt)
 
             feeRate = 0.003
-            batchSize = 1000
 
-            validOrder = (amtA * amtB) < 0
-            #print_ln('**** validOrder %s', validOrder.reveal())
+            poolProduct = poolA * poolB
 
-            buyA = amtA > 0
-            totalB = (1 + feeRate) * amtB
-            enoughB = (-totalB)  <= balanceB
-            actualAmtA = poolA  - poolA * poolB / (poolB  - amtB)
-            acceptA = actualAmtA  >= amtA
-            flagBuyA = validOrder * buyA * enoughB * acceptA
-            #print_ln('**** buyA %s', buyA.reveal())
-            #print_ln('**** totalB %s', totalB.reveal())
-            #print_ln('**** enoughB %s', enoughB.reveal())
-            #print_ln('**** actualAmtA %s', actualAmtA.reveal())
-            #print_ln('**** acceptA %s', acceptA.reveal())
-            #print_ln('**** flagBuyA %s', flagBuyA.reveal())
-
-            buyB = 1 - buyA
             totalA = (1 + feeRate) * amtA
-            enoughA = (-totalA) <= balanceA
-            actualAmtB = poolB  - poolA * poolB / (poolA  - amtA)
-            acceptB = actualAmtB  >= amtB
-            flagBuyB = validOrder * buyB * enoughA * acceptB
-            #print_ln('**** buyB %s', buyB.reveal())
-            #print_ln('**** totalA %s', totalA.reveal())
-            #print_ln('**** enoughA %s', enoughA.reveal())
-            #print_ln('**** actualAmtB %s', actualAmtB.reveal())
-            #print_ln('**** acceptB %s', acceptB.reveal())
-            #print_ln('**** flagBuyB %s', flagBuyB.reveal())
+            totalB = (1 + feeRate) * amtB
+
+            ### TODO: realize by ZKP
+            ### validOrder = (amtA * amtB) < 0
+            ### enoughB = (-totalB) <= balanceB
+            ### enoughA = (-totalA) <= balanceA
+            ### flagBuyA = validOrder * buyA * enoughB * acceptA
+            ### flagBuyB = validOrder * buyB * enoughA * acceptB
+
+            actualAmtA = poolA - poolProduct / (poolB - amtB)
+            actualAmtB = poolB - poolProduct / (poolA - amtA)
+
+            buyA = amtA > 0 ### TODO: could also be replaced by ZKP
+            acceptA = actualAmtA >= amtA
+            acceptB = actualAmtB >= amtB
+            buyB = 1 - buyA
+
+            flagBuyA = buyA * acceptA
+            flagBuyB = buyB * acceptB
 
             changeA = flagBuyA * actualAmtA + flagBuyB * totalA
             changeB = flagBuyA * totalB + flagBuyB * actualAmtB
-            #print_ln('**** changeA %s', changeA.reveal())
-            #print_ln('**** changeB %s', changeB.reveal())
 
             poolA -= changeA
             poolB -= changeB
             balanceA += changeA
             balanceB += changeB
 
+            orderSucceed = flagBuyA + flagBuyB
+            totalCnt += orderSucceed
+
             print_ln('**** balanceA %s', balanceA.reveal())
             print_ln('**** balanceB %s', balanceB.reveal())
             print_ln('**** poolA %s', poolA.reveal())
             print_ln('**** poolB %s', poolB.reveal())
 
-            orderSucceed = flagBuyA + flagBuyB
-            #print_ln('**** orderSucceed %s', orderSucceed.reveal())
-
-            price = - changeB / (changeA + 1 - orderSucceed)
-            #print_ln('**** price %s', price.reveal())
-            totalPrice += price
-            totalCnt += orderSucceed
-            #print_ln('**** totalPrice %s', totalPrice.reveal())
-            #print_ln('**** totalCnt %s', totalCnt.reveal())
-
-            batchPrice = ((totalCnt >= batchSize).reveal()).if_else((totalPrice / totalCnt).reveal(), cfix.from_int(0))
-            #print_ln('**** batchPrice %s', batchPrice)
-
-            mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix price, sfix totalPrice, sint totalCnt, cfix batchPrice)
+            mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix changeA, sfix changeB, sint orderSucceed, sint totalCnt)
 
             times.append(time.perf_counter())
 
@@ -381,21 +368,14 @@ contract hbswap {
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenA}', poolA, int)
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenB}', poolB, int)
-
-            if batchPrice > 0:
-                batchPrice = str(1. * batchPrice / fp)
-                print('**** batchPrice', batchPrice)
-                set(estimatedPrice, string memory batchPrice, address tokenA, address tokenB)
-                totalPrice = 0
-                totalCnt = 0
-
-            writeDB(f'totalPrice_{tokenA}_{tokenB}', totalPrice, int)
             writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
-            writeDB(f'price_{seqTrade}', price, int)
+
+            ### TODO: delayed reveal individual price
+            ### NOTICE: users have to calculate price by themselves
+            priceInfo = [orderSucceed, changeA, changeB]
+            writeDB(f'price_{seqTrade}', priceInfo, list)
 
             times.append(time.perf_counter())
-
-            print(f'**** seqTrade {seqTrade} finish')
 
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
                 for op, t in enumerate(times):
@@ -405,4 +385,99 @@ contract hbswap {
                             f'cur_time\t{t}\n')
         }
     }
+
+
+    function updateBatchPrice() public {
+        mpc() {
+            tradePair = readDB(f'trade_pair', dict)
+            print(f'**** tradePair {tradePair}')
+
+            for tokenA in tradePair.keys():
+                for tokenB in tradePair[tokenA].keys():
+                    server.loop.create_task(runCheckAndUpdate(server, tokenA, tokenB))
+        }
+    }
+
+
+    pureMpc checkAndUpdate(server, tokenA, tokenB) {
+        if (await runCheckBatchFull(server, tokenA, tokenB)):
+            totalPrice, totalCnt = await runCalculateBatchPrice(server, tokenA, tokenB)
+            await runUploadBatchPrice(server, totalPrice, totalCnt, tokenA, tokenB)
+    }
+
+
+    pureMpc checkBatchFull(server, tokenA, tokenB) {
+        totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
+
+        mpcInput(sint totalCnt)
+
+        print(f'**** totalCnt %s', totalCnt.reveal())
+
+        batchSize = 1000
+        batchFull = (totalCnt >= batchSize).reveal()
+
+        mpcOutput(cint batchFull)
+
+        print(f'**** batchFull {batchFull}')
+
+        return batchFull
+    }
+
+
+    pureMpc calculateBatchPrice(server, tokenA, tokenB) {
+        tradePair = readDB(f'trade_pair', dict)
+        del tradePair[tokenA][tokenB]
+        if len(tradePair[tokenA]) == 0:
+            del tradePair[tokenA]
+        writeDB(f'trade_pair', tradePair, dict)
+
+        tradeList = readDB(f'trade_list_{tokenA}_{tokenB}', list)
+        _tradeList = []
+        writeDB(f'trade_list_{tokenA}_{tokenB}', _tradeList, list)
+        print(f'**** tradeList {tradeList}')
+
+        totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
+        _totalCnt = 0
+        writeDB(f'totalCnt_{tokenA}_{tokenB}', _totalCnt, int)
+
+        totalPrice = 0
+
+        for seqTrade in tradeList:
+            totalPrice = await runAddTotalPrice(server, seqTrade, totalPrice)
+
+        return totalPrice, totalCnt
+    }
+
+
+    pureMpc addTotalPrice(server, seqTrade, totalPrice) {
+        priceInfo = readDB(f'price_{seqTrade}', list)
+
+        orderSucceed, changeA, changeB = priceInfo
+
+        mpcInput(sfix totalPrice, sint orderSucceed, sfix changeA, sfix changeB)
+
+        price = - changeB / (changeA + 1 - orderSucceed)
+        totalPrice += price
+
+        print_ln('**** totalPrice %s', totalPrice.reveal())
+
+        mpcOutput(sfix totalPrice)
+
+        return totalPrice
+    }
+
+
+    pureMpc uploadBatchPrice(server, totalPrice, totalCnt, tokenA, tokenB) {
+        mpcInput(sfix totalPrice, sint totalCnt)
+
+        batchPrice = (totalPrice / totalCnt).reveal()
+
+        mpcOutput(cfix batchPrice)
+
+        batchPrice = str(1. * batchPrice / fp)
+        print('**** batchPrice', batchPrice)
+        set(estimatedPrice, string memory batchPrice, address tokenA, address tokenB)
+    }
+
+
 }
