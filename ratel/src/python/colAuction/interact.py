@@ -7,7 +7,7 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks, reserveInput
 from ratel.src.python.deploy import url, app_addr
-from ratel.src.python.utils import fp,parse_contract, getAccount, players, blsPrime, sign_and_send
+from ratel.src.python.utils import fp,parse_contract, getAccount, players, prime, sign_and_send
 
 contract_name = 'colAuction'
 
@@ -19,7 +19,7 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
 
     idx1 = reserveInput(web3, appContract, 1, account)[0]
     mask1 = asyncio.run(get_inputmasks(players(appContract), f'{idx1}'))[0]
-    maskedTM = (totalAmt + mask1) % blsPrime
+    maskedTM = (totalAmt + mask1) % prime
     
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.createAuction(StartPrice,FloorPrice,idx1,maskedTM).buildTransaction({
@@ -47,7 +47,7 @@ def submitBids(appContract,colAuctionId,price,amt,account):
 
     idx1, idx2 = reserveInput(web3, appContract, 2, account)
     mask1, mask2 = asyncio.run(get_inputmasks(players(appContract), f'{idx1},{idx2}'))
-    maskedP, maskedAmt = (price + mask1) % blsPrime, (amt + mask2) % blsPrime
+    maskedP, maskedAmt = (price + mask1) % prime, (amt + mask2) % prime
 
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.submitBids(colAuctionId, idx1, maskedP, idx2, maskedAmt).buildTransaction({
