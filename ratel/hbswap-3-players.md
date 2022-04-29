@@ -15,15 +15,15 @@
 
 ./ratel/benchmark/src/test_concurrent_trade_start.sh 3 1 1
 ./ratel/benchmark/src/test_concurrent_trade_start.sh 3 2 2
-./ratel/benchmark/src/test_concurrent_trade_start.sh 3 10 10
+./ratel/benchmark/src/test_concurrent_trade_start.sh 3 4 4
 ```
 
 ```
 ./ratel/benchmark/src/test_concurrent_trade_run.sh [players] [client_num] [concurrency] [rep]
 
 ./ratel/benchmark/src/test_concurrent_trade_run.sh 3 1 1 1
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 2 2 1
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 10 10 10
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 2 2 10
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 4 4 10
 ```
 
 `python3 -m ratel.benchmark.src.plot ratel/benchmark/data`

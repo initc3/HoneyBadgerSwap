@@ -20,8 +20,8 @@ def parse_contract(name):
 
 def sign_and_send(tx, web3, account):
     signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
-    web3.eth.send_raw_transaction(signedTx.rawTransaction)
-    return web3.eth.wait_for_transaction_receipt(signedTx.hash)
+    tx_hash = web3.eth.send_raw_transaction(signedTx.rawTransaction)
+    return web3.eth.wait_for_transaction_receipt(tx_hash)
 
 
 def getAccount(web3, keystoreDir):
@@ -257,7 +257,7 @@ shareBatchSize = 1000
 
 confirmation = 2
 
-replay = 10
+replay = 1
 
 trade_key_num = 7
 

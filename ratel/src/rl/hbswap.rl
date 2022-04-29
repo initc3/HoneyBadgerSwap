@@ -295,6 +295,10 @@ contract hbswap {
         address user = msg.sender;
 
         mpc(address user, address tokenA, address tokenB, $uint amtA, $uint amtB) {
+            times = []
+
+            import time
+            times.append(time.perf_counter())
 
             tradePair = readDB(f'trade_pair', dict)
             if tokenA not in tradePair.keys():
@@ -306,11 +310,6 @@ contract hbswap {
             tradeList.append(seqTrade)
             writeDB(f'trade_list_{tokenA}_{tokenB}', tradeList, list)
 
-            times = []
-
-            import time
-            times.append(time.perf_counter())
-
             balanceA = readDB(f'balance_{tokenA}_{user}', int)
             balanceB = readDB(f'balance_{tokenB}_{user}', int)
             poolA = readDB(f'pool_{tokenA}_{tokenB}_{tokenA}', int)
@@ -318,14 +317,7 @@ contract hbswap {
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
             times.append(time.perf_counter())
 
-            print(f'**** seqTrade {seqTrade} start')
-
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sint totalCnt)
-
-            print_ln('**** balanceA %s', balanceA.reveal())
-            print_ln('**** balanceB %s', balanceB.reveal())
-            print_ln('**** poolA %s', poolA.reveal())
-            print_ln('**** poolB %s', poolB.reveal())
 
             feeRate = 0.003
 
@@ -376,16 +368,14 @@ contract hbswap {
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenA}', poolA, int)
             writeDB(f'pool_{tokenA}_{tokenB}_{tokenB}', poolB, int)
-            times.append(time.perf_counter())
+            writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
 
             ### TODO: delayed reveal individual price
             ### NOTICE: users have to calculate price by themselves
             priceInfo = [orderSucceed, changeA, changeB]
             writeDB(f'price_{seqTrade}', priceInfo, list)
 
-            writeDB(f'totalCnt_{tokenA}_{tokenB}', totalCnt, int)
-
-            print(f'**** seqTrade {seqTrade} finish')
+            times.append(time.perf_counter())
 
             with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
                 for op, t in enumerate(times):

@@ -4,11 +4,10 @@ import sys
 idx_op = 4
 idx_time = 6
 
-op_start_mpc_chain = '1' ### lock acquired
-op_lock_acquired = '2'
-op_start_mpc = '3'
-op_end_mpc = '4'
-op_end_mpc_chain = '6'
+op_lock_acquired = '1'
+op_start_mpc = '2'
+op_end_mpc = '3'
+op_end_mpc_chain = '4'
 
 def scan(serverID):
     mpc = 0

@@ -434,14 +434,19 @@ void mpcInput() {
     }
 
     /* python */
-    textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
-    textFuncLower += indent + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
-    textFuncLower += indent + "stdout, stderr = await proc.communicate()\n";
-    textFuncLower += indent + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
-    textFuncLower += indent + "if stdout:\n";
-    textFuncLower += indent + "    print(f'[stdout]\\n{stdout.decode()}')\n";
-    textFuncLower += indent + "if stderr:\n";
-    textFuncLower += indent + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    if (funcName == "Trade") {
+        textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
+        textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold)\n";
+    } else {
+        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
+        textFuncLower += indent + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
+        textFuncLower += indent + "stdout, stderr = await proc.communicate()\n";
+        textFuncLower += indent + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
+        textFuncLower += indent + "if stdout:\n";
+        textFuncLower += indent + "    print(f'[stdout]\\n{stdout.decode()}')\n";
+        textFuncLower += indent + "if stderr:\n";
+        textFuncLower += indent + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    }
     textFuncLower += "\n";
 }
 

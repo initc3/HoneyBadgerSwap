@@ -30,6 +30,7 @@ def trade(appContract, tokenA, tokenB, amtA, amtB, account):
                 f"gasUsed\t{receipt['gasUsed']}\t"
                 f"{time.perf_counter()}\n")
 
+
 if __name__=='__main__':
     client_id = int(sys.argv[1])
     tokenA = token_addrs[int(sys.argv[2])]
