@@ -105,45 +105,44 @@ contract colAuction{
 
                 curStatus = 1
                 set(status, uint curStatus, uint colAuctionId)
-                return
             
-
-            n = len(bids)
-
-            amtSold = 0
-
-            for i in range(n-1):
-                (Xi,Pi,Amti) = bids[i+1]
-
-                
-                mpcInput(sint Xi, cint curPrice)
-
-                valid = (curPrice.less_equal(Xi,bit_length = bit_length)).reveal()
-
-                mpcOutput(cint valid)
-
-                if valid == 1:
-                    mpcInput(sint Amti, sint amtSold, sint totalAmt)
-                    amtSold += Amti
-                    aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-                    mpcOutput(sint amtSold,cint aucDone)
-
-                    if aucDone == 1:
-                        break
-
-            mpcInput(sint amtSold, sint totalAmt)
-            aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-            mpcOutput(cint aucDone)
-
-            set(checkNum, uint curCheckNum, uint colAuctionId)
+            else:
             
-            if aucDone == 1:
-                print(colAuctionId,'Auction success!!!!!!!!!')
-                res = 'Auction success!!!'
-                set(colres, string memory res, uint colAuctionId)
-                curStatus = 1
-                set(status, uint curStatus, uint colAuctionId)
-                return
+                n = len(bids)
+
+                amtSold = 0
+
+                for i in range(n-1):
+                    (Xi,Pi,Amti) = bids[i+1]
+
+                    mpcInput(sint Xi, cint curPrice)
+
+                    valid = (curPrice.less_equal(Xi,bit_length = bit_length)).reveal()
+
+                    mpcOutput(cint valid)
+
+                    if valid == 1:
+                        mpcInput(sint Amti, sint amtSold, sint totalAmt)
+                        amtSold += Amti
+                        aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+                        mpcOutput(sint amtSold,cint aucDone)
+
+                        if aucDone == 1:
+                            break
+
+                mpcInput(sint amtSold, sint totalAmt)
+                aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+                mpcOutput(cint aucDone)
+
+                set(checkNum, uint curCheckNum, uint colAuctionId)
+            
+                if aucDone == 1:
+                    print(colAuctionId,'Auction success!!!!!!!!!')
+                    res = 'Auction success!!!'
+                    set(colres, string memory res, uint colAuctionId)
+                    curStatus = 1
+                    set(status, uint curStatus, uint colAuctionId)
+                    return
 
         }
     }
