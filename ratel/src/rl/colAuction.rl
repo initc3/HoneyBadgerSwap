@@ -160,25 +160,13 @@ contract colAuction{
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}', dict)
 
-            mpcInput(sint price, sint FloorPrice)
+            bids.append((price,P,Amt))
+            print('**** bids', bids)
 
-            valid = (price.greater_equal(FloorPrice, bit_length=bit_length)).reveal()
-
-            mpcOutput(cint valid)
-
-            print('**** valid', valid)
-            if valid == 1:
-                bids.append((price,P,Amt))
-                print('**** bids', bids)
-                writeDB(f'bidsBoard_{colAuctionId}',bids,list)
-
-                curStatus = bidders_id+2
-                set(status, uint curStatus, uint colAuctionId)
-            else:
-                print('**** bidders_id',bidders_id)
-                curStatus = bidders_id+2
-                set(status, uint curStatus, uint colAuctionId)
-
+            writeDB(f'bidsBoard_{colAuctionId}',bids,list)
+            curStatus = bidders_id+2
+            set(status, uint curStatus, uint colAuctionId)
+            
             print('submit end',colAuctionId,bidders_id)
 
         }
