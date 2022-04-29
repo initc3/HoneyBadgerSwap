@@ -4,7 +4,7 @@ import shutil
 import sys
 import time
 
-from ratel.src.python.utils import mpc_port, prog, offline_prog, blsPrime, repeat_experiment, execute_cmd
+from ratel.src.python.utils import mpc_port, prog, offline_prog, prime, repeat_experiment, execute_cmd
 
 
 def set_up_share_files(players, concurrency):
@@ -15,7 +15,7 @@ def set_up_share_files(players, concurrency):
 
 
 async def run_online_ONLY(server_id, port, players, threshold):
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} hbswapTrade1'
     await execute_cmd(cmd)
 
 
@@ -30,13 +30,13 @@ async def run_online(server_id, port, players, threshold):
     await execute_cmd(cmd)
 
     dir = dst_dir
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} -F --prep-dir {dir} hbswapTrade1'
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} -F --prep-dir {dir} hbswapTrade1'
     await execute_cmd(cmd)
 
 
 async def run_offline(server_id, port, players, threshold):
     dir = f'Player-data-port-{port}'
-    cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} --prep-dir {dir} hbswapTrade1'
+    cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} --prep-dir {dir} hbswapTrade1'
     await execute_cmd(cmd)
 
 
@@ -67,6 +67,7 @@ async def rep(func, players, threshold, concurrency):
     for i in range(repeat_experiment):
         sum += await run_test(func, players, threshold, concurrency)
     avg = sum / repeat_experiment
+    print(f'!!!! {func} {avg}')
     return avg
 
 

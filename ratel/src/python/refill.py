@@ -7,27 +7,22 @@ from ratel.src.python.utils import getAccount, parse_contract
 
 
 def transferEther(client_account, server_account, amt):
-    tx_hash = web3.eth.send_transaction({
+    web3.eth.send_transaction({
         'to': client_account.address,
         'from': server_account.address,
         'value': amt
     })
-    web3.eth.wait_for_transaction_receipt(tx_hash)
 
-    print(f'**** receiver {receiver} ether balance {web3.eth.get_balance(client_account.address)}')
 
 def transferToken(token_index, client_account, amt):
     token_addr = token_addrs[token_index]
     abi, bytecode = parse_contract('Token')
     tokenContract = web3.eth.contract(address=token_addr, abi=abi)
 
-    tx_hash = tokenContract.functions.approve(client_account.address, amt).transact()
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    tokenContract.functions.approve(client_account.address, amt).transact()
 
-    tx_hash = tokenContract.functions.transfer(client_account.address, amt).transact()
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    tokenContract.functions.transfer(client_account.address, amt).transact()
 
-    print(f'**** receiver {receiver} token {token_index} balance {tokenContract.functions.balanceOf(client_account.address).call()}')
 
 def refill(receiver, token_id):
     client_account = getAccount(web3, f'/opt/poa/keystore/{receiver}/')
@@ -40,6 +35,7 @@ def refill(receiver, token_id):
         transferEther(client_account, server_account, amt)
     else:
         transferToken(token_id, client_account, amt)
+
 
 if __name__=='__main__':
     receiver = sys.argv[1]
