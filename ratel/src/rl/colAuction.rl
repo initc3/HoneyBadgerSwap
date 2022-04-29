@@ -175,8 +175,11 @@ contract colAuction{
                 curStatus = bidders_id+2
                 set(status, uint curStatus, uint colAuctionId)
             else:
+                print('**** bidders_id',bidders_id)
                 curStatus = bidders_id+2
                 set(status, uint curStatus, uint colAuctionId)
+
+            print('submit end',colAuctionId,bidders_id)
 
         }
     }
