@@ -159,7 +159,9 @@ async def execute_cmd(cmd):
     return proc.returncode
 
 
-def mark_finish(server, seq):
+def mark_finish(server, seq, port):
+    server.portLock[port].release()
+
     key = 'execHistory'
     execHistory = read_db(server, key)
     execHistory = bytes_to_dict(execHistory)

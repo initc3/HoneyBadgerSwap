@@ -317,6 +317,7 @@ contract hbswap {
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
             times.append(time.perf_counter())
 
+            print(f'**** start {seqTrade}')
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sint totalCnt)
 
             feeRate = 0.003

@@ -28,7 +28,6 @@ int numInput;
 string textLine;
 
 string textFuncUpper; /* read from log, recover private input, acquire locks */
-string textFuncMid; /* code til last mpcOutput */
 string textFuncLower;
 
 string textPythonUpper; /* only used for monitor function */
@@ -479,9 +478,6 @@ void mpcOutput() {
     for (int i = 0; i < num; i++) {
         textFuncLower += indent + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
-
-    textFuncMid += textFuncLower;
-    textFuncLower = "";
 }
 
 
@@ -525,7 +521,6 @@ SPACE [ \t\r]+
     cntMPC = 0;
     cntReadDB = 0;
     textFuncUpper = "";
-    textFuncMid = "";
     textFuncLower = "";
     readKeySet.clear();
     writeKeySet.clear();
@@ -539,7 +534,6 @@ SPACE [ \t\r]+
     cntMPC = 0;
     cntReadDB = 0;
     textFuncUpper = "";
-    textFuncMid = "";
     textFuncLower = "";
     readKeySet.clear();
     writeKeySet.clear();
@@ -644,14 +638,9 @@ SPACE [ \t\r]+
         createLocks();
         acquireLocks();
 
-        textPythonLower += textFuncUpper + textFuncMid;
+        textPythonLower += textFuncUpper + textFuncLower;
 
-        textPythonLower += "\n";
-        textPythonLower += "    server.portLock[port].release()\n";
-
-        textPythonLower += textFuncLower;
-
-        if (!inPureMpc) textPythonLower += "    mark_finish(server, seq" + funcName + ")";
+        if (!inPureMpc) textPythonLower += "    mark_finish(server, seq" + funcName + ", port)";
 
         textPythonLower += returnLine;
 
