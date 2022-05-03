@@ -38,6 +38,12 @@ sudo docker tag initc3/honeybadgerswap:8fc1863 hbswap:latest
 sudo docker-compose up -d
 sudo docker exec -it honeybadgerswap_dev_1 bash
 ```
+
+#### setup ssl connection
+```
+bash setup-ssl.sh 4
+```
+
 #### compile the ratel
 ```
 bash ratel/src/compile.sh colAuction
