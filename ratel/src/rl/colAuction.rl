@@ -22,15 +22,13 @@ contract colAuction{
     mapping (uint => uint) public checkTime;
 
     mapping (uint => uint) public checkCnt;
-    mapping (uint => uint) public checkNum; // closed-1 created-2 submitted --- bidders_num+2 
+    mapping (uint => uint) public checkNum;  
     mapping (address => uint) public checkNumValue;
     mapping (uint => uint) public checkNumCount;
 
     mapping (uint => uint) public status; // closed-1 created-2 submitted --- bidders_num+2 
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
-
-
     
     mapping (uint => string) public colres;
     mapping (address => string) public colresValue;
@@ -73,9 +71,7 @@ contract colAuction{
 
         uint curTime = block.number;
 
-        if(curTime < lastTime + 10){
-            return;
-        }
+        require(curTime >= lastTime + 10);
 
         checkTime[colAuctionId] = block.number;
 
@@ -87,14 +83,15 @@ contract colAuction{
         uint curCheckNum = checkCnt[colAuctionId]+1;
         checkCnt[colAuctionId] = curCheckNum;
 
-        mpc(uint colAuctionId, uint curCheckNum, uint curPrice, uint FloorPrice, uint curTime, uint lastTime){
+        mpc(uint colAuctionId, uint curCheckNum, uint curPrice, uint FloorPrice){
 
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}',dict)
 
             totalAmt = auc['totalAmt']
 
-            print("curPrice:",curPrice)
+            print("**** curPrice:",curPrice)
+            print("**** totalAmt:",totalAmt)
 
             if curPrice < FloorPrice:
                 res = 'Auction failed!!!'
@@ -109,10 +106,12 @@ contract colAuction{
             else:
             
                 n = len(bids)
+                print("**** n:",n)
 
                 amtSold = 0
 
                 for i in range(n-1):
+
                     (Xi,Pi,Amti) = bids[i+1]
 
                     mpcInput(sint Xi, sint curPrice)
@@ -121,18 +120,35 @@ contract colAuction{
 
                     mpcOutput(cint valid)
 
+                    print("**** valid:",valid)
+
                     if valid == 1:
                         mpcInput(sint Amti, sint amtSold, sint totalAmt)
+
+                        print_ln("**** Amti %s", Amti.reveal())
+                        print_ln("**** amtSold %s", amtSold.reveal())
+                        print_ln("**** totalAmt %s", totalAmt.reveal())
+
                         amtSold += Amti
                         aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+
+                        print_ln('**** amtSold %s',amtSold.reveal())
+
                         mpcOutput(sint amtSold,cint aucDone)
 
                         if aucDone == 1:
                             break
 
                 mpcInput(sint amtSold, sint totalAmt)
+
+                print_ln("**** amtSold %s",amtSold.reveal())
+                print_ln("**** totalAmt %s",totalAmt.reveal())
+
                 aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
+                
                 mpcOutput(cint aucDone)
+
+                print("**** aucDone", aucDone)
 
                 set(checkNum, uint curCheckNum, uint colAuctionId)
             
@@ -142,7 +158,6 @@ contract colAuction{
                     set(colres, string memory res, uint colAuctionId)
                     curStatus = 1
                     set(status, uint curStatus, uint colAuctionId)
-                    
 
         }
     }
@@ -160,6 +175,9 @@ contract colAuction{
             auc = readDB(f'aucBoard_{colAuctionId}', dict)
 
             mpcInput(sint price, sint FloorPrice)
+
+            print_ln("**** price %s", price.reveal())
+            print_ln("**** FloorPrice %s", FloorPrice.reveal())
 
             valid = (price.greater_equal(FloorPrice, bit_length=bit_length)).reveal()
 
