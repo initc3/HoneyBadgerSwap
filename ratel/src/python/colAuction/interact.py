@@ -35,6 +35,8 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
         if status == 2:
             return colAuctionId
 
+
+
 # means I'll buy up to $amt if the prices reaches $price or below
 def submitBids(appContract,colAuctionId,price,amt,account):
     status = appContract.functions.status(colAuctionId).call()
@@ -75,19 +77,15 @@ if __name__=='__main__':
     appContract = web3.eth.contract(address=app_addr, abi=abi)
 
 
-
     client_1 = getAccount(web3,f'/opt/poa/keystore/client_2/')
     client_2 = getAccount(web3,f'/opt/poa/keystore/client_3/')
     client_3 = getAccount(web3,f'/opt/poa/keystore/client_4/')
     client_4 = getAccount(web3,f'/opt/poa/keystore/client_5/')
     client_5 = getAccount(web3,f'/opt/poa/keystore/client_6/')
     client_6 = getAccount(web3,f'/opt/poa/keystore/client_7/')
-    client_7 = getAccount(web3,f'/opt/poa/keystore/client_8/')
+
     
-    #test auction success
-
-#    print('==================================')
-
+    # auction1 success
     
     totalAmt1 = 20
     StartPrice1 = 100
@@ -96,6 +94,8 @@ if __name__=='__main__':
     print('new Auction id:',colAuctionId1)
     time.sleep(10)
 
+    # auction2 faild due to total amt > sum of all bidder's amt 
+
     totalAmt2 = 40
     StartPrice2 = 100
     FloorPrice2 = 10 
@@ -103,13 +103,12 @@ if __name__=='__main__':
     print('new Auction id:',colAuctionId2)
     time.sleep(10)
 
-
-
     price11 = 60
     Amt11 = 2
     submitBids(appContract,colAuctionId1,price11,Amt11,client_1)
     print('finished input client_1 AuctionId:',colAuctionId1)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId2,price11,Amt11,client_1)
     print('finished input client_1 AuctionId:',colAuctionId2)
     time.sleep(20)
@@ -119,9 +118,13 @@ if __name__=='__main__':
     submitBids(appContract,colAuctionId1,price12,Amt12,client_2)
     print('finished input client_2 AuctionId:',colAuctionId1)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId2,price12,Amt12,client_2)
     print('finished input client_2 AuctionId:',colAuctionId2)
     time.sleep(20)
+
+
+    # auction3 failed due to the FloorPrice is too high
 
     totalAmt3 = 20
     StartPrice3 = 100
@@ -129,9 +132,11 @@ if __name__=='__main__':
     colAuctionId3 = createAuction(appContract,StartPrice3,FloorPrice3,totalAmt3,client_1)
     print('new Auction id:',colAuctionId3)
     time.sleep(10)
+    
     submitBids(appContract,colAuctionId3,price11,Amt11,client_1)
     print('finished input client_1 AuctionId:',colAuctionId3)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId3,price12,Amt12,client_2)
     print('finished input client_2 AuctionId:',colAuctionId3)
     time.sleep(20)
@@ -142,9 +147,11 @@ if __name__=='__main__':
     submitBids(appContract,colAuctionId1,price13,Amt13,client_3)
     print('finished input client_3 AuctionId:',colAuctionId1)
     time.sleep(20)
+    
     submitBids(appContract,colAuctionId2,price13,Amt13,client_3)
     print('finished input client_3 AuctionId:',colAuctionId2)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId3,price13,Amt13,client_3)
     print('finished input client_3 AuctionId:',colAuctionId3)
     time.sleep(20)
@@ -155,9 +162,11 @@ if __name__=='__main__':
     submitBids(appContract,colAuctionId1,price14,Amt14,client_4)
     print('finished input client_4 AuctionId:',colAuctionId1)
     time.sleep(20)
+    
     submitBids(appContract,colAuctionId2,price14,Amt14,client_4)
     print('finished input client_4 AuctionId:',colAuctionId2)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId3,price14,Amt14,client_4)
     print('finished input client_4 AuctionId:',colAuctionId3)
     time.sleep(20)
@@ -167,11 +176,12 @@ if __name__=='__main__':
     submitBids(appContract,colAuctionId1,price15,Amt15,client_5)
     print('finished input client_5 AuctionId:',colAuctionId1)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId2,price15,Amt15,client_5)
     print('finished input client_5 AuctionId:',colAuctionId2)
     time.sleep(20)
+
     submitBids(appContract,colAuctionId3,price15,Amt15,client_5)
     print('finished input client_5 AuctionId:',colAuctionId3)
     time.sleep(20)
-
 
