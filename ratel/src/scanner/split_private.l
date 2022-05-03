@@ -100,7 +100,7 @@ string getIndent(string text) {
 
 void initPython() {
     textPythonUpper += "import asyncio\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, replay, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, replay, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "async def monitor(server):\n";
@@ -433,18 +433,13 @@ void mpcInput() {
     }
 
     /* python */
-    if (funcName == "Trade") {
+    string mpcName = mpcFile.substr(4, mpcFile.length() - 8);
+    if (mpcName == "hbswapTrade1") {
         textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
-        textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold)\n";
+        textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
     } else {
-        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
-        textFuncLower += indent + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
-        textFuncLower += indent + "stdout, stderr = await proc.communicate()\n";
-        textFuncLower += indent + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
-        textFuncLower += indent + "if stdout:\n";
-        textFuncLower += indent + "    print(f'[stdout]\\n{stdout.decode()}')\n";
-        textFuncLower += indent + "if stderr:\n";
-        textFuncLower += indent + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcName + "\'\n";
+        textFuncLower += indent + "await execute_cmd(cmd)\n";
     }
     textFuncLower += "\n";
 }

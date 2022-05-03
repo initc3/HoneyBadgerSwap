@@ -19,7 +19,7 @@ async def run_online_ONLY(server_id, port, players, threshold):
     await execute_cmd(cmd)
 
 
-async def run_online(server_id, port, players, threshold):
+async def run_online(server_id, port, players, threshold, mpcProg, seq):
     src_dir = f'Player-data-port-{port}'
     dst_dir = f'Player-data-port-{port}-s{server_id}-copy'
 
@@ -30,8 +30,8 @@ async def run_online(server_id, port, players, threshold):
     await execute_cmd(cmd)
 
     dir = dst_dir
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} -F --prep-dir {dir} hbswapTrade1'
-    await execute_cmd(cmd)
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} -F --prep-dir {dir} {mpcProg}'
+    await execute_cmd(cmd, f'**** trade seq {seq}')
 
 
 async def run_offline(server_id, port, players, threshold):

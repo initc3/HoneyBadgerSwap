@@ -45,7 +45,6 @@ contract hbswap {
         publicBalance[token][user] -= amt;
 
         mpc(address user, address token, uint amt) {
-            #print('**** begin deposit', seqSecretDeposit)
 
             secretBalance = readDB(f'balance_{token}_{user}', int)
 
@@ -56,10 +55,7 @@ contract hbswap {
 
             mpcOutput(sfix secretBalance)
 
-            #print('**** secretBalance', token, secretBalance)
             writeDB(f'balance_{token}_{user}', secretBalance, int)
-
-            #print('**** end deposit', seqSecretDeposit)
         }
     }
 
@@ -117,17 +113,12 @@ contract hbswap {
             import math
             amtLT = math.floor(math.sqrt(amtA * amtB))
 
-            #print('**** before initPool', balanceA, amtA, balanceB, amtB, totalSupplyLT, balanceLT, poolA, poolB, amtLT)
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix totalSupplyLT, sfix balanceLT, sfix poolA, sfix poolB, sfix amtLT)
 
             enoughA = balanceA >= amtA
             enoughB = balanceB >= amtB
             zeroTotalLT = totalSupplyLT == 0
             validOrder = (enoughA * enoughB * zeroTotalLT).reveal()
-            print_ln("**** balanceA %s", balanceA.reveal())
-            print_ln("**** balanceB %s", balanceB.reveal())
-            print_ln("**** poolA %s", poolA.reveal())
-            print_ln("**** poolB %s", poolB.reveal())
 
             if_then(validOrder)
             balanceA -= amtA
@@ -137,6 +128,7 @@ contract hbswap {
             poolB += amtB
             totalSupplyLT += amtLT
             end_if()
+
             print_ln("**** balanceA %s", balanceA.reveal())
             print_ln("**** balanceB %s", balanceB.reveal())
             print_ln("**** balanceLT %s", balanceLT.reveal())
@@ -145,8 +137,6 @@ contract hbswap {
             print_ln("**** totalSupplyLT %s", totalSupplyLT.reveal())
 
             mpcOutput(cint validOrder, sfix balanceA, sfix balanceB, sfix balanceLT, sfix poolA, sfix poolB, sfix totalSupplyLT)
-
-            #print('**** after initPool', balanceA, balanceB, balanceLT, poolA, poolB, totalSupplyLT)
 
             writeDB(f'balance_{tokenA}_{user}', balanceA, int)
             writeDB(f'balance_{tokenB}_{user}', balanceB, int)
@@ -315,9 +305,9 @@ contract hbswap {
             poolA = readDB(f'pool_{tokenA}_{tokenB}_{tokenA}', int)
             poolB = readDB(f'pool_{tokenA}_{tokenB}_{tokenB}', int)
             totalCnt = readDB(f'totalCnt_{tokenA}_{tokenB}', int)
+
             times.append(time.perf_counter())
 
-            print(f'**** start {seqTrade}')
             mpcInput(sfix balanceA, sfix amtA, sfix balanceB, sfix amtB, sfix poolA, sfix poolB, sint totalCnt)
 
             feeRate = 0.003
