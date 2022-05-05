@@ -1,6 +1,8 @@
 %option noyywrap
 
 %{
+
+
 #include <string>
 #include <vector>
 #include <assert.h>
@@ -8,11 +10,11 @@
 
 using namespace std;
 
-bool isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isEmptyLine = true;
+bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput; /* see keyword in the current line */
+bool inPureMpc; /* in pureMpc block */
+bool inFunc; /* in function block */
 
 int braces;
-int numInput;
-int cntValueDB;
 
 string fileName;
 string funcName;
@@ -20,25 +22,36 @@ string mpcFile;
 FILE *mpcFp, *pythonFp;
 
 int cntMPC;
-bool isMPC;
+bool isMPC; /* MP-SPDZ code */
+int numInput;
 
 string textLine;
-string textPythonUpper, textPythonLower;
-string textFuncUpper, textFuncMid, textFuncLower;
+
+string textFuncUpper; /* read from log, recover private input, acquire locks */
+string textFuncLower;
+
+string textPythonUpper; /* only used for monitor function */
+string textPythonLower;
+
 string textMpc;
+
+string textRecover;
+bool hasRecoverFunc;
+
+string returnLine;
 
 bool isArg;
 string arg;
 vector<string> args;
 
-string prefix;
+string indent;
 
-string textRecover;
+int cntReadDB;
 
 vector<string> events;
 
-int funcStage;
-set<string> keyReadDB, keyWriteDB;
+set<string> readKeySet, writeKeySet;
+
 
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
@@ -48,6 +61,7 @@ string removeType(string st) {
     }
 }
 
+
 string getType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
         if (st[i] == ' ') {
@@ -55,6 +69,7 @@ string getType(string st) {
         }
     }
 }
+
 
 string tab(int repetition) {
     string ret = "";
@@ -64,7 +79,8 @@ string tab(int repetition) {
     return ret;
 }
 
-string removeSpace(string text) {
+
+string removeIndent(string text) {
     for (int i = 0; i < text.length(); i++) {
         if (text[i] != ' ') {
             return text.substr(i);
@@ -72,7 +88,8 @@ string removeSpace(string text) {
     }
 }
 
-string getPrefix(string text) {
+
+string getIndent(string text) {
     for (int i = 0; i < text.length(); i++) {
         if (text[i] != ' ') {
             return text.substr(0, i);
@@ -80,14 +97,13 @@ string getPrefix(string text) {
     }
 }
 
+
 void initPython() {
-    textPythonUpper += "import ast\n";
     textPythonUpper += "import asyncio\n";
-    textPythonUpper += "import time\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, blsPrime, sz, int_to_hex, hex_to_int, recover_input, fp, replay\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, replay, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd\n";
     textPythonUpper += "\n";
 
-    textPythonUpper += "async def monitor(server, loop):\n";
+    textPythonUpper += "async def monitor(server):\n";
     textPythonUpper += "    blkNum = server.web3.eth.get_block_number()\n";
     textPythonUpper += "    while True:\n";
     textPythonUpper += "        curBlkNum = server.web3.eth.get_block_number()\n";
@@ -96,6 +112,7 @@ void initPython() {
     string pythonFile = "python/" + fileName + ".py";
     pythonFp = fopen(pythonFile.c_str(), "w");
 }
+
 
 void finalizePython() {
     textPythonUpper += "            logs = []\n";
@@ -111,9 +128,10 @@ void finalizePython() {
     textPythonUpper += "\n";
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
-    textPythonUpper += "            for log in logs:\n";
-    textPythonUpper += "                for _ in range((1 if log[2] != 'Trade' else replay)):\n";
-    textPythonUpper += "                    loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+    textPythonUpper += "            for i in range(replay):\n";
+    textPythonUpper += "                for log in logs:\n";
+    textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
+    textPythonUpper += "                        server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
     textPythonUpper += "            await asyncio.sleep(1)\n";
@@ -124,11 +142,12 @@ void finalizePython() {
     fclose(pythonFp);
 }
 
+
 void initMPC() {
     mpcFile = "mpc/" + fileName + funcName + to_string(++cntMPC) + ".mpc";
     mpcFp = fopen(mpcFile.c_str(), "w");
 
-    textMpc += "bit_length = 212\n";
+    textMpc += "bit_length = 210\n";
     textMpc += "\n";
 
     textMpc += "def read_sint(idx):\n";
@@ -141,6 +160,7 @@ void initMPC() {
     textMpc += "def main():\n";
 }
 
+
 void finalizeMPC() {
     textMpc += "main()";
 
@@ -149,6 +169,39 @@ void finalizeMPC() {
 
     textMpc = "";
 }
+
+
+void processPureMpc() {
+    textFuncUpper += "\n";
+    textFuncUpper += "async def run" + funcName + "(";
+
+    int num = args.size();
+    if (num > 0) textFuncUpper += args[0];
+    for (int i = 1; i < num; i++) {
+        textFuncUpper += ", " + args[i];
+    }
+
+    textFuncUpper += "):\n";
+
+    textFuncUpper += "    seq" + funcName + " = -1\n";
+    textFuncUpper += "\n";
+
+}
+
+
+void processEventParam() {
+    for (int i = 0; i < args.size(); i++) {
+        if (i > 0) textLine += ", ";
+        if (args[i][0] == '$') {
+            string postVarName = removeType(args[i]);
+            postVarName[0] = toupper(postVarName[0]);
+            textLine += "idx" + postVarName + ", " + "masked" + postVarName;
+        } else {
+            textLine += removeType(args[i]);
+        }
+    }
+}
+
 
 void monitorEvent() {
     events.push_back(funcName);
@@ -160,85 +213,213 @@ void monitorEvent() {
     int num = args.size();
     for (int i = 0; i < num; i++) {
         string arg = args[i];
-        textFuncUpper += tab(1) + arg + " = log['args']['" + arg + "']\n";
+
+        string type = getType(arg);
+        string varName = removeType(arg);
+
+        if (type[0] == '$') {
+            varName[0] = toupper(varName[0]);
+
+            string idxVarName = "idx" + varName;
+            textFuncUpper += tab(1) + idxVarName + " = log['args']['" + idxVarName + "']\n";
+
+            string maskedVarName = "masked" + varName;
+            textFuncUpper += tab(1) + maskedVarName + " = log['args']['" + maskedVarName + "']\n";
+
+        } else {
+            textFuncUpper += tab(1) + varName + " = log['args']['" + varName + "']\n";
+        }
     }
     textFuncUpper += "\n";
 
-    textRecover += "def recover" + funcName + "(seq" + funcName;
-    for (int i = 0; i < num; i++) {
-        textRecover += ", " + args[i];
+    if (args.size()) {
+        textRecover += "def recover" + funcName + "(seq" + funcName;
+        for (int i = 0; i < num; i++) {
+            string arg = args[i];
+
+            string type = getType(arg);
+            string varName = removeType(arg);
+
+            if (type[0] == '$') {
+                varName[0] = toupper(varName[0]);
+
+                string idxVarName = "idx" + varName;
+                textRecover += ", " + idxVarName;
+
+                string maskedVarName = "masked" + varName;
+                textRecover += ", " + maskedVarName;
+
+            } else {
+                textRecover += ", " + varName;
+            }
+        }
+        textRecover += "):\n";
+        textRecover += "    return [";
+
+        hasRecoverFunc = true;
     }
-    textRecover += "):\n";
-    textRecover += "    return [";
 }
+
+
+void unmaskInput() {
+    bool flag = 0;
+    for (int i = 0; i < args.size(); i++) {
+        if (args[i][0] == '$') {
+            flag = 1;
+            string varName = removeType(args[i]);
+            string postVarName = varName;
+            postVarName[0] = toupper(postVarName[0]);
+            textFuncUpper += "    " + varName + " = recover_input(server.db, masked" + postVarName + ", idx" + postVarName + ")\n";
+        }
+    }
+    if (flag) textFuncUpper += "\n";
+}
+
+
+void collectKeys() {
+    string tmp;
+
+    textFuncUpper += "    readKeys = [";
+    for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
+        tmp += *it + ", ";
+    }
+
+    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+    textFuncUpper += tmp + "]\n";
+
+    tmp = "";
+    textFuncUpper += "    writeKeys = [";
+    for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
+        tmp += *it + ", ";
+    }
+    if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
+    textFuncUpper += tmp + "]\n";
+
+    textFuncUpper += "\n";
+}
+
+
+void createLocks() {
+    bool flag;
+
+    if (readKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+        textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    }
+
+    if (writeKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        if key not in server.dbLock.keys():\n";
+        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+        textFuncUpper += "            server.dbLockCnt[key] = 0\n";
+    }
+
+    if (flag) textFuncUpper += "\n";
+}
+
+
+void acquireLocks() {
+    textFuncUpper += "    tasks = []\n";
+
+    if (readKeySet.size() > 0) {
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
+    }
+
+    if (writeKeySet.size() > 0) {
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        if key not in readKeys:\n";
+        textFuncUpper += "            tasks.append(server.dbLock[key].acquire())\n";
+    }
+
+    textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
+    textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
+
+    textFuncUpper += "    await asyncio.wait(tasks)\n";
+
+    textFuncUpper += "\n";
+
+    bool flag;
+
+    if (readKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in readKeys:\n";
+        textFuncUpper += "        server.dbLockCnt[key] += 1\n";
+    }
+
+    if (writeKeySet.size() > 0) {
+        flag = true;
+        textFuncUpper += "    for key in writeKeys:\n";
+        textFuncUpper += "        server.dbLockCnt[key] += 1\n";
+    }
+
+    if (flag) textFuncUpper += "\n";
+}
+
 
 void readDB() {
     string textTmp = textLine;
 
-    string value = "value" + to_string(++cntValueDB);
+    string value = "value" + to_string(++cntReadDB);
+    string key = args[0];
+    string type = args[1];
 
-    keyReadDB.insert(args[0]);
+    readKeySet.insert(key);
 
-    textLine = prefix + "try:\n";
-    textLine += prefix + "    " + value + " = server.db.Get(" + args[0] + ".lower().encode())\n";
-    textLine += prefix + "except KeyError:\n";
-    textLine += prefix + "    " + value + " = bytes(0)\n";
-    if (args[1] == "int") {
-        textLine += prefix + value + " = int.from_bytes(" + value + ", 'big')\n";
-    } else if (args[1] == "list") {
-        textLine += prefix + "try:\n";
-        textLine += prefix + "    " + value + " = " + value + ".decode(encoding='utf-8')\n";
-        textLine += prefix + "    " + value + " = list(ast.literal_eval(" + value + "))\n";
-        textLine += prefix + "except:\n";
-        textLine += prefix + "    " + value + " = []\n";
-    } else if (args[1] == "dict") {
-        textLine += prefix + "try:\n";
-        textLine += prefix + "    " + value + " = " + value + ".decode(encoding='utf-8')\n";
-        textLine += prefix + "    " + value + " = dict(ast.literal_eval(" + value + "))\n";
-        textLine += prefix + "except:\n";
-        textLine += prefix + "    " + value + " = {}\n";
+    textLine = indent + value + " = read_db(server, " + key + ")\n";
+    if (type == "int") {
+        textLine += indent + value + " = bytes_to_int(" + value + ")\n";
+    } else if (type == "list") {
+        textLine += indent + value + " = bytes_to_list(" + value + ")\n";
+    } else if (type == "dict") {
+        textLine += indent + value + " = bytes_to_dict(" + value + ")\n";
     } else {
         assert(0);
     }
     textLine += textTmp + value;
 }
 
-void writeDB() {
-    keyWriteDB.insert(args[0]);
-    if (args[2] == "int") {
-        string key = args[0];
-        string value = args[1];
-        textLine += "server.db.Put(" + key + ".lower().encode(), " + value + ".to_bytes((" + value + ".bit_length() + 7) // 8, 'big'))";
-    } else if (args[2] == "list" || args[2] == "dict") {
-        string key = args[0];
-        string value = args[1];
-        string textTmp;
 
-        textTmp = prefix + value + " = str(" + value + ")\n";
-        textTmp += prefix + value + " = bytes(" + value + ", encoding='utf-8')\n";
-        textLine += "server.db.Put(" + key + ".lower().encode(), " + value + ")";
-        textLine = textTmp + textLine;
+void writeDB() {
+    string key = args[0];
+    string value = args[1];
+    string type = args[2];
+
+    writeKeySet.insert(key);
+
+    if (type == "int") {
+        textLine += indent + value + " = int_to_bytes(" + value + ")\n";
+    } else if (type == "list") {
+        textLine += indent + value + " = list_to_bytes(" + value + ")\n";
+    } else if (type == "dict") {
+        textLine += indent + value + " = dict_to_bytes(" + value + ")\n";
     } else {
         assert(0);
     }
 
-    textRecover += args[0] + ", ";
+    textLine += indent + "write_db(server, " + key + ", " + value + ")";
+
+    if (hasRecoverFunc) textRecover += key + ", ";
 }
 
+
 void mpcInput() {
-    //python
-    textFuncLower += "\n";
-    textFuncLower += prefix + "file = location_sharefile(server.serverID, port)\n";
-    textFuncLower += prefix + "with open(file, \"wb\") as f:\n";
-    textFuncLower += prefix + "    f.write(\n";
+    /* python */
+    textFuncLower += indent + "file = location_sharefile(server.serverID, port)\n";
+    textFuncLower += indent + "with open(file, \"wb\") as f:\n";
+    textFuncLower += indent + "    f.write(\n";
     numInput = args.size();
     for (int i = 0; i < numInput; i++) {
-        textFuncLower += prefix + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
+        textFuncLower += indent + tab(2) + ((i == 0) ? "" : "+ ") + "int_to_hex(" + removeType(args[i]) + ")\n";
     }
-    textFuncLower += prefix + tab(1) + ")\n";
+    textFuncLower += indent + tab(1) + ")\n";
     textFuncLower += "\n";
 
-    //mpc
+    /* MP-SPDZ */
     initMPC();
     for (int i = 0; i < numInput; i++) {
         string varType = getType(args[i]);
@@ -250,23 +431,22 @@ void mpcInput() {
             textMpc += tab(1) + varName + " = sfix._new(read_sint(" + to_string(i) + "))\n";
         }
     }
-    textMpc += "\n";
 
-    //python
-    textFuncLower += prefix + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} " + mpcFile.substr(4, mpcFile.length() - 8) + "\'\n";
-    textFuncLower += prefix + "proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)\n";
-    textFuncLower += prefix + "stdout, stderr = await proc.communicate()\n";
-    textFuncLower += prefix + "print(f'[{cmd!r} exited with {proc.returncode}]')\n";
-    textFuncLower += prefix + "if stdout:\n";
-    textFuncLower += prefix + "    print(f'[stdout]\\n{stdout.decode()}')\n";
-    textFuncLower += prefix + "if stderr:\n";
-    textFuncLower += prefix + "    print(f'[stderr]\\n{stderr.decode()}')\n";
+    /* python */
+    string mpcName = mpcFile.substr(4, mpcFile.length() - 8);
+    if (mpcName == "hbswapTrade1") {
+        textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
+        textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
+    } else {
+        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcName + "\'\n";
+        textFuncLower += indent + "await execute_cmd(cmd)\n";
+    }
     textFuncLower += "\n";
 }
 
+
 void mpcOutput() {
-    //mpc
-    textMpc += "\n";
+    /* MP-SPDZ */
     int num = args.size();
     for (int i = 0; i < num; i++) {
         string varType = getType(args[i]);
@@ -286,39 +466,37 @@ void mpcOutput() {
 
     finalizeMPC();
 
-    //python
-    textFuncLower += prefix + "input_arg_num = " + to_string(numInput) + "\n";
-    textFuncLower += prefix + "with open(file, \"rb\") as f:\n";
-    textFuncLower += prefix + "    f.seek(input_arg_num * sz)\n";
+    /* python */
+    textFuncLower += indent + "input_arg_num = " + to_string(numInput) + "\n";
+    textFuncLower += indent + "with open(file, \"rb\") as f:\n";
+    textFuncLower += indent + "    f.seek(input_arg_num * sz)\n";
     for (int i = 0; i < num; i++) {
-        textFuncLower += prefix + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
+        textFuncLower += indent + tab(1) + removeType(args[i]) + " = hex_to_int(f.read(sz))\n";
     }
-    textFuncLower += prefix + "server.portLock[port].release()\n";
-    textFuncLower += "\n";
 }
+
 
 void addText(char *yytext) {
     string text = string(yytext);
 
-    for (int i = 0; i < text.length(); i++) {
-        char ch = text[i];
-        if (ch != ' ' && ch != '\r' && ch != '\t') {
-            isEmptyLine = false;
-        }
-    }
-
     if (isArg) {
         arg += text;
-    } else {
+    } else if (returnLine.length() > 0) {
+        returnLine += text;
+    }else {
         textLine += text;
     }
 }
 
+
 %}
+
 
 SPACE [ \t\r]+
 
+
 %%
+
 
 .*import.*\n {
     string text = string(yytext);
@@ -330,53 +508,72 @@ SPACE [ \t\r]+
     }
 }
 
+
+^pureMpc{SPACE} {
+    inPureMpc = true;
+    isPureMpc = true;
+    isArg = true;
+    cntMPC = 0;
+    cntReadDB = 0;
+    textFuncUpper = "";
+    textFuncLower = "";
+    readKeySet.clear();
+    writeKeySet.clear();
+}
+
+
 ^mpc{SPACE} {
+    inFunc = true;
     isEvent = true;
     isArg = true;
     cntMPC = 0;
-    cntValueDB = 0;
-    funcStage = 0;
+    cntReadDB = 0;
     textFuncUpper = "";
-    textFuncMid = "";
     textFuncLower = "";
-    keyReadDB.clear();
-    keyWriteDB.clear();
+    readKeySet.clear();
+    writeKeySet.clear();
 }
+
 
 ^.*readDB\( {
     isReadDB = true;
     isArg = true;
-    funcStage = 1;
 
     string text = string(yytext);
-    prefix = getPrefix(text);
-    textLine += text.substr(0, text.length() - 7);
+    indent = getIndent(text);
+    textLine += text.substr(0, text.length() - strlen("readDB("));
 }
+
 
 ^.*writeDB\( {
     isWriteDB = true;
     isArg = true;
 
     string text = string(yytext);
-    prefix = getPrefix(text);
-    textLine += text.substr(0, text.length() - 8);
+    indent = getIndent(text);
 }
+
 
 ^.*mpcInput\( {
     isMpcInput = true;
     isArg = true;
-    funcStage = 2;
 
-    prefix = getPrefix(string(yytext));
+    indent = getIndent(string(yytext));
 }
+
 
 ^.*mpcOutput\( {
     isMpcOutput = true;
     isArg = true;
 }
 
+^.*return {
+    returnLine = string(yytext);
+}
+
+
 \( {
-    if (isEvent) {
+    if (isEvent || isPureMpc) {
         funcName = arg;
         arg = "";
     } else {
@@ -384,10 +581,13 @@ SPACE [ \t\r]+
     }
 }
 
+
 \) {
     if (isArg) {
-        args.push_back(arg);
-        arg = "";
+        if (arg.length()) {
+            args.push_back(arg);
+            arg = "";
+        }
 
         if (isReadDB) {
             assert(args.size() == 2);
@@ -403,6 +603,7 @@ SPACE [ \t\r]+
     }
 }
 
+
 ,{SPACE}* {
     if (isArg) {
         args.push_back(arg);
@@ -412,103 +613,55 @@ SPACE [ \t\r]+
     }
 }
 
+
 \{ {
     braces++;
     addText(yytext);
 }
 
+
 \} {
     braces--;
     if (braces > 0) addText(yytext);
     else {
-        textRecover += "]\n\n";
-
-        textFuncUpper += "\n";
-        textFuncUpper += "    await server.dbLock['access'].acquire()\n";
-        textFuncUpper += "    readKeys = [";
-        set<string> _set;
-        string tmp;
-        for (set<string>::iterator it = keyReadDB.begin(); it != keyReadDB.end(); it++) {
-            string key = *it;
-            if (keyWriteDB.find(key) != keyWriteDB.end()) {
-                _set.insert(key);
-            }
-        }
-        for (set<string>::iterator it = _set.begin(); it != _set.end(); it++) {
-            keyReadDB.erase(*it);
-        }
-        for (set<string>::iterator it = keyReadDB.begin(); it != keyReadDB.end(); it++) {
-            tmp += *it + ", ";
+        if (hasRecoverFunc) {
+            textRecover += "]\n\n";
+            hasRecoverFunc = false;
         }
 
-        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-        textFuncUpper += tmp + "]\n";
+        collectKeys();
+        createLocks();
+        acquireLocks();
 
-        textFuncUpper += "    writeKeys = [";
-        tmp = "";
-        for (set<string>::iterator it = keyWriteDB.begin(); it != keyWriteDB.end(); it++) {
-            tmp += *it + ", ";
-        }
-        if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
-        textFuncUpper += tmp + "]\n";
+        textPythonLower += textFuncUpper + textFuncLower;
 
-        textFuncUpper += "    for key in readKeys:\n";
-        textFuncUpper += "        if key not in server.dbLock.keys():\n";
-        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
+        if (!inPureMpc) textPythonLower += "    mark_finish(server, seq" + funcName + ", port)";
 
-        textFuncUpper += "    for key in writeKeys:\n";
-        textFuncUpper += "        if key not in server.dbLock.keys():\n";
-        textFuncUpper += "            server.dbLock[key] = asyncio.Lock()\n";
-        textFuncUpper += "    server.dbLock['access'].release()\n";
-        textFuncUpper += "\n";
+        textPythonLower += returnLine;
 
-        textFuncUpper += "    tasks = []\n";
-        textFuncUpper += "    for key in readKeys:\n";
-        textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
-        textFuncUpper += "    for key in writeKeys:\n";
-        textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
-        textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
-        textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
-        textFuncUpper += "    await asyncio.wait(tasks)\n";
-
-        textFuncUpper += "\n";
-
-        textFuncMid += "    for key in readKeys:\n";
-        textFuncMid += "        server.dbLock[key].release()\n";
-
-        textPythonLower += textFuncUpper + textFuncMid + textFuncLower;
-
-        textPythonLower += "\n";
-        textPythonLower += "    await server.dbLock['execHistory'].acquire()\n";
-        textPythonLower += "    try:\n";
-        textPythonLower += "        execHistory = server.db.Get(f'execHistory'.encode())\n";
-        textPythonLower += "    except KeyError:\n";
-        textPythonLower += "        execHistory = bytes(0)\n";
-        textPythonLower += "    try:\n";
-        textPythonLower += "        execHistory = execHistory.decode(encoding='utf-8')\n";
-        textPythonLower += "        execHistory = dict(ast.literal_eval(execHistory))\n";
-        textPythonLower += "    except:\n";
-        textPythonLower += "        execHistory = {}\n";
-        textPythonLower += "    execHistory[f'seq" + funcName + "'] = True\n";
-        textPythonLower += "    execHistory = str(execHistory)\n";
-        textPythonLower += "    execHistory = bytes(execHistory, encoding='utf-8')\n";
-        textPythonLower += "    server.db.Put(f'execHistory'.encode(), execHistory)\n";
-        textPythonLower += "    server.dbLock['execHistory'].release()\n";
-        textPythonLower += "\n";
+        inPureMpc = false;
+        inFunc = false;
+        returnLine = "";
     }
 }
+
 
 \n {
     textLine += "\n";
 
-//    printf("textLine:%s", textLine.c_str());
+//    printf("-textLine:%s", textLine.c_str());
 
-    if (isEvent) {
+    if (isPureMpc) {
+        processPureMpc();
+
+        isPureMpc = false;
+    } else if (isEvent) {
         monitorEvent();
+        unmaskInput();
 
         isEvent = false;
     } else if (isReadDB) {
-        textFuncMid += textLine;
+        textFuncLower += textLine;
 
         isReadDB = false;
     } else if (isMpcInput) {
@@ -523,35 +676,31 @@ SPACE [ \t\r]+
         isMpcOutput = false;
     } else if (isWriteDB) {
         textFuncLower += textLine;
-        string key = args[0];
-        textFuncLower += getPrefix(textLine) + "server.dbLock[" + key + "].release()\n";
 
         isWriteDB = false;
-    } else if (!isEmptyLine) {
+    } else if (returnLine.length() == 0) {
         if (isMPC) {
-            textMpc += tab(1) + removeSpace(textLine);
+            textMpc += tab(1) + removeIndent(textLine);
+        } else if (inFunc || inPureMpc) {
+            textFuncLower += textLine;
         } else {
-            if (funcStage == 0) {
-                textFuncUpper += textLine;
-            } else if (funcStage == 1) {
-                textFuncMid += textLine;
-            } else {
-                textFuncLower += textLine;
-            }
+            textPythonLower += textLine;
         }
     }
 
     args.clear();
-    isEmptyLine = true;
 
     textLine = "";
 }
+
 
 . {
     addText(yytext);
 }
 
+
 %%
+
 
 int main(int argc, char **argv) {
     char *_fileName = argv[1];
@@ -572,3 +721,4 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+

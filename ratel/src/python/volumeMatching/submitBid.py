@@ -4,12 +4,12 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
 from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH, reserveInput, getAccount
-from ratel.src.python.utils import fp, blsPrime
+from ratel.src.python.utils import fp, prime
 
 contract_name = 'VolumeMatching'
 
 def submitBid(appContract, tokenA, tokenB, amtB, account):
-    amtB = int(amtB * fp) % blsPrime
+    amtB = int(amtB * fp) % prime
     idx = reserveInput(web3, appContract, 1, account)[0]
     print(idx)
     mask = asyncio.run(get_inputmasks(f'{idx}'))[0]

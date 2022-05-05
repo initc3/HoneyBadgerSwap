@@ -92,7 +92,7 @@ contract rockPaperScissors {
             mpcOutput(cint result)
 
             if result > 2:
-                result -= blsPrime
+                result -= prime
             print('****', result)
             if result == 0:
                 print('**** tie')

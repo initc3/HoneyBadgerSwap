@@ -5,11 +5,13 @@ from web3.middleware import geth_poa_middleware
 from ratel.src.python.deploy import url, app_addr, token_addrs
 from ratel.src.python.utils import fp, decimal, getAccount, sign_and_send, parse_contract
 
+
 def approve(tokenContract, receiver, amt):
     tx = tokenContract.functions.approve(receiver, int(amt * fp)).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     sign_and_send(tx, web3, account)
+
 
 def deposit(appContract, tokenAddr, depositAmt):
     if tokenAddr == token_addrs[0]:
@@ -18,6 +20,7 @@ def deposit(appContract, tokenAddr, depositAmt):
             'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
         })
         sign_and_send(tx, web3, account)
+
     else:
         abi, bytecode = parse_contract('Token')
         tokenContract = web3.eth.contract(address=tokenAddr, abi=abi)
@@ -32,6 +35,7 @@ def deposit(appContract, tokenAddr, depositAmt):
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     sign_and_send(tx, web3, account)
+
 
 if __name__=='__main__':
     client_id = int(sys.argv[1])

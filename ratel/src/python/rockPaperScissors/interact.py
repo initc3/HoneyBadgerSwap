@@ -6,21 +6,20 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks, reserveInput
 from ratel.src.python.deploy import url, app_addr
-from ratel.src.python.utils import parse_contract, getAccount, players, blsPrime, sign_and_send
+from ratel.src.python.utils import parse_contract, getAccount, players, prime, sign_and_send, threshold
 
 contract_name = 'rockPaperScissors'
 
 def createGame(appContract, value1, account):
     idx = reserveInput(web3, appContract, 1, account)[0]
-    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedValue = (value1 + mask) % blsPrime
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}', threshold(appContract)))[0]
+    maskedValue = (value1 + mask) % prime
 
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.createGame(idx, maskedValue).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    receipt = web3.eth.get_transaction_receipt(tx_hash)
+    receipt = sign_and_send(tx, web3, account)
 
     log = appContract.events.CreateGame().processReceipt(receipt)
     gameId = log[0]['args']['gameId']
@@ -30,17 +29,17 @@ def createGame(appContract, value1, account):
         if status == 1:
             return gameId
 
+
 def joinGame(appContract, gameId, value2, account):
     idx = reserveInput(web3, appContract, 1, account)[0]
-    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}'))[0]
-    maskedValue = (value2 + mask) % blsPrime
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}', threshold(appContract)))[0]
+    maskedValue = (value2 + mask) % prime
 
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.joinGame(gameId, idx, maskedValue).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    sign_and_send(tx, web3, account)
 
     while True:
         time.sleep(1)
@@ -48,13 +47,13 @@ def joinGame(appContract, gameId, value2, account):
         if status == 2:
             return
 
+
 def startRecon(appContract, gameId, account):
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.startRecon(gameId).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    sign_and_send(tx, web3, account)
 
     while True:
         winner = appContract.functions.winners(gameId).call()
@@ -62,6 +61,7 @@ def startRecon(appContract, gameId, account):
             print('!!!! winner', winner)
             break
         time.sleep(1)
+
 
 if __name__=='__main__':
     web3 = Web3(Web3.WebsocketProvider(url))

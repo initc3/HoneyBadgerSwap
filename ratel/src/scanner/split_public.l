@@ -1,6 +1,8 @@
 %option noyywrap
 
 %{
+
+
 #include <string>
 
 using namespace std;
@@ -10,6 +12,7 @@ bool otherParameters, isConstructorHead, isConstructorBody;
 
 int braces;
 
+
 %}
 
 SPACE [ \t\r]*
@@ -17,8 +20,6 @@ SPACE [ \t\r]*
 %%
 
 .*constructor{SPACE}\( {
-    textPublic += "\n";
-
     textPublic += "    event InputMask(uint[] inpusMaskIndexes);\n";
     textPublic += "    uint public inputMaskCnt;\n";
     textPublic += "    mapping (uint => address) public inputMaskOwner;\n";
@@ -46,6 +47,8 @@ SPACE [ \t\r]*
     textPublic += "    mapping (uint => uint) public voteFinalization;\n";
     textPublic += "    mapping (uint => mapping (address => bool)) public votedFinalization;\n";
     textPublic += "    mapping (uint => uint) public finalizedTime;\n";
+    textPublic += "\n";
+    textPublic += "\n";
 
     textPublic += string(yytext);
     isConstructorHead = true;
@@ -91,12 +94,14 @@ SPACE [ \t\r]*
         textPublic += string(yytext);
         textPublic += "\n";
         textPublic += "\n";
+        textPublic += "\n";
 
         textPublic += "    function registerServer() public {\n";
         textPublic += "        address server = msg.sender;\n";
         textPublic += "        require(!isServer[server]);\n";
         textPublic += "        emit NewServer(server);\n";
         textPublic += "    }\n";
+        textPublic += "\n";
         textPublic += "\n";
 
         textPublic += "    function addServer(address s) public {\n";
@@ -114,6 +119,7 @@ SPACE [ \t\r]*
         textPublic += "        }\n";
         textPublic += "    }\n";
         textPublic += "\n";
+        textPublic += "\n";
 
         textPublic += "    function setReady(uint num) public {\n";
         textPublic += "        address server = msg.sender;\n";
@@ -124,9 +130,11 @@ SPACE [ \t\r]*
         textPublic += "        }\n";
         textPublic += "    }\n";
         textPublic += "\n";
+        textPublic += "\n";
 
         textPublic += "    function resetThreshold() public {\n";
         textPublic += "    }\n";
+        textPublic += "\n";
         textPublic += "\n";
 
         textPublic += "    function removeServer(address s) public {\n";
@@ -141,6 +149,7 @@ SPACE [ \t\r]*
         textPublic += "        }\n";
         textPublic += "    }\n";
         textPublic += "\n";
+        textPublic += "\n";
 
         textPublic += "    function reserveInput(uint num) public {\n";
         textPublic += "        require(isInputMaskReady > T);\n";
@@ -154,6 +163,7 @@ SPACE [ \t\r]*
         textPublic += "        emit InputMask(inputMaskIndexes);\n";
         textPublic += "    }\n";
         textPublic += "\n";
+        textPublic += "\n";
 
         textPublic += "    function finalize(uint seq) public {\n";
         textPublic += "        address server = msg.sender;\n";
@@ -163,8 +173,7 @@ SPACE [ \t\r]*
         textPublic += "        if (voteFinalization[seq] > T && finalizedTime[seq] == 0) {\n";
         textPublic += "            finalizedTime[seq] = block.number;\n";
         textPublic += "        }\n";
-        textPublic += "    }\n";
-
+        textPublic += "    }";
     } else textPublic += string(yytext);
 }
 

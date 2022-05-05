@@ -2,12 +2,12 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.deploy import url, parse_contract, appAddress, tokenAddress, ETH
-from ratel.src.python.utils import fp, blsPrime
+from ratel.src.python.utils import fp, prime
 
 contract_name = 'VolumeMatching'
 
 def volumeMatch(appContract, tokenA, tokenB, price):
-    price = int(price * fp) % blsPrime
+    price = int(price * fp) % prime
     tx_hash = appContract.functions.volumeMatch(tokenA, tokenB, price).transact()
     web3.eth.wait_for_transaction_receipt(tx_hash)
 

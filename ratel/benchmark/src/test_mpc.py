@@ -1,87 +1,104 @@
 import asyncio
-import os
-
 import matplotlib.pyplot as plt
 import shutil
+import sys
 import time
 
-from ratel.src.python.utils import mpc_port, prog, blsPrime
+from ratel.src.python.utils import mpc_port, prog, offline_prog, prime, repeat_experiment, execute_cmd
 
-players = 4
-threshold = 1
-max_concurrency = 20
-output_file = 'ratel/benchmark/data/mp-spdz.txt'
 
-def set_up_share_files(concurrency):
-    for server_id in range(players):
-        for i in range(concurrency):
-            port = mpc_port + i * 100
+def set_up_share_files(players, concurrency):
+    for i in range(concurrency):
+        port = mpc_port + i * 100
+        for server_id in range(players):
             shutil.copyfile(f'ratel/benchmark/data/sharefiles/Transactions-P{server_id}-{mpc_port}.data', f'Persistence/Transactions-P{server_id}-{port}.data')
 
-async def run_mpc(server_id, port):
+
+async def run_online_ONLY(server_id, port, players, threshold):
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} hbswapTrade1'
+    await execute_cmd(cmd)
+
+
+async def run_online(server_id, port, players, threshold, mpcProg, seq):
+    src_dir = f'Player-data-port-{port}'
+    dst_dir = f'Player-data-port-{port}-s{server_id}-copy'
+
+    cmd = f'rm -rf {dst_dir}'
+    await execute_cmd(cmd)
+
+    cmd = f'cp -rf {src_dir} {dst_dir}'
+    await execute_cmd(cmd)
+
+    dir = dst_dir
+    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} -F --prep-dir {dir} {mpcProg}'
+    await execute_cmd(cmd, f'**** trade seq {seq}')
+
+
+async def run_offline(server_id, port, players, threshold):
+    dir = f'Player-data-port-{port}'
+    cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} --prep-dir {dir} hbswapTrade1'
+    await execute_cmd(cmd)
+
+
+async def test(func, server_id, port, players, threshold):
     start_time = time.perf_counter()
-    cmd = f'{prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {blsPrime} hbswapTrade1'
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    # print(f'[{cmd!r} exited with {proc.returncode}]')
-    # if stdout:
-    #     print(f'[stdout]\n{stdout.decode()}')
-    # if stderr:
-    #     print(f'[stderr]\n{stderr.decode()}')
+
+    await eval(func)(server_id, port, players, threshold)
+
     end_time = time.perf_counter()
     duration = end_time - start_time
-    return server_id, port, start_time, end_time, duration
 
-def write_to(st):
-    with open(output_file, 'a') as f:
-        f.write(st)
+    return duration
 
-async def run_test(concurrency):
-    set_up_share_files(concurrency)
+
+async def run_test(func, players, threshold, concurrency):
     tasks = []
-    for server_id in range(players):
-        for i in range(concurrency):
-            port = mpc_port + i * 100
-            tasks.append(run_mpc(server_id, port))
+    for i in range(concurrency):
+        port = mpc_port + i * 100
+        for server_id in range(players):
+            tasks.append(test(func, server_id, port, players, threshold))
     results = await asyncio.gather(*tasks)
-    print(results)
-    return results
+    print(f'!!!! {func} {results}')
+    return sum(results) / (players * concurrency)
 
-async def main():
-    if os.path.exists(output_file):
-            os.remove(output_file)
-    else:
-        print("Can not delete the file as it doesn't exists")
 
-    set_up_share_files(max_concurrency)
+async def rep(func, players, threshold, concurrency):
+    sum = 0
+    for i in range(repeat_experiment):
+        sum += await run_test(func, players, threshold, concurrency)
+    avg = sum / repeat_experiment
+    print(f'!!!! {func} {avg}')
+    return avg
 
-    x, y = [], []
+
+async def main(players, threshold, max_concurrency):
+    x, y_offline, y_online, y_online_ONLY = [], [], [], []
     for concurrency in range(1, 1 + max_concurrency):
-        results = await run_test(concurrency)
-        sum = 0
-        for server_id, port, start_time, end_time, duration in results:
-            sum += duration
-            write_to(f'{server_id}\t{port}\t{start_time}\t{end_time}\t{duration}\n')
-        sum /= players * concurrency
-        write_to(f'\n'
-                 f'----------\n'
-                 f'{concurrency}\t{sum}\n'
-                 f'----------\n\n')
-
         x.append(concurrency)
-        y.append(sum)
+        y_offline.append(await rep('run_offline', players, threshold, concurrency))
+        y_online.append(await rep('run_online', players, threshold, concurrency))
+        y_online_ONLY.append(await rep('run_online_ONLY', players, threshold, concurrency))
 
-    write_to(f'{x}\n{y}\n')
+    with open('ratel/benchmark/data/mp-spdz.txt', 'w') as f:
+        f.write(str(x) + '\n')
+        f.write(str(y_offline) + '\n')
+        f.write(str(y_online) + '\n')
+        f.write(str(y_online_ONLY) + '\n')
 
     plt.figure(figsize=(13, 4))
-    plt.plot(x, y)
+    plt.scatter(x, y_offline)
+    plt.scatter(x, y_online)
+    plt.scatter(x, y_online_ONLY)
     plt.savefig(f'ratel/benchmark/data/mp-spdz.pdf')
 
+
 if __name__ == '__main__':
-    asyncio.run(run_test(50))
-    # asyncio.run(main())
-    # loop = asyncio.get_event_loop()
-    # loop.run_until_complete(main(loop))
-    # loop.close()
+    players = int(sys.argv[1])
+    threshold = int(sys.argv[2])
+    max_concurrency = int(sys.argv[3])
+
+    set_up_share_files(players, max_concurrency)
+    asyncio.run(main(players, threshold, max_concurrency))
+
 
 

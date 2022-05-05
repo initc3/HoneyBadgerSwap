@@ -36,5 +36,4 @@ if __name__ == '__main__':
         test,
     )
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(server.init(rockPaperScissors.monitor(server, loop)))
+    server.loop.run_until_complete(server.init(rockPaperScissors.monitor(server)))
