@@ -148,18 +148,34 @@ def list_to_str(list):
     return st
 
 
-async def execute_cmd(cmd):
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    print(f'[{cmd!r} exited with {proc.returncode}]')
-    if stdout:
-        print(f'[stdout]\n{stdout.decode()}')
-    if stderr:
-        print(f'[stderr]\n{stderr.decode()}')
-    return proc.returncode
+async def execute_cmd(cmd, info=''):
+    retry = mpc_failed_retry
+    while True:
+        proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await proc.communicate()
+
+        print(f'[{cmd!r} exited with {proc.returncode}]')
+        if info:
+            print(f'[info]\n{info}')
+        if stdout:
+            print(f'[stdout]\n{stdout.decode()}')
+
+        returncode = proc.returncode
+        if returncode != 0:
+            print(f'[stderr]\n{stderr.decode()}')
+
+        retry -= 1
+
+        if retry <= 0 or returncode == 0:
+            if returncode != 0:
+                print('**** ERROR')
+
+            return returncode
 
 
-def mark_finish(server, seq):
+def mark_finish(server, seq, port):
+    server.portLock[port].release()
+
     key = 'execHistory'
     execHistory = read_db(server, key)
     execHistory = bytes_to_dict(execHistory)
@@ -262,3 +278,5 @@ replay = 1
 trade_key_num = 7
 
 repeat_experiment = 5
+
+mpc_failed_retry = 3
