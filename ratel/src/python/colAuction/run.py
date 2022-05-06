@@ -37,4 +37,4 @@ if __name__ == '__main__':
     )
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(server.init(colAuction.monitor(server, loop)))
+    loop.run_until_complete(server.init(colAuction.monitor(server)))
