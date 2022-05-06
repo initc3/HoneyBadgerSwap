@@ -25,9 +25,9 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
     tx = appContract.functions.createAuction(StartPrice,FloorPrice,idx1,maskedTM).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    receipt = web3.eth.get_transaction_receipt(tx_hash)
-    log = appContract.events.CreateAuction().processReceipt(receipt)
+    receipt = sign_and_send(tx, web3, account)
+
+    log = appContract.events.CreateGame().processReceipt(receipt)
     colAuctionId = log[0]['args']['colAuctionId']
     while True:
         time.sleep(1)
@@ -55,8 +55,7 @@ def submitBids(appContract,colAuctionId,price,amt,account):
     tx = appContract.functions.submitBids(colAuctionId, idx1, maskedP, idx2, maskedAmt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    sign_and_send(tx, web3, account)
 
     while True:
         time.sleep(1)
