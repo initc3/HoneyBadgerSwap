@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import time
 
@@ -5,22 +6,40 @@ from web3 import Web3
 
 from ratel.src.python.Server import Server
 from ratel.src.python.deploy import url, app_addr
-from ratel.src.python.utils import parse_contract
+from ratel.src.python.utils import parse_contract, repeat_experiment
 
-def test(shareBatchSize):
-    print('****', shareBatchSize)
-    start_time = time.perf_counter()
-    server.genInputMask(shareBatchSize)
-    end_time = time.perf_counter()
 
+async def rep(shareBatchSize):
+    sum = 0
+    for i in range(repeat_experiment):
+        start_time = time.perf_counter()
+        await server.genInputMask(shareBatchSize)
+        end_time = time.perf_counter()
+        duration = end_time - start_time
+
+        with open(f'ratel/benchmark/data/inputmask_generation_latency_{server.serverID}.csv', 'a') as f:
+            f.write(f'shareBatchSize\t{shareBatchSize}\t'
+                    f'duration\t{duration}\n')
+        print('**** duration', duration)
+
+        sum += duration
+
+    avg = sum / repeat_experiment
+    return avg
+
+
+async def test(shareBatchSize):
+    print('**** shareBatchSize', shareBatchSize)
+    avg_duration = await rep(shareBatchSize)
     with open(f'ratel/benchmark/data/inputmask_generation_latency_{server.serverID}.csv', 'a') as f:
         f.write(f'shareBatchSize\t{shareBatchSize}\t'
-                f'start_time\t{start_time}\t'
-                f'end_time\t{end_time}\t'
-                f'time_dif\t{end_time - start_time}\n')
+                f'avg_duration\t{avg_duration}\n')
+
 
 if __name__ == '__main__':
     serverID = int(sys.argv[1])
+    players = int(sys.argv[2])
+    threshold = int(sys.argv[3])
 
     web3 = Web3(Web3.WebsocketProvider(url))
     abi, bytecode = parse_contract('hbswap')
@@ -31,11 +50,13 @@ if __name__ == '__main__':
         serverID,
         web3,
         appContract,
-        None,
-        None,
+        players,
+        threshold,
         concurrency,
+        None,
+        0
     )
 
     batch = 10000
-    for shareBatchSize in range(batch, 10 * batch, batch):
-        test(shareBatchSize)
+    for shareBatchSize in range(batch, 5 * batch, batch):
+        asyncio.run(test(shareBatchSize))

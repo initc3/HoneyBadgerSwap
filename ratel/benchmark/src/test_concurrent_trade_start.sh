@@ -6,21 +6,27 @@
 set -e
 set -x
 
+source ratel/src/utils.sh
+
 ##### fixed parameter
-players=4
 threshold=1
 token_A_id=0
+test=0
 #####
-client_num=$1
-concurrency=$2
-token_num=$client_num
 
-.utils
-clear
+##### get argv
+players=$1
+client_num=$2
+concurrency=$3
+#####
+token_num=$client_num
 
 bash ratel/src/deploy.sh hbswap $token_num $players $threshold
 
-bash ratel/src/run.sh hbswap 0,1,2,3 $players $threshold $concurrency
+refill $players
+
+ids=$(create_ids $players)
+bash ratel/src/run.sh hbswap $ids $players $threshold $concurrency $test
 
 for (( client_id = 1; client_id <= $client_num; client_id++ )) do
   token_B_id=$client_id

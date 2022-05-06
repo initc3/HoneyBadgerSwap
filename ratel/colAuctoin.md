@@ -19,7 +19,7 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 ```
 
 #### install docker-compose
@@ -67,7 +67,8 @@ python3 -m ratel.src.python.refill client_1 0 \
 & python3 -m ratel.src.python.refill client_2 0 \
 & python3 -m ratel.src.python.refill client_3 0 \
 & python3 -m ratel.src.python.refill client_4 0 \
-& python3 -m ratel.src.python.refill client_5 0
+& python3 -m ratel.src.python.refill client_5 0 \
+& python3 -m ratel.src.python.refill client_6 0
 ```
 #### Start MPC servers to monitor events emitted by application contract and take MPC tasks:
 

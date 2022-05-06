@@ -15,8 +15,7 @@ def reserveInput(web3, appContract, num, account):
     return log[0]['args']['inpusMaskIndexes']
 
 
-#### TODO: check sharings consistency
-def interpolate(shares):
+def reconstruction(shares):
     value = 0
     n = len(shares)
     for i in range(n):
@@ -29,7 +28,18 @@ def interpolate(shares):
     return value
 
 
-def batch_interpolate(results):
+def interpolate(shares, t):
+    value = reconstruction(shares[:t + 1])
+    n = len(shares)
+    for i in range(t + 2, n):
+        check = reconstruction(shares[:i])
+        if check != value:
+            print('mac_fail')
+            return 0
+    return value % prime
+
+
+def batch_interpolate(results, threshold):
     res = []
     num = len(results[0])
     players = len(results)
@@ -39,7 +49,7 @@ def batch_interpolate(results):
             result = int(results[j][i])
             if result != 0:
                 shares.append((j + 1, result))
-        res.append(interpolate(shares))
+        res.append(interpolate(shares, threshold))
     return res
 
 
@@ -60,12 +70,12 @@ async def send_requests(players, request):
     return results
 
 
-async def get_inputmasks(players, inputmask_idxes):
+async def get_inputmasks(players, inputmask_idxes, threshold):
     request = f"inputmasks/{inputmask_idxes}"
     results = await send_requests(players, request)
     for i in range(len(results)):
         results[i] = re.split(",", results[i]["inputmask_shares"])
 
-    inputmasks = batch_interpolate(results)
+    inputmasks = batch_interpolate(results, threshold)
 
     return inputmasks
