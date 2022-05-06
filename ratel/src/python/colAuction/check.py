@@ -23,8 +23,7 @@ def scheduleCheck(appContract,colAuctionId,account):
     tx = appContract.functions.scheduleCheck(colAuctionId).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
-    tx_hash = sign_and_send(tx, web3, account)
-    web3.eth.wait_for_transaction_receipt(tx_hash)
+    sign_and_send(tx, web3, account)
 
     checkId = appContract.functions.checkNum(colAuctionId).call()
     if checkId >= cur_check:
