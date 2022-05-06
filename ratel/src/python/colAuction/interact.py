@@ -27,7 +27,7 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
     })
     receipt = sign_and_send(tx, web3, account)
 
-    log = appContract.events.CreateGame().processReceipt(receipt)
+    log = appContract.events.CreateAuction().processReceipt(receipt)
     colAuctionId = log[0]['args']['colAuctionId']
     while True:
         time.sleep(1)
