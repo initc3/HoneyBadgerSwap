@@ -19,6 +19,14 @@ def scheduleCheck(appContract,colAuctionId,account):
     cur_check = checkCnt[colAuctionId-1]
 #    print("schedule check aucId:",colAuctionId,"checkCnt:",cur_check)
 
+    curTime = web3.eth.block_number
+    print("curTime: ",curTime)
+
+    lastTime = appContract.functions.checkTime(colAuctionId).call()
+    if(lastTime + 10 < curTime):
+        return
+
+
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.scheduleCheck(colAuctionId).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
