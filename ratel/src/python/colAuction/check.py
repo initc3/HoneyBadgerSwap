@@ -20,7 +20,7 @@ def scheduleCheck(appContract,colAuctionId,account):
 #    print("schedule check aucId:",colAuctionId,"checkCnt:",cur_check)
 
     curTime = web3.eth.block_number
-    print("curTime: ",curTime)
+#    print("curTime: ",curTime)
 
     lastTime = appContract.functions.checkTime(colAuctionId).call()
     if(lastTime + 10 >= curTime):
