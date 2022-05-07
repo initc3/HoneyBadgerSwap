@@ -23,7 +23,7 @@ def scheduleCheck(appContract,colAuctionId,account):
     print("curTime: ",curTime)
 
     lastTime = appContract.functions.checkTime(colAuctionId).call()
-    if(lastTime + 10 < curTime):
+    if(lastTime + 10 >= curTime):
         return
 
 
