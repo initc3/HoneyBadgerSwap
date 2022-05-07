@@ -81,7 +81,7 @@ if __name__=='__main__':
     client_3 = getAccount(web3,f'/opt/poa/keystore/client_4/')
     client_4 = getAccount(web3,f'/opt/poa/keystore/client_5/')
     client_5 = getAccount(web3,f'/opt/poa/keystore/client_6/')
-    client_6 = getAccount(web3,f'/opt/poa/keystore/client_7/')
+#    client_6 = getAccount(web3,f'/opt/poa/keystore/client_7/')
 
     
     # auction1 success
