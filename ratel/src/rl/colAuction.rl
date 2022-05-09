@@ -21,7 +21,6 @@ contract colAuction{
     mapping (uint => uint) public status; // closed-1 created-2 submitted --- bidders_num+2 
     mapping (address => uint) public statusValue;
     mapping (uint => uint) public statusCount;
-    
 
     constructor() public {}
 
@@ -57,7 +56,6 @@ contract colAuction{
         uint FloorPrice = floorPriceList[colAuctionId];
 
         mpc(uint colAuctionId, uint curPrice, uint FloorPrice){
-
             bids = readDB(f'bidsBoard_{colAuctionId}', list)
             auc = readDB(f'aucBoard_{colAuctionId}',dict)
 
@@ -74,14 +72,12 @@ contract colAuction{
                 amtSold = 0
 
                 for i in range(n):
-
                     (Xi,Pi,Amti) = bids[i]
 
                     mpcInput(sint Xi, sint curPrice, sint Amti, sint amtSold, sint totalAmt)
                     valid = (curPrice.less_equal(Xi,bit_length = bit_length))
                     amtSold += Amti*valid
                     mpcOutput(sint amtSold)
-
 
                 mpcInput(sint amtSold, sint totalAmt)
                 aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
@@ -113,7 +109,6 @@ contract colAuction{
 
             if valid == 1:
                 bids.append((price,P,Amt))
-
             writeDB(f'bidsBoard_{colAuctionId}',bids,list)
             
             curStatus = bidders_id+2
