@@ -17,12 +17,12 @@ def createAuction(appContract,StartPrice,FloorPrice,totalAmt,account):
 
     bids_cnt.append(0)
 
-    idx1 = reserveInput(web3, appContract, 1, account)[0]
-    mask1 = asyncio.run(get_inputmasks(players(appContract), f'{idx1}', threshold(appContract)))[0]
-    maskedTM = (totalAmt + mask1) % prime
+#    idx1 = reserveInput(web3, appContract, 1, account)[0]
+#    mask1 = asyncio.run(get_inputmasks(players(appContract), f'{idx1}', threshold(appContract)))[0]
+#    maskedTM = (totalAmt + mask1) % prime
     
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.createAuction(StartPrice,FloorPrice,idx1,maskedTM).buildTransaction({
+    tx = appContract.functions.createAuction(StartPrice,FloorPrice,totalAmt).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     receipt = sign_and_send(tx, web3, account)
