@@ -25,7 +25,7 @@ contract colAuction{
 
     constructor() public {}
 
-    function createAuction(uint StartPrice, uint FloorPrice, $uint totalAmt) public{
+    function createAuction(uint StartPrice, uint FloorPrice, uint totalAmt) public{
         uint colAuctionId = ++colAuctionCnt;
         curPriceList[colAuctionId] = StartPrice;
         floorPriceList[colAuctionId] = FloorPrice;
