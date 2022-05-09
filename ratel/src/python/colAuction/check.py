@@ -12,30 +12,20 @@ from ratel.src.python.utils import fp,parse_contract, getAccount, players, prime
 contract_name = 'colAuction'
 
 liveAuct = []
-checkCnt = []
 
 # means I'll buy up to $amt if the prices reaches $price or below
 def scheduleCheck(appContract,colAuctionId,account):
-    cur_check = checkCnt[colAuctionId-1]
-#    print("schedule check aucId:",colAuctionId,"checkCnt:",cur_check)
 
     curTime = web3.eth.block_number
-#    print("curTime: ",curTime)
-
     lastTime = appContract.functions.checkTime(colAuctionId).call()
     if(lastTime + 10 >= curTime):
         return
-
 
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.scheduleCheck(colAuctionId).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     sign_and_send(tx, web3, account)
-
-    checkId = appContract.functions.checkNum(colAuctionId).call()
-    if checkId >= cur_check:
-        checkCnt[colAuctionId-1] = checkId
         
     
 
@@ -61,7 +51,6 @@ if __name__=='__main__':
             if status >= 1:
                 cur_n += 1
                 liveAuct.append(cur_n)
-                checkCnt.append(0)
                 print("cur Live Auct Id(adding):",liveAuct)
             else:
                 break
@@ -77,7 +66,6 @@ if __name__=='__main__':
             print("curLiveAuctionId:",liveAuct)
 
         for aucId in liveAuct:
-#            print("start check:",aucId)
             scheduleCheck(appContract,aucId,client_1)
 
         time.sleep(5)
