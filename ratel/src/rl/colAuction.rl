@@ -46,13 +46,9 @@ contract colAuction{
     }
 
     function scheduleCheck(uint colAuctionId) public {
-        
         uint lastTime = checkTime[colAuctionId];
-
         uint curTime = block.number;
-
         require(lastTime + 10 < curTime);
-
         checkTime[colAuctionId] = block.number;
 
         uint curPrice = curPriceList[colAuctionId]*99/100;
@@ -67,9 +63,6 @@ contract colAuction{
 
             totalAmt = auc['totalAmt']
 
-            print("**** curPrice:",curPrice)
-            print("**** totalAmt:",totalAmt)
-
             if curPrice < FloorPrice:
                 print(colAuctionId,'Auction failed!!!!!!!!!')
 
@@ -77,10 +70,7 @@ contract colAuction{
                 set(status, uint curStatus, uint colAuctionId)
             
             else:
-            
                 n = len(bids)
-                print("**** n:",n)
-
                 amtSold = 0
 
                 for i in range(n):
@@ -88,21 +78,14 @@ contract colAuction{
                     (Xi,Pi,Amti) = bids[i]
 
                     mpcInput(sint Xi, sint curPrice, sint Amti, sint amtSold, sint totalAmt)
-
                     valid = (curPrice.less_equal(Xi,bit_length = bit_length))
-
                     amtSold += Amti*valid
-
                     mpcOutput(sint amtSold)
 
 
                 mpcInput(sint amtSold, sint totalAmt)
-
                 aucDone = (amtSold.greater_equal(totalAmt,bit_length = bit_length).reveal())
-                
                 mpcOutput(cint aucDone)
-
-                print("**** aucDone", aucDone)
 
                 if aucDone == 1:
                     print(colAuctionId,'Auction success!!!!!!!!!')
@@ -125,26 +108,16 @@ contract colAuction{
             auc = readDB(f'aucBoard_{colAuctionId}', dict)
 
             mpcInput(sint price, sint FloorPrice)
-
-            print_ln("**** price %s", price.reveal())
-            print_ln("**** FloorPrice %s", FloorPrice.reveal())
-
             valid = (price.greater_equal(FloorPrice, bit_length=bit_length)).reveal()
-
             mpcOutput(cint valid)
 
-            print('**** valid', valid)
             if valid == 1:
                 bids.append((price,P,Amt))
-                print('**** bids', bids)
 
             writeDB(f'bidsBoard_{colAuctionId}',bids,list)
             
             curStatus = bidders_id+2
             set(status, uint curStatus, uint colAuctionId)
-
-            print('submit end',colAuctionId,bidders_id)
-
         }
     }
 }
