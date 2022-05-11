@@ -1,5 +1,6 @@
-ARG mpspdz_commit=073a2a8
-FROM initc3/mal-shamir:${mpspdz_commit} as malshamir
+ARG mpspdz_commit=2bb036d
+FROM initc3/malicious-shamir-party.x:${mpspdz_commit} as malshamirparty
+FROM initc3/mal-shamir-offline.x:${mpspdz_commit} as malshamiroffline
 FROM initc3/random-shamir.x:${mpspdz_commit} as randomshamir
 FROM initc3/mpspdz:${mpspdz_commit} as mpspdzbase
 
@@ -54,14 +55,14 @@ RUN mkdir -p \
             ${PREP_DIR}
 
 # malicious-shamir-party.x
-COPY --from=malshamir \
+COPY --from=malshamirparty \
                 /usr/local/bin/malicious-shamir-party.x \
                 /usr/local/bin/malicious-shamir-party.x
-COPY --from=malshamir /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
+COPY --from=malshamirparty /usr/src/MP-SPDZ/libSPDZ.so /usr/src/MP-SPDZ/
 RUN cp /usr/local/bin/malicious-shamir-party.x /usr/src/hbswap/
 
 # mal-shamir-offline.x
-COPY --from=malshamir \
+COPY --from=malshamiroffline \
                 /usr/local/bin/mal-shamir-offline.x /usr/local/bin/
 RUN cp /usr/local/bin/mal-shamir-offline.x /usr/src/hbswap/
 
@@ -100,4 +101,4 @@ RUN pip3 install \
 
 WORKDIR $HBSWAP_HOME
 
-RUN ./setup-ssl.sh 4
+RUN ./setup-ssl.sh 4 /opt/ssl
