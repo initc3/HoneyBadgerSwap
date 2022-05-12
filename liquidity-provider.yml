@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  init.pool:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: go-deps
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+    #networks:
+    #  - hbswap
+    working_dir: /usr/src/scripts
+    volumes:
+      # FIXME must change config depending on deployment
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      - ./poa:/opt/poa
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./scripts:/usr/src/scripts
+    entrypoint: ""
+    # TODO wait for contract to be deployed/available
+    command: ["bash", "init-pool.sh"]
+    #command: ["bash", "init-pool.sh", "$HBSWAP_ETHNODE"]

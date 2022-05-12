@@ -1,0 +1,157 @@
+version: '3.8'
+
+networks:
+  hbswap:
+
+volumes:
+  mpc-bytecodes:
+  mpc-schedules:
+  public-keys:
+  secrets-p0:
+  secrets-p1:
+  secrets-p2:
+  secrets-p3:
+  inputmaskshares-p0:
+  inputmaskshares-p1:
+  inputmaskshares-p2:
+  inputmaskshares-p3:
+  ppdata-p0:
+  ppdata-p1:
+  ppdata-p2:
+  ppdata-p3:
+  persistence-p0:
+  persistence-p1:
+  persistence-p2:
+  persistence-p3:
+  db-p0:
+  db-p1:
+  db-p2:
+  db-p3:
+
+services:
+
+  mpcnode0:
+    image: hbswap:kovan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: 0
+      POA_KEYSTORE: /opt/poa/keystore
+    ports:
+      - 58080:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa/keystore:/opt/poa/keystore
+      - ./log:/usr/src/hbswap/log
+      - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p0:/opt/hbswap/db
+      - ./testkeys/public:/opt/hbswap/public-keys
+    secrets:
+      - P0.key
+    working_dir: /usr/src/hbswap
+    command: ["bash", "mpc-node-testnet.sh"]
+
+  mpcnode1:
+    image: hbswap:kovan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: 1
+      POA_KEYSTORE: /opt/poa/keystore
+    ports:
+      - 58081:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa/keystore:/opt/poa/keystore
+      - ./log:/usr/src/hbswap/log
+      - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p1:/opt/hbswap/db
+      - ./testkeys/public:/opt/hbswap/public-keys
+    secrets:
+      - P1.key
+    working_dir: /usr/src/hbswap
+    command: ["bash", "mpc-node-testnet.sh"]
+
+  mpcnode2:
+    image: hbswap:kovan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: 2
+      POA_KEYSTORE: /opt/poa/keystore
+    ports:
+      - 58082:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa/keystore:/opt/poa/keystore
+      - ./log:/usr/src/hbswap/log
+      - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p2:/opt/hbswap/db
+      - ./testkeys/public:/opt/hbswap/public-keys
+    secrets:
+      - P2.key
+    working_dir: /usr/src/hbswap
+    command: ["bash", "mpc-node-testnet.sh"]
+
+  mpcnode3:
+    image: hbswap:kovan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: 3
+      POA_KEYSTORE: /opt/poa/keystore
+    ports:
+      - 58083:8080
+    networks:
+      - hbswap
+    volumes:
+      - mpc-bytecodes:/usr/src/hbswap/Programs/Bytecode
+      - mpc-schedules:/usr/src/hbswap/Programs/Schedules
+      - ./conf/server-kovan.toml:/opt/hbswap/conf/server.toml
+      - ./scripts/mpc-node-testnet.sh:/usr/src/hbswap/mpc-node-testnet.sh
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./poa/keystore:/opt/poa/keystore
+      - ./log:/usr/src/hbswap/log
+      - ./src/python:/usr/src/honeybadgerswap-python
+      - db-p3:/opt/hbswap/db
+      - ./testkeys/public:/opt/hbswap/public-keys
+    secrets:
+      - P3.key
+    working_dir: /usr/src/hbswap
+    command: ["bash", "mpc-node-testnet.sh"]
+
+secrets:
+  P0.key:
+    file: testkeys/secret/P0.key
+  P1.key:
+    file: testkeys/secret/P1.key
+  P2.key:
+    file: testkeys/secret/P2.key
+  P3.key:
+    file: testkeys/secret/P3.key

@@ -1,0 +1,367 @@
+<d class="container">
+
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid" style="padding-right: 0">
+            <div class="navbar-header">
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <span id="usertitle">User</span>
+                    <span class="badge" id="user"></span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="row" id="title">
+        <div class="text-center col-sm-12">HoneybadgerSwap</div>
+    </div>
+
+    Notice: <br />
+    1. This demo ONLY works for Kovan test net. <br />
+    2. Do not refresh your page or click other buttons before your request completed, i.e., status is "Done". <br />
+    3. If your trade failed, i.e., the price is 0, make your trading amount smaller as the liquidity pool might not large enough to meet the slippage you set. <br />
+    4. Links to etherscan cannot be opened in the JsFiddle window. In order to see your transaction status, open the link in a new tab/window. <br />
+    5. The demo is an experimental prototype. Our service might crash at any time and data might be lost. Your money will disappear along with it... <br />
+
+    <div class="card">
+        <div class="card-header">
+            Trade
+        </div>
+        <div>
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <label class="col-sm-3 control-label">Slippage Tolerance</label>
+                    <div>
+                        <select id='slippage' class="form-control" onfocus="updateAmtTradeFrom()" onchange="updateAmtTradeFrom()">
+                            <option value="0.1">10%</option>
+                            <option value="0.05">5%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <label class="col-sm-2 control-label" style="padding-top: 10px">From</label>
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-7 balance row">
+                                <label class="col-sm-7 control-label">balance</label>
+                                <div class="col-sm-5">
+                                    <span id="balanceTradeFrom"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                        </div>
+                        <div class="row" style="margin-top:10px; margin-left: 10px;">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <input id="amtTradeFrom" class="form-control" type="text" value="" onchange="updateAmtTradeFrom()" onfocus="updateAmtTradeFrom()"/>
+                                </div>
+                                <select id='tradeFromToken' class="form-control col-sm-3" onchange="updateTradePair()" onfocus="updateTradePair()">
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
+                                 10^-3
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-1" style="text-align: center; font-size: 35pt;">→</div>
+
+                    <div class="col-sm-5">
+                        <div class="row">
+
+                            <label class="col-sm-2 control-label" style="padding-top: 10px">To</label>
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-7 balance row">
+                                <label class="col-sm-7 control-label">balance</label>
+                                <div class="col-sm-5">
+                                    <span id="balanceTradeTo"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                        </div>
+
+
+                        <div class="row" style="margin-top:10px; margin-left: 10px;">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <input id="amtTradeTo" class="form-control" type="text" value="" onchange="updateAmtTradeTo()" onfocus="updateAmtTradeTo()"/>
+                                </div>
+                                <select id='tradeToToken' class="form-control col-sm-3" onchange="updateTradePair()" onfocus="updateTradePair()">
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
+                                10^-3
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p style="color:#ff7679" ;> Suggest amounts to trade: 0.1 to 2 (*10^-3) ETH/TOKEN</p>
+                Estimated Price: <span id="estPriceTrade"></span><br />
+
+                Minimum Received: <span id="minRecv"></span><br />
+
+                Liquidity Provider Fee(0.30%): <span id="fee"></span><br />
+
+                <div class="row" style="padding-left: 12px; margin-top: 20px">
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="trade();" value="Trade" />
+                    <div class="col-sm-1"></div>
+                    <div class="alert alert-info col-sm-4" role="alert" id="tradeInfo" style="margin-top: 0px; padding-bottom: 5px; margin-bottom:0; text-align: center">
+                    </div>
+                </div>
+
+                <hr>
+
+                Status: <span id="tradeStatus"></span><br />
+
+                Inputmask Indexes: <span id="tradeIdxes"></span><br />
+
+                Inputmask Values: <span id="tradeMasks"></span><br />
+
+                Trade Seq: <span id="seq"></span><br />
+
+                Trade Price: <span id="price"></span><br />
+                &nbsp server_0 <span id="tradePrice0"></span><br />
+                &nbsp server_1 <span id="tradePrice1"></span><br />
+                &nbsp server_2 <span id="tradePrice2"></span><br />
+                &nbsp server_3 <span id="tradePrice3"></span><br />
+                Transaction links to Etherscan: <span id="tradeTxLink"></span><br />
+                <div style="text-align: center">
+                    <svg id="tradeStatusNeutral" xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-emoji-neutral" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M4 10.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5zm3-4C7 5.672 6.552 5 6 5s-1 .672-1 1.5S5.448 8 6 8s1-.672 1-1.5zm4 0c0-.828-.448-1.5-1-1.5s-1 .672-1 1.5S9.448 8 10 8s1-.672 1-1.5z"/>
+                    </svg>
+                    <svg id="tradeStatusFail" xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-emoji-dizzy" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M9.146 5.146a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708.708l-.647.646.647.646a.5.5 0 0 1-.708.708l-.646-.647-.646.647a.5.5 0 1 1-.708-.708l.647-.646-.647-.646a.5.5 0 0 1 0-.708zm-5 0a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 1 1 .708.708l-.647.646.647.646a.5.5 0 1 1-.708.708L5.5 7.207l-.646.647a.5.5 0 1 1-.708-.708l.647-.646-.647-.646a.5.5 0 0 1 0-.708zM10 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                    </svg>
+                    <svg id="tradeStatusSucceed" xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-emoji-wink" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm1.757-.437a.5.5 0 0 1 .68.194.934.934 0 0 0 .813.493c.339 0 .645-.19.813-.493a.5.5 0 1 1 .874.486A1.934 1.934 0 0 1 10.25 7.75c-.73 0-1.356-.412-1.687-1.007a.5.5 0 0 1 .194-.68z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-header">
+            Deposit
+        </div>
+        <div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="input-group col-sm-6">
+                        <div class="input-group-prepend">
+                            <input id="depositAmt" class="form-control" type="text" value="" />
+                        </div>
+                        <select id='depositToken' class="form-control col-sm-3" onchange="updateDepositToken()" onfocus="updateDepositToken()">
+                            <option>ETH</option>
+                            <option>DAI</option>
+                            <option>HBS</option>
+                        </select>
+                        10^-3
+                    </div>
+
+
+                    <div class="col-sm-4 balance row">
+                        <label class="col-sm-7 control-label">balance</label>
+                        <div class="col-sm-5">
+                            <span id="depositBalance"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row" style="padding-left: 12px; margin-top: 20px">
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="deposit();" value="Deposit" />
+                    <div class="col-sm-1"></div>
+                    <div class="alert alert-info col-sm-4" role="alert" id="depositInfo" style="margin-top: 0px; padding-bottom: 5px; margin-bottom:0; text-align: center">
+                    </div>
+                </div>
+
+
+                <div class="row" style="padding-left: 12px; margin-top: 20px">
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="withdraw();" value="Withdraw" />
+                    <div class="col-sm-1"></div>
+                    <div class="alert alert-info col-sm-4" role="alert" id="withdrawInfo" style="margin-top: 0px; padding-bottom: 5px; margin-bottom:0; text-align: center">
+                    </div>
+                </div>
+
+                <p style="color:#ff7679" ;>Notice: all tokens are operated in unit of 10^-3. Ex. input 23 in the window represents 0.023 Ether/Token.</p>
+
+                Status: <span id="depositStatus"></span><br />
+
+                Personal balance: <span id="personalBalance"></span><br />
+
+                Contract balance: <span id="contractBalance"></span><br />
+
+                Secret balance: <span id="secretBalance"></span><br />
+                &nbsp server_0 <span id="depositUpdate0"></span><br />
+                &nbsp server_1 <span id="depositUpdate1"></span><br />
+                &nbsp server_2 <span id="depositUpdate2"></span><br />
+                &nbsp server_3 <span id="depositUpdate3"></span><br />
+                Transaction links to Etherscan: <span id="depositTxLink"></span><br />
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-header">
+            Pool
+        </div>
+        <div>
+            <div class="card-body">
+
+
+                <div class="form-group row">
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <label class="col-sm-3 control-label" style="padding-top: 10px">TokenA</label>
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-8 balance row">
+                                <label class="col-sm-7 control-label">balance</label>
+                                <div class="col-sm-5">
+                                    <span id="balancePoolTokenA"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                        </div>
+                        <div class="row" style="margin-top:10px; margin-left: 10px;">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <input id="amtPoolTokenA" class="form-control" type="text" value="" />
+                                </div>
+                                <select id='poolTokenA' class="form-control col-sm-3" onchange="updatePoolPair()" onfocus="updatePoolPair()">
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
+                                10^-3
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-sm-1" style="text-align: center; font-size: 35pt;"></div>
+
+                    <div class="col-sm-5">
+                        <div class="row">
+
+                            <label class="col-sm-3 control-label" style="padding-top: 10px">TokenB</label>
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-8 balance row">
+                                <label class="col-sm-7 control-label">balance</label>
+                                <div class="col-sm-5">
+                                    <span id="balancePoolTokenB"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                        </div>
+
+
+                        <div class="row" style="margin-top:10px; margin-left: 10px;">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <input id="amtPoolTokenB" class="form-control" type="text" value="" />
+                                </div>
+                                <select id='poolTokenB' class="form-control col-sm-3" onchange="updatePoolPair()" onfocus="updatePoolPair()">
+                                    <option>ETH</option>
+                                    <option>DAI</option>
+                                    <option>HBS</option>
+                                </select>
+                                10^-3
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                Estimated Price: <span id="estPricePool"></span><br />
+
+                <div class="row" style="padding-left:10pt; margin-top:10pt">
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="initPool();" value="Init" />&nbsp;
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="addLiquidity();" value="Add" />
+                    <div class="col-sm-1"></div>
+                    <div class="alert alert-info col-sm-4" role="alert" id="addInfo" style="margin-top: 0px; padding-bottom: 5px; margin-bottom:0; text-align: center">
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="row">
+
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-8 balance row">
+                                <label class="col-sm-7 control-label">balance</label>
+                                <div class="col-sm-5">
+                                    <span id="balancePoolLiquidityToken"></span>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-5">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="amtPoolLiquidityToken">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">Liquidity Token</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row" style="padding-left:10pt; margin-top:10pt">
+                    <input type="button" class="btn btn-lg btn-info col-sm-2" style="font-weight: bold" onclick="removeLiquidity();" value="Remove" />
+                    <div class="col-sm-1"></div>
+                    <div class="alert alert-info col-sm-4" role="alert" id="removeInfo" style="margin-top: 0px; padding-bottom: 5px; margin-bottom:0; text-align: center">
+                    </div>
+                </div>
+
+                <hr>
+
+                Status: <span id="poolStatus"></span><br />
+
+                Inputmask Indexes: <span id="poolIdxes"></span><br />
+
+                Inputmask Values: <span id="poolMasks"></span><br />
+
+                Transaction links to Etherscan: <span id="poolTxLink"></span><br />
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-header">
+            MPC server log
+        </div>
+        <div>
+            <div class="card-body">
+                <pre id="log"></pre>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Store the ABI -->
+    <p hidden id="hbswapABI">
+        [  {    "inputs": [      {        "internalType": "address[]",        "name": "_servers",        "type": "address[]"      },      {        "internalType": "uint256",        "name": "_threshold",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "nonpayable",    "type": "constructor"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenA",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenB",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "idxA",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "idxB",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "maskedAmtA",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "maskedAmtB",        "type": "uint256"      }    ],    "name": "AddLiquidity",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenA",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenB",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "amtA",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "amtB",        "type": "uint256"      }    ],    "name": "InitPool",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "uint256[]",        "name": "inpusMaskIndexes",        "type": "uint256[]"      }    ],    "name": "InputMask",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenA",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenB",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "idx",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "maskedAmt",        "type": "uint256"      }    ],    "name": "RemoveLiquidity",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "address",        "name": "token",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "amt",        "type": "uint256"      }    ],    "name": "SecretDeposit",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "uint256",        "name": "seq",        "type": "uint256"      },      {        "indexed": false,        "internalType": "address",        "name": "token",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "amt",        "type": "uint256"      }    ],    "name": "SecretWithdraw",    "type": "event"  },  {    "anonymous": false,    "inputs": [      {        "indexed": false,        "internalType": "uint256",        "name": "tradeSeq",        "type": "uint256"      },      {        "indexed": false,        "internalType": "address",        "name": "user",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenA",        "type": "address"      },      {        "indexed": false,        "internalType": "address",        "name": "tokenB",        "type": "address"      },      {        "indexed": false,        "internalType": "uint256",        "name": "idxA",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "idxB",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "maskedAmtA",        "type": "uint256"      },      {        "indexed": false,        "internalType": "uint256",        "name": "maskedAmtB",        "type": "uint256"      }    ],    "name": "Trade",    "type": "event"  },  {    "constant": true,    "inputs": [],    "name": "Decimals",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [],    "name": "Fp",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      },      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "name": "consentRecord",    "outputs": [      {        "internalType": "bool",        "name": "",        "type": "bool"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "name": "inputMaskOwner",    "outputs": [      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [],    "name": "inputmaskCnt",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "address",        "name": "",        "type": "address"      },      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "name": "lastUpdateSeq",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "address",        "name": "",        "type": "address"      },      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "name": "prices",    "outputs": [      {        "internalType": "string",        "name": "",        "type": "string"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "address",        "name": "",        "type": "address"      },      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "name": "publicBalance",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [],    "name": "secretWithdrawCnt",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "name": "secretWithdrawMap",    "outputs": [      {        "internalType": "address",        "name": "token",        "type": "address"      },      {        "internalType": "address",        "name": "user",        "type": "address"      },      {        "internalType": "uint256",        "name": "amt",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [      {        "internalType": "address",        "name": "",        "type": "address"      }    ],    "name": "servers",    "outputs": [      {        "internalType": "bool",        "name": "",        "type": "bool"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [],    "name": "threshold",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": true,    "inputs": [],    "name": "tradeCnt",    "outputs": [      {        "internalType": "uint256",        "name": "",        "type": "uint256"      }    ],    "payable": false,    "stateMutability": "view",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_token",        "type": "address"      },      {        "internalType": "uint256",        "name": "_amt",        "type": "uint256"      }    ],    "name": "publicDeposit",    "outputs": [],    "payable": true,    "stateMutability": "payable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_token",        "type": "address"      },      {        "internalType": "uint256",        "name": "_amt",        "type": "uint256"      }    ],    "name": "secretDeposit",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_token",        "type": "address"      },      {        "internalType": "uint256",        "name": "_amt",        "type": "uint256"      }    ],    "name": "secretWithdraw",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "uint256",        "name": "_seq",        "type": "uint256"      }    ],    "name": "consent",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_token",        "type": "address"      },      {        "internalType": "uint256",        "name": "_amt",        "type": "uint256"      }    ],    "name": "publicWithdraw",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "uint256",        "name": "_num",        "type": "uint256"      }    ],    "name": "reserveInput",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "uint256",        "name": "_amtA",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_amtB",        "type": "uint256"      }    ],    "name": "initPool",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "uint256",        "name": "_idxA",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_idxB",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_maskedAmtA",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_maskedAmtB",        "type": "uint256"      }    ],    "name": "addLiquidity",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "uint256",        "name": "_idx",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_maskedAmt",        "type": "uint256"      }    ],    "name": "removeLiquidity",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "uint256",        "name": "_idxA",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_idxB",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_maskedA",        "type": "uint256"      },      {        "internalType": "uint256",        "name": "_maskedB",        "type": "uint256"      }    ],    "name": "trade",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "uint256",        "name": "_checkpointSeq",        "type": "uint256"      },      {        "internalType": "string",        "name": "_price",        "type": "string"      }    ],    "name": "updatePrice",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_tokenA",        "type": "address"      },      {        "internalType": "address",        "name": "_tokenB",        "type": "address"      },      {        "internalType": "address[]",        "name": "_servers",        "type": "address[]"      }    ],    "name": "resetPrice",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  },  {    "constant": false,    "inputs": [      {        "internalType": "address",        "name": "_token",        "type": "address"      },      {        "internalType": "address",        "name": "_user",        "type": "address"      }    ],    "name": "resetBalance",    "outputs": [],    "payable": false,    "stateMutability": "nonpayable",    "type": "function"  }]
+    </p>
+
+    <p hidden id="tokenABI">
+        [ { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "constant": true, "inputs": [], "name": "DECIMALS", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "INITIAL_SUPPLY", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" } ], "name": "allowance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "approve", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "internalType": "address", "name": "account", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" } ], "name": "decreaseAllowance", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" } ], "name": "increaseAllowance", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" } ]
+    </p>

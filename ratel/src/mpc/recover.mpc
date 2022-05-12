@@ -1,0 +1,14 @@
+def read_sint(idx):
+    start = regint(idx * 32)
+    end = regint()
+    share = sint()
+    readsharesfromfile(start, end, share)
+    return share
+
+def main():
+    secret = read_sint(0)
+    input_mask = read_sint(1)
+    masked_secret = secret + input_mask
+    sint.write_to_file(masked_secret)
+
+main()

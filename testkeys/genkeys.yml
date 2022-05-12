@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  genkeys:
+    image: sbellem/mpspdz:setupssl
+    volumes:
+      - ./public:/usr/src/public
+      - ./secret:/usr/src/secret
+    command: ["4"]

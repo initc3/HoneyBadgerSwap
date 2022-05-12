@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  public.deposit:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: go-deps
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+    #networks:
+    #  - hbswap
+    working_dir: /usr/src/scripts
+    volumes:
+      #- ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      - ./poa:/opt/poa
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./scripts:/usr/src/scripts
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+    entrypoint: ""
+    # TODO wait for contract to be deployed/available
+    command: ["bash", "client-public-deposit.sh"]
+    #command: ["bash", "client-public-deposit.sh", "$HBSWAP_ETHNODE"]
+
+  secret.deposit:
+    image: hbswap-go
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: go-deps
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+    #networks:
+    #  - hbswap
+    working_dir: /usr/src/scripts
+    volumes:
+      #- ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      - ./poa:/opt/poa
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./scripts:/usr/src/scripts
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+    entrypoint: ""
+    # TODO wait for contract to be deployed/available
+    command: ["bash", "client-secret-deposit.sh"]
+    #command: ["bash", "client-secret-deposit.sh", "$HBSWAP_ETHNODE"]
+
+  trade-1:
+    image: hbswap:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # FIXME is the poa stuff needed?
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+    #networks:
+    #  - hbswap
+    # FIXME is the poa stuff needed?
+    volumes:
+      - ./poa:/opt/poa
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      #- ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./scripts:/usr/src/scripts
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./src/python:/usr/src/honeybadgerswap-python
+    working_dir: /usr/src/scripts
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-1.sh"]
+    command: ["bash", "trade-1.sh"]
+    #command: ["bash", "trade-1.sh", "$HBSWAP_ETHNODE"]
+
+  trade-2:
+    image: hbswap:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # FIXME is the poa stuff needed?
+    environment:
+      POADIR: /opt/poa
+      POA_KEYSTORE: /opt/poa/keystore
+    #networks:
+    #  - hbswap
+    # FIXME is the poa stuff needed?
+    volumes:
+      - ./poa:/opt/poa
+      - ./conf/client_aws.toml:/opt/hbswap/conf/client.toml
+      #- ./conf/client.toml:/opt/hbswap/conf/client.toml
+      - ./scripts:/usr/src/scripts
+      - ./scripts/wait-for-it.sh:/usr/local/bin/wait-for-it
+      - ./src:/go/src/github.com/initc3/HoneyBadgerSwap/src
+      - ./src/python:/usr/src/honeybadgerswap-python
+    working_dir: /usr/src/scripts
+    #command: ["wait-for-it", "mpcnode3:8080", "--", "bash", "trade-2.sh"]
+    command: ["bash", "trade-2.sh"]
+    #command: ["bash", "trade-2.sh", "$HBSWAP_ETHNODE"]

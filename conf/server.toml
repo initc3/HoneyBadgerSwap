@@ -1,0 +1,41 @@
+# MPC network configuation
+
+# MPC network params
+N = 4
+T = 1
+# IMPORTANT!
+# The leader hostname be the one of MPC player 0
+LeaderHostname = "mpcnode0"
+
+[EthNode]
+Network = "privatenet"
+Hostname = "ethnode"
+HttpEndpoint = ""
+WsEndpoint   = ""
+HttpPort = 8545
+WsPort  = 8546
+
+# MPC servers
+[[Servers]]
+Id = 0
+Host = "mpcnode0"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
+
+[[Servers]]
+Id = 1
+Host = "mpcnode1"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
+
+[[Servers]]
+Id = 2
+Host = "mpcnode2"
+HttpPort = 8080
+HttpHost = "0.0.0.0"
+
+[[Servers]]
+Id = 3
+Host = "mpcnode3"
+HttpPort = 8080
+HttpHost = "0.0.0.0"

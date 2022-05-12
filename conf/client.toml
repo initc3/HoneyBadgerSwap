@@ -1,0 +1,32 @@
+# MPC network configuation
+
+# MPC network params
+N = 4
+T = 1
+
+[EthNode]
+Network = "privatenet"
+Hostname = "ethnode"
+HttpPort = 8545
+WsPort  = 8546
+
+# MPC servers
+[[Servers]]
+Id = 0
+Host = "mpcnode0"
+HttpPort = 8080
+
+[[Servers]]
+Id = 1
+Host = "mpcnode1"
+HttpPort = 8080
+
+[[Servers]]
+Id = 2
+Host = "mpcnode2"
+HttpPort = 8080
+
+[[Servers]]
+Id = 3
+Host = "mpcnode3"
+HttpPort = 8080
