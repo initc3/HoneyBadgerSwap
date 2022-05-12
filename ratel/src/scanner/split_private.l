@@ -438,7 +438,7 @@ void mpcInput() {
         textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
         textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
     } else {
-        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} " + mpcName + "\'\n";
+        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} -npfs " + mpcName + "\'\n";
         textFuncLower += indent + "await execute_cmd(cmd)\n";
     }
     textFuncLower += "\n";
