@@ -15,9 +15,8 @@ from ratel.src.python.utils import (
     threshold,
 )
 
-from ratel.src.zkrp_pyo3.zkrp_pyo3 import zkrp_prove
+from pybulletproofs import zkrp_prove
 
-from ratel.src.zkrp_pyo3.zkrp_pyo3 import zkrp_prove
 
 contract_name = "rockPaperScissors"
 

@@ -102,3 +102,5 @@ RUN pip3 install \
 WORKDIR $HBSWAP_HOME
 
 RUN ./setup-ssl.sh 4 /opt/ssl
+
+RUN pip install pybulletproofs
