@@ -7,4 +7,4 @@ if __name__ == '__main__':
     players = int(sys.argv[1])
     threshold = int(sys.argv[2])
     concurrency = int(sys.argv[3])
-    asyncio.run(run_test('run_offline', players, threshold, concurrency))
+    asyncio.run(run_test('run_offline', players, threshold, concurrency, 'hbswapTrade1'))

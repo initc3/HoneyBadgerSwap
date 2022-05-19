@@ -8,7 +8,7 @@
 
 `bash setup-ssl.sh 3`
 
-`bash ratel/src/compile.sh hbswap`
+`bash ratel/src/compile.sh hbswap 0 1`
 
 ```
 ./ratel/benchmark/src/test_concurrent_trade_start.sh [players] [client_num] [concurrency]
@@ -43,6 +43,10 @@ python3 -m ratel.benchmark.src.calc 3 ratel/benchmark/data
 ```
 ./compile.py -v -C -F 128 ratel/genfiles/mpc/hbswapTrade1.mpc
 python3 -m ratel.benchmark.src.test_mpc 3 1 10
+```
+
+```
+./ratel/benchmark/src/move.sh 3 1
 ```
 
 ```

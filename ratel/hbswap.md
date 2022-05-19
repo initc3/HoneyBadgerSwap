@@ -8,7 +8,7 @@
 
 `bash setup-ssl.sh 4`
 
-`bash ratel/src/compile.sh hbswap`
+`bash ratel/src/compile.sh hbswap 0 0`
 
 `bash ratel/src/deploy.sh hbswap 1 4 1`
 
@@ -31,6 +31,8 @@ python3 -m ratel.src.python.hbswap.deposit 1 1 10000
 `python3 -m ratel.src.python.hbswap.initPool 1 0 1 1000 1000`
 
 `python3 -m ratel.src.python.hbswap.trade 1 0 1 0.5 -1 1`
+
+`python3 -m ratel.src.python.hbswap.withdraw 1 0 2000`
 
 
 

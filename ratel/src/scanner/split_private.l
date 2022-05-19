@@ -10,6 +10,9 @@
 
 using namespace std;
 
+bool finalizeOnChain;
+bool isBenchmark;
+
 bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput; /* see keyword in the current line */
 bool inPureMpc; /* in pureMpc block */
 bool inFunc; /* in function block */
@@ -36,7 +39,6 @@ string textPythonLower;
 string textMpc;
 
 string textRecover;
-bool hasRecoverFunc;
 
 string returnLine;
 
@@ -49,6 +51,7 @@ string indent;
 int cntReadDB;
 
 vector<string> events;
+vector<string> eventArgs;
 
 set<string> readKeySet, writeKeySet;
 
@@ -100,7 +103,7 @@ string getIndent(string text) {
 
 void initPython() {
     textPythonUpper += "import asyncio\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, replay, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "async def monitor(server):\n";
@@ -118,6 +121,12 @@ void finalizePython() {
     textPythonUpper += "            logs = []\n";
     textPythonUpper += "\n";
 
+    events.push_back("GenInputMask");
+
+    if (finalizeOnChain) {
+        events.push_back("Finalization");
+    }
+
     for (vector<string>::iterator it = events.begin(); it != events.end(); it++) {
         string eventName = *it;
         textPythonUpper += "            eventFilter = server.contract.events." + eventName + ".createFilter(fromBlock=blkNum, toBlock=curBlkNum - server.confirmation)\n";
@@ -128,14 +137,39 @@ void finalizePython() {
     textPythonUpper += "\n";
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
-    textPythonUpper += "            for i in range(replay):\n";
-    textPythonUpper += "                for log in logs:\n";
-    textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
-    textPythonUpper += "                        server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+
+    if (isBenchmark) {
+        textPythonUpper += "            from ratel.src.python.utils import replay\n";
+        textPythonUpper += "            for i in range(replay):\n";
+        textPythonUpper += "                for log in logs:\n";
+        textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
+        textPythonUpper += "                        server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+    } else {
+        textPythonUpper += "            for log in logs:\n";
+        textPythonUpper += "                server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
+    }
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
     textPythonUpper += "            await asyncio.sleep(1)\n";
+    textPythonUpper += "\n\n";
+
+    if (finalizeOnChain) {
+        textPythonUpper += "async def runFinalization(server, log):\n";
+        textPythonUpper += "    seq = log['args']['seq']\n";
+        textPythonUpper += "    from ratel.genfiles.python." + fileName + "Recover import recover\n";
+        textPythonUpper += "    keys = recover(server.contract, seq, 'allSet')\n";
+        textPythonUpper += "    for key in keys:\n";
+        textPythonUpper += "        server.dbLock[key.lower()].release()\n";
+        textPythonUpper += "    mark_finish(server, seq)\n";
+        textPythonUpper += "\n\n";
+    }
+
+    textPythonUpper += "async def runGenInputMask(server, log):\n";
+    textPythonUpper += "    input_mask_cnt = log['args']['inputMaskCnt']\n";
+    textPythonUpper += "    input_mask_version = log['args']['inputMaskVersion']\n";
+    textPythonUpper += "    await server.gen_input_mask(input_mask_cnt, input_mask_version)\n";
     textPythonUpper += "\n";
+
 
     fprintf(pythonFp, "%s", textPythonUpper.c_str());
     fprintf(pythonFp, "%s", textPythonLower.c_str());
@@ -232,32 +266,7 @@ void monitorEvent() {
     }
     textFuncUpper += "\n";
 
-    if (args.size()) {
-        textRecover += "def recover" + funcName + "(seq" + funcName;
-        for (int i = 0; i < num; i++) {
-            string arg = args[i];
-
-            string type = getType(arg);
-            string varName = removeType(arg);
-
-            if (type[0] == '$') {
-                varName[0] = toupper(varName[0]);
-
-                string idxVarName = "idx" + varName;
-                textRecover += ", " + idxVarName;
-
-                string maskedVarName = "masked" + varName;
-                textRecover += ", " + maskedVarName;
-
-            } else {
-                textRecover += ", " + varName;
-            }
-        }
-        textRecover += "):\n";
-        textRecover += "    return [";
-
-        hasRecoverFunc = true;
-    }
+    eventArgs = args;
 }
 
 
@@ -295,6 +304,9 @@ void collectKeys() {
     if (tmp.length() > 0) tmp = tmp.substr(0, tmp.size() - 2);
     textFuncUpper += tmp + "]\n";
 
+    textFuncUpper += "    readKeys =  [k.lower() for k in readKeys]\n";
+    textFuncUpper += "    writeKeys =  [k.lower() for k in writeKeys]\n";
+
     textFuncUpper += "\n";
 }
 
@@ -325,22 +337,39 @@ void createLocks() {
 void acquireLocks() {
     textFuncUpper += "    tasks = []\n";
 
-    if (readKeySet.size() > 0) {
-        textFuncUpper += "    for key in readKeys:\n";
-        textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
-    }
-
-    if (writeKeySet.size() > 0) {
-        textFuncUpper += "    for key in writeKeys:\n";
-        textFuncUpper += "        if key not in readKeys:\n";
-        textFuncUpper += "            tasks.append(server.dbLock[key].acquire())\n";
-    }
-
     textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
-    textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
+    if (finalizeOnChain) {
+        textFuncUpper += "    tasks.append(server.portLock[port])\n";
 
-    textFuncUpper += "    await asyncio.wait(tasks)\n";
+        if (readKeySet.size() > 0) {
+            textFuncUpper += "    for key in readKeys:\n";
+            textFuncUpper += "        tasks.append(server.dbLock[key])\n";
+        }
 
+        if (writeKeySet.size() > 0) {
+            textFuncUpper += "    for key in writeKeys:\n";
+            textFuncUpper += "        if key not in readKeys:\n";
+            textFuncUpper += "            tasks.append(server.dbLock[key])\n";
+        }
+
+        textFuncUpper += "    await MultiAcquire(tasks)\n";
+
+    } else {
+        textFuncUpper += "    tasks.append(server.portLock[port].acquire())\n";
+
+        if (readKeySet.size() > 0) {
+            textFuncUpper += "    for key in readKeys:\n";
+            textFuncUpper += "        tasks.append(server.dbLock[key].acquire())\n";
+        }
+
+        if (writeKeySet.size() > 0) {
+            textFuncUpper += "    for key in writeKeys:\n";
+            textFuncUpper += "        if key not in readKeys:\n";
+            textFuncUpper += "            tasks.append(server.dbLock[key].acquire())\n";
+        }
+
+        textFuncUpper += "    await asyncio.wait(tasks)\n";
+    }
     textFuncUpper += "\n";
 
     bool flag;
@@ -361,6 +390,54 @@ void acquireLocks() {
 }
 
 
+void setRecover() {
+    if (eventArgs.size()) {
+        string parameter = "(seq" + funcName;
+        int num = eventArgs.size();
+        for (int i = 0; i < num; i++) {
+            string arg = eventArgs[i];
+
+            string type = getType(arg);
+            string varName = removeType(arg);
+
+            if (type[0] == '$') {
+                varName[0] = toupper(varName[0]);
+
+                string idxVarName = "idx" + varName;
+                parameter += ", " + idxVarName;
+
+                string maskedVarName = "masked" + varName;
+                parameter += ", " + maskedVarName;
+
+            } else {
+                parameter += ", " + varName;
+            }
+        }
+        parameter += ")";
+
+        textRecover += "def writeSet" + funcName + parameter + ":\n";
+        textRecover += "    return set({";
+        for (set<string>::iterator it = writeKeySet.begin(); it != writeKeySet.end(); it++) {
+            textRecover += *it + ", ";
+        }
+        textRecover += "})\n";
+        textRecover += "\n\n";
+
+        textRecover += "def readSet" + funcName + parameter + ":\n";
+        textRecover += "    return set({";
+        for (set<string>::iterator it = readKeySet.begin(); it != readKeySet.end(); it++) {
+            textRecover += *it + ", ";
+        }
+        textRecover += "})\n";
+        textRecover += "\n\n";
+
+        textRecover += "def allSet" + funcName + parameter + ":\n";
+        textRecover += "    return writeSet" + funcName + parameter + ".union(readSet" + funcName + parameter + ")\n";
+        textRecover += "\n\n";
+    }
+}
+
+
 void readDB() {
     string textTmp = textLine;
 
@@ -370,7 +447,7 @@ void readDB() {
 
     readKeySet.insert(key);
 
-    textLine = indent + value + " = read_db(server, " + key + ")\n";
+    textLine = indent + value + " = read_db(server, " + key + ", " + char('0' + int(finalizeOnChain)) + ")\n";
     if (type == "int") {
         textLine += indent + value + " = bytes_to_int(" + value + ")\n";
     } else if (type == "list") {
@@ -401,9 +478,8 @@ void writeDB() {
         assert(0);
     }
 
-    textLine += indent + "write_db(server, " + key + ", " + value + ")";
+    textLine += indent + "write_db(server, " + key + ", " + value + ", " + char('0' + int(finalizeOnChain)) + ")";
 
-    if (hasRecoverFunc) textRecover += key + ", ";
 }
 
 
@@ -434,7 +510,7 @@ void mpcInput() {
 
     /* python */
     string mpcName = mpcFile.substr(4, mpcFile.length() - 8);
-    if (mpcName == "hbswapTrade1") {
+    if (isBenchmark && mpcName == "hbswapTrade1") {
         textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
         textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
     } else {
@@ -624,18 +700,23 @@ SPACE [ \t\r]+
     braces--;
     if (braces > 0) addText(yytext);
     else {
-        if (hasRecoverFunc) {
-            textRecover += "]\n\n";
-            hasRecoverFunc = false;
-        }
 
         collectKeys();
         createLocks();
         acquireLocks();
 
+        setRecover();
+
         textPythonLower += textFuncUpper + textFuncLower;
 
-        if (!inPureMpc) textPythonLower += "    mark_finish(server, seq" + funcName + ", port)";
+        if (!inPureMpc) {
+            if (finalizeOnChain) {
+                textPythonLower += "    tx = server.contract.functions.finalize(seq" + funcName + ").buildTransaction({'from': server.account.address, 'gas': 1000000, 'nonce': server.web3.eth.get_transaction_count(server.account.address)})\n";
+                textPythonLower += "    sign_and_send(tx, server.web3, server.account)";
+            } else {
+                textPythonLower += "    mark_finish(server, seq" + funcName + ")";
+            }
+        }
 
         textPythonLower += returnLine;
 
@@ -705,6 +786,12 @@ SPACE [ \t\r]+
 int main(int argc, char **argv) {
     char *_fileName = argv[1];
     fileName = string(_fileName);
+
+    finalizeOnChain = argv[2][0] - '0';
+    isBenchmark = 0;
+    if (argc > 3) {
+        isBenchmark = argv[3][0] - '0';
+    }
 
     initPython();
 

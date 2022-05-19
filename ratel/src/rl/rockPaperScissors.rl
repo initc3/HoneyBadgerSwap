@@ -11,14 +11,12 @@ contract rockPaperScissors {
     uint public gameCnt;
 
     mapping (uint => uint) public status; // active-1, ready-2, completed-3
-    mapping (address => uint) public statusValue;
-    mapping (uint => uint) public statusCount;
 
     mapping (uint => string) public winners;
-    mapping (address => string) public winnersValue;
-    mapping (string => uint) public winnersCount;
+
 
     constructor() public {}
+
 
     function createGame($uint value1) public {
         address player1 = msg.sender;
@@ -44,6 +42,7 @@ contract rockPaperScissors {
                 set(status, uint curStatus, uint gameId)
         }
     }
+
 
     function joinGame(uint gameId, $uint value2) public {
         require(status[gameId] == 1);
@@ -71,6 +70,7 @@ contract rockPaperScissors {
                 set(status, uint curStatus, uint gameId)
         }
     }
+
 
     function startRecon(uint gameId) public { // 1 < 2; 2 < 3; 3 < 1;
         require(status[gameId] == 2);

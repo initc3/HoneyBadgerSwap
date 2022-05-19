@@ -32,10 +32,10 @@ docker exec -it honeybadgerswap_dev_1 bash
 
 ### Compile ratel program:
 ```shell
-bash ratel/src/compile.sh [app_names]
+bash ratel/src/compile.sh [app_names] [finalize_on_chain(0 or 1)] [is_benchmark(0 or 1)]
 ```
 ```shell
-bash ratel/src/compile.sh rockPaperScissors
+bash ratel/src/compile.sh rockPaperScissors 0 0
 ```
 Compile ratel programs (*.rl) in directory `ratel/src/rl` to python programs in `ratel/genfiles/python`, MP-SPDZ programs in `ratel/genfiles/mpc`, and Solidity contracts in `ratel/genfiles/contracts`.
 

@@ -74,8 +74,12 @@ def mpcPort(seq, concurrency):
         return mpc_port + seq * 100
 
 
-def key_inputmask(idx):
-    return f'inputmask_{idx}'.encode()
+def key_inputmask_index(idx):
+    return f'inputmask_index_{idx}'.encode()
+
+
+def key_inputmask_version(idx):
+    return f'inputmask_version_{idx}'.encode()
 
 
 def location_sharefile(server_id, base_port):
@@ -124,7 +128,7 @@ def get_inverse(a):
 
 def recover_input(db, masked_value, idx): # return: int
     try:
-        input_mask_share = db.Get(key_inputmask(idx))
+        input_mask_share = db.Get(key_inputmask_index(idx))
     except KeyError:
         input_mask_share = bytes(0)
     input_mask_share = int.from_bytes(input_mask_share, 'big')
@@ -173,7 +177,8 @@ async def execute_cmd(cmd, info=''):
             return returncode
 
 
-def mark_finish(server, seq, port):
+def mark_finish(server, seq):
+    port = mpcPort(seq, server.concurrency)
     server.portLock[port].release()
 
     key = 'execHistory'
@@ -186,27 +191,31 @@ def mark_finish(server, seq, port):
     write_db(server, key, execHistory)
 
 
-def read_db(server, key):
+def read_db(server, key, finalize_on_chain=False):
+    key = key.lower()
     try:
-        value = server.db.Get(key.lower().encode())
+        value = server.db.Get(key.encode())
     except KeyError:
         value = bytes(0)
 
     if key in server.dbLock.keys():
         server.dbLockCnt[key] -= 1
         if server.dbLockCnt[key] == 0:
-            server.dbLock[key].release()
+            if not finalize_on_chain:
+                server.dbLock[key].release()
 
     return value
 
 
-def write_db(server, key, value):
-    server.db.Put(key.lower().encode(), value)
+def write_db(server, key, value, finalize_on_chain=False):
+    key = key.lower()
+    server.db.Put(key.encode(), value)
 
     if key in server.dbLock.keys():
         server.dbLockCnt[key] -= 1
         if server.dbLockCnt[key] == 0:
-            server.dbLock[key].release()
+            if not finalize_on_chain:
+                server.dbLock[key].release()
 
 
 def bytes_to_int(value):

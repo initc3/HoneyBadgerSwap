@@ -30,6 +30,7 @@ def createGame(appContract, value1, account):
     mask = asyncio.run(
         get_inputmasks(players(appContract), f"{idx}", threshold(appContract))
     )[0]
+
     maskedValue = (value1 + mask) % prime
 
     bmask = asyncio.run(
@@ -55,6 +56,7 @@ def createGame(appContract, value1, account):
 
 
 def joinGame(appContract, gameId, value2, account):
+    print(f'**** JoinGame {value2}')
     idx = reserveInput(web3, appContract, 1, account)[0]
     mask = asyncio.run(
         get_inputmasks(players(appContract), f"{idx}", threshold(appContract))
