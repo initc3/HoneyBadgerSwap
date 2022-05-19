@@ -13,7 +13,7 @@ async def rep(shareBatchSize):
     sum = 0
     for i in range(repeat_experiment):
         start_time = time.perf_counter()
-        await server.genInputMask(shareBatchSize)
+        await server.gen_input_mask(shareBatchSize)
         end_time = time.perf_counter()
         duration = end_time - start_time
 

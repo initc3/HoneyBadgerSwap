@@ -2,15 +2,12 @@ import asyncio
 import re
 
 from aiohttp import ClientSession
-from ratel.src.python.utils import http_port, http_host, get_inverse, prime
+from ratel.src.python.utils import http_port, http_host, get_inverse, prime, sign_and_send
 
 
 def reserveInput(web3, appContract, num, account):
     tx = appContract.functions.reserveInput(num).buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})
-    signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
-    web3.eth.send_raw_transaction(signedTx.rawTransaction)
-    web3.eth.wait_for_transaction_receipt(signedTx.hash)
-    receipt = web3.eth.get_transaction_receipt(signedTx.hash)
+    receipt = sign_and_send(tx, web3, account)
     log = appContract.events.InputMask().processReceipt(receipt)
     return log[0]['args']['inpusMaskIndexes']
 

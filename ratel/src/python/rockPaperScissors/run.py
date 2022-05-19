@@ -33,7 +33,7 @@ if __name__ == '__main__':
         init_threshold,
         concurrency,
         recover,
-        test,
+        # test,
     )
 
     server.loop.run_until_complete(server.init(rockPaperScissors.monitor(server)))

@@ -32,7 +32,7 @@ async def testing():
 
     task = loop.create_task(send_requests(online_players, request))
 
-    await server.genInputMask(len(keys))
+    await server.gen_input_mask(len(keys))
     await task
 
     masked_shares = task.result()

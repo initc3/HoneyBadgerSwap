@@ -15,13 +15,6 @@ contract hbswap {
     mapping (address => mapping (address => uint)) public publicBalance;
 
     mapping (address => mapping (address => string)) public estimatedPrice;
-    mapping (address => string) public estimatedPriceValue;
-    mapping (string => uint) public estimatedPriceCount;
-
-    uint public secretWithdrawCnt;
-    mapping (address => mapping (uint => uint)) public secretWithdrawValue;
-    mapping (uint => bool) public secretWithdrawFinish;
-    mapping (uint => mapping (uint => uint)) public secretWithdrawCount;
 
 
     constructor() public {}
@@ -92,7 +85,7 @@ contract hbswap {
 
             print('****', balance, enough)
             if enough == 1:
-                add(publicBalance, uint seqSecretWithdraw, uint amt, address token, address user)
+                add(publicBalance, uint amt, address token, address user, uint seqSecretWithdraw)
                 writeDB(f'balance_{token}_{user}', balance, int)
         }
     }

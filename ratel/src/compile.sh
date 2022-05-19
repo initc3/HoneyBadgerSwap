@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
+
+#### parameters
+apps=$1
+finalize_on_chain=$2
+is_benchmark=$3
+####
+
+
 compile_flex() {
   flex ../src/scanner/$1.l
   g++ -o $1 lex.yy.c
 }
+
 
 compile_flexes() {
   compile_flex split_public_private
@@ -12,9 +21,11 @@ compile_flexes() {
   compile_flex split_private
 }
 
+
 compile_sol() {
   truffle compile
 }
+
 
 compile_mpc() {
   cd mpc
@@ -24,22 +35,20 @@ compile_mpc() {
   cd ..
 }
 
-run_scanner() {
-  ./$1 $2 <$3
-}
 
 parse() {
   # split public and private code
-  run_scanner split_public_private $1 ../src/rl/$1.rl
+  ./split_public_private $1 < ../src/rl/$1.rl
 
   # reorg sol code
-  run_scanner split_public $1 contracts/$1.sol
+  ./split_public $1 $$finalize_on_chain < contracts/$1.sol
   mv contracts/tmp.sol contracts/$1.sol
 
   # split python and MP-SPDZ code
-  run_scanner split_private $1 mpc/$1.mpc
+  ./split_private $1 $finalize_on_chain $is_benchmark < mpc/$1.mpc
   rm mpc/$1.mpc
 }
+
 
 init() {
   rm -rf ratel/genfiles
@@ -53,8 +62,6 @@ init() {
 }
 
 
-
-
 init
 
 cd ratel/genfiles
@@ -64,7 +71,6 @@ compile_flexes
 ####
 
 #### compile application
-apps=$1
 IFS=','
 read -a strarr <<< "$apps"
 for app in "${strarr[@]}";

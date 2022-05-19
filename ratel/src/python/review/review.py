@@ -6,7 +6,7 @@ from web3.middleware import geth_poa_middleware
 
 from ratel.src.python.Client import get_inputmasks
 from ratel.src.python.deploy import url, parse_contract, appAddress, reserveInput, getAccount
-from ratel.src.python.utils import fp
+from ratel.src.python.utils import fp, sign_and_send
 
 contract_name = 'review'
 
@@ -54,9 +54,7 @@ def peerReview(appContract, sessionId, paperNum, reviewersPerPaper):
             maskedScore = score + mask
 
             tx = appContract.functions.peerReview(sessionId, i, idx, maskedScore).buildTransaction({'from': account.address, 'gas': 1000000, 'nonce': web3.eth.get_transaction_count(account.address)})
-            signedTx = web3.eth.account.sign_transaction(tx, private_key=account.privateKey)
-            web3.eth.send_raw_transaction(signedTx.rawTransaction)
-            web3.eth.wait_for_transaction_receipt(signedTx.hash)
+            sign_and_send(tx, web3, account)
 
 def calcResult(appContract, sessionId, threshold):
     dueReview = appContract.functions.dueReview(sessionId).call()
