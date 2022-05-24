@@ -6,6 +6,7 @@ import os
 
 from gmpy import binary, mpz
 from gmpy2 import mpz_from_old_binary
+from pybulletproofs import pedersen_aggregate, pedersen_commit, zkrp_verify
 
 
 INPUTMASK_SHARES_DIR = os.getenv(
@@ -250,6 +251,34 @@ def list_to_bytes(value):
 
 def dict_to_bytes(value):
     return bytes(str(value), encoding='utf-8')
+
+
+async def verify_proof(server, idxValue, maskedValue, idxValueBlinding, maskedValueBlinding, proof, commitment, bits=32):
+    # TODO:
+    # proof, commitment, blinding_ = zkrp_prove(2022, 32)
+    if not zkrp_verify(proof, commitment, bits):
+        print("[Error]: Committed secret value does not pass range proof verification!")
+        return False
+
+    value1 = recover_input(server.db, maskedValue, idxValue)
+    blinding = recover_input(server.db, maskedValueBlinding, idxValueBlinding)
+
+    # TODO: where is the blinding mask created? we also need to share it.
+    value1_bytes = list(value1.to_bytes(32, byteorder='little'))
+    blinding_bytes = list(blinding.to_bytes(32, byteorder='little'))
+
+    share_commitment = pedersen_commit(value1_bytes, blinding_bytes)
+
+    # TODO: create the function to commit to the unmasked secret shares.
+    # TODO: we also need to change the current zkrp interface to allow specifying r and choose range to prove.
+
+    server.zkrpShares[f'{idxValue}'] = share_commitment
+    results = await server.get_zkrp_shares(players(server.contract), f'{idxValue}')
+    # print(")))))))", results)
+    agg_commitment = pedersen_aggregate(results, [x + 1 for x in list(range(server.players))])
+
+    # print("((((((((", agg_commitment, commitment)
+    return agg_commitment == commitment
 
 
 leaderHostname = 'mpcnode0'

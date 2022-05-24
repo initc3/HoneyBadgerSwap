@@ -1,6 +1,8 @@
 import asyncio
 import time
 
+from pybulletproofs import zkrp_prove
+
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -22,28 +24,23 @@ contract_name = "rockPaperScissors"
 
 
 def createGame(appContract, value1, account):
-    proof, commitment, blinding_bytes = zkrp_prove(value1, 32)
-    blinding = int.from_bytes(blinding_bytes, byteorder="little")
+    print(f'**** CreateGame {value1}')
+    bits = 32
+    proof, commitment, blinding_bytes = zkrp_prove(value1, bits)
+    blinding = int.from_bytes(blinding_bytes, byteorder='little')
 
     idx, bidx = reserveInput(web3, appContract, 2, account)
 
-    mask = asyncio.run(
-        get_inputmasks(players(appContract), f"{idx}", threshold(appContract))
-    )[0]
-
+    mask = asyncio.run(get_inputmasks(players(appContract), f'{idx}', threshold(appContract)))[0]
     maskedValue = (value1 + mask) % prime
 
-    bmask = asyncio.run(
-        get_inputmasks(players(appContract), f"{bidx}", threshold(appContract))
-    )[0]
+    bmask = asyncio.run(get_inputmasks(players(appContract), f'{bidx}', threshold(appContract)))[0]
     maskedBlinding = (blinding + bmask) % prime
 
     web3.eth.defaultAccount = account.address
-    tx = appContract.functions.createGame(
-        idx, maskedValue, bidx, maskedBlinding, proof, commitment
-    ).buildTransaction(
-        {"nonce": web3.eth.get_transaction_count(web3.eth.defaultAccount)}
-    )
+    tx = appContract.functions.createGame(idx, maskedValue, bidx, maskedBlinding, proof, commitment).buildTransaction({
+        'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
+    })
     receipt = sign_and_send(tx, web3, account)
 
     log = appContract.events.CreateGame().processReceipt(receipt)

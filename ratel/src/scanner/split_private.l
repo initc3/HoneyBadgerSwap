@@ -103,7 +103,7 @@ string getIndent(string text) {
 
 void initPython() {
     textPythonUpper += "import asyncio\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send, verify_proof\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "async def monitor(server):\n";
@@ -215,9 +215,8 @@ void processPureMpc() {
         textFuncUpper += ", " + args[i];
     }
 
-    textFuncUpper += "):\n";
+    textFuncUpper += ", port=4900):\n";
 
-    textFuncUpper += "    seq" + funcName + " = -1\n";
     textFuncUpper += "\n";
 
 }
@@ -230,6 +229,9 @@ void processEventParam() {
             string postVarName = removeType(args[i]);
             postVarName[0] = toupper(postVarName[0]);
             textLine += "idx" + postVarName + ", " + "masked" + postVarName;
+            if (args[i][1] == '#') {
+                textLine += ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName;
+            }
         } else {
             textLine += removeType(args[i]);
         }
@@ -260,6 +262,20 @@ void monitorEvent() {
             string maskedVarName = "masked" + varName;
             textFuncUpper += tab(1) + maskedVarName + " = log['args']['" + maskedVarName + "']\n";
 
+            if (type[1] == '#') {
+                string idxVarNameBlinding = "idx" + varName + "Blinding";
+                textFuncUpper += tab(1) + idxVarNameBlinding + " = log['args']['" + idxVarNameBlinding + "']\n";
+
+                string maskedVarNameBlinding = "masked" + varName + "Blinding";
+                textFuncUpper += tab(1) + maskedVarNameBlinding + " = log['args']['" + maskedVarNameBlinding + "']\n";
+
+                string proofVarName = "proof" + varName;
+                textFuncUpper += tab(1) + proofVarName + " = log['args']['" + proofVarName + "']\n";
+
+                string commitmentVarName = "commitment" + varName;
+                textFuncUpper += tab(1) + commitmentVarName + " = log['args']['" + commitmentVarName + "']\n";
+            }
+
         } else {
             textFuncUpper += tab(1) + varName + " = log['args']['" + varName + "']\n";
         }
@@ -272,6 +288,7 @@ void monitorEvent() {
 
 void unmaskInput() {
     bool flag = 0;
+    bool hasZKP = 0;
     for (int i = 0; i < args.size(); i++) {
         if (args[i][0] == '$') {
             flag = 1;
@@ -279,9 +296,16 @@ void unmaskInput() {
             string postVarName = varName;
             postVarName[0] = toupper(postVarName[0]);
             textFuncUpper += "    " + varName + " = recover_input(server.db, masked" + postVarName + ", idx" + postVarName + ")\n";
+            if (args[i][1] == '#') {
+                textFuncUpper += "    " + varName + "Blinding = recover_input(server.db, masked" + postVarName + "Blinding, idx" + postVarName + "Blinding)\n";
+
+                textFuncLower += "    assert(await verify_proof(server, idx" + postVarName + ", masked" + postVarName + ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName + "))\n";
+                hasZKP = 1;
+            }
         }
     }
     if (flag) textFuncUpper += "\n";
+    if (hasZKP) textFuncLower += "\n";
 }
 
 
@@ -337,7 +361,7 @@ void createLocks() {
 void acquireLocks() {
     textFuncUpper += "    tasks = []\n";
 
-    textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
+    if (!inPureMpc) textFuncUpper += "    port = mpcPort(seq" + funcName + ", server.concurrency)\n";
     if (finalizeOnChain) {
         textFuncUpper += "    tasks.append(server.portLock[port])\n";
 
@@ -716,6 +740,8 @@ SPACE [ \t\r]+
             } else {
                 textPythonLower += "    mark_finish(server, seq" + funcName + ")";
             }
+        } else {
+            textPythonLower += "    server.portLock[port].release()\n";
         }
 
         textPythonLower += returnLine;

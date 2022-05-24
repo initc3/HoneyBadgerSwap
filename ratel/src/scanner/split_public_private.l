@@ -80,18 +80,47 @@ string getFuncName(string st) {
 }
 
 
+string argWithType(string arg, bool isEvent=false) {
+    string ret;
+    if (arg[0] == '$') {
+        string varType = getType(arg).substr(1);
+        string postVarName = removeType(arg);
+        postVarName[0] = toupper(postVarName[0]);
+        string tmp = "";
+        string mem = isEvent ? "" : "memory" ;
+        if (varType[0] == '#') {
+            varType = varType.substr(1);
+            tmp = ", uint idx" + postVarName + "Blinding, uint masked" + postVarName + "Blinding, uint8[] " + mem + " proof" + postVarName + ", uint8[] " + mem + " commitment" + postVarName;
+        }
+        ret = "uint idx" + postVarName + ", uint masked" + postVarName + tmp;
+    } else {
+        ret = arg;
+    }
+    return ret;
+}
+
+
+string argWithoutType(string arg) {
+    string ret;
+    if (arg[0] == '$') {
+        string postVarName = removeType(arg);
+        postVarName[0] = toupper(postVarName[0]);
+        ret = "idx" + postVarName + ", masked" + postVarName;
+        if (arg[1] == '#') {
+            ret += ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName;
+        }
+    } else {
+        ret = removeType(arg);
+    }
+    return ret;
+}
+
+
 void addEventDeclare() {
     textPublicEvents += "    event " + funcName + "(uint seq" + funcName;
     for (int i = 0; i < args.size(); i++) {
-        textPublicEvents += ", ";
-        if (args[i][0] == '$') {
-            string varType = getType(args[i]).substr(1);
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textPublicEvents += "uint idx" + postVarName + ", " + varType + " masked" + postVarName;
-        } else {
-            textPublicEvents += args[i];
-        }
+        textPublicEvents += ", " + argWithType(args[i], true);
+
     }
     textPublicEvents += ");\n";
 }
@@ -104,36 +133,17 @@ void addEventEmit() {
         textRecover += "pass\n\n";
     } else {
         for (int i = 0; i < args.size(); i++) {
-            if (args[i][0] == '$') {
-                string postVarName = removeType(args[i]);
-                postVarName[0] = toupper(postVarName[0]);
-                textRecover += "idx" + postVarName + ", masked" + postVarName;
-            } else {
-                textRecover += removeType(args[i]);
-            }
-            textRecover += ", ";
+            textRecover += argWithoutType(args[i]) + ", ";
         }
         textRecover += " = decode_single(\'(";
         for (int i = 0; i < args.size(); i++) {
             if (i > 0) textRecover += ",";
-            if (args[i][0] == '$') {
-                string varType = getType(args[i]).substr(1);
-                textRecover += "uint256," + varType;
-            } else {
-                textRecover += getType(args[i]);
-            }
+            textRecover += argWithType(args[i], true);
         }
         textRecover += ")\', opContent)\n";
         textRecover += "        return eval(f'\{op\}" + funcName + "')(opSeq";
         for (int i = 0; i < args.size(); i++) {
-            textRecover += ", ";
-            if (args[i][0] == '$') {
-                string postVarName = removeType(args[i]);
-                postVarName[0] = toupper(postVarName[0]);
-                textRecover += "idx" + postVarName + ", masked" + postVarName;
-            } else {
-                textRecover += removeType(args[i]);
-            }
+            textRecover += ", " + argWithoutType(args[i]);
         }
         textRecover += ")\n";
         textRecover += "\n";
@@ -144,27 +154,14 @@ void addEventEmit() {
     textPublic += "        opContent[seq" + funcName + "] = abi.encode(";
     for (int i = 0; i < args.size(); i++) {
         if (i > 0) textPublic += ", ";
-        if (args[i][0] == '$') {
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textPublic += "idx" + postVarName + ", masked" + postVarName;
-        } else {
-            textPublic += removeType(args[i]);
-        }
+        textPublic += argWithoutType(args[i]);
     }
     textPublic += ");\n";
     textPublic += "\n";
 
     textPublic += "        emit " + funcName + "(seq" + funcName ;
     for (int i = 0; i < args.size(); i++) {
-        textPublic += ", ";
-        if (args[i][0] == '$') {
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textPublic += "idx" + postVarName + ", " + "masked" + postVarName;
-        } else {
-            textPublic += removeType(args[i]);
-        }
+        textPublic += ", " + argWithoutType(args[i]);
     }
     textPublic += ");\n";
 }
@@ -181,14 +178,7 @@ void addMpcParam() {
 void addFuncParam() {
     for (int i = 0; i < args.size(); i++) {
         if (i > 0) textLine += ", ";
-        if (args[i][0] == '$') {
-            string varType = getType(args[i]).substr(1);
-            string postVarName = removeType(args[i]);
-            postVarName[0] = toupper(postVarName[0]);
-            textLine += "uint idx" + postVarName + ", " + varType + " masked" + postVarName;
-        } else {
-            textLine += args[i];
-        }
+        textLine += argWithType(args[i]);
     }
 }
 
@@ -200,6 +190,9 @@ void addInputMaskCheck() {
         varName[0] = toupper(varName[0]);
         if (args[i][0] == '$') {
             textLine += "        require(inputMaskOwner[idx" + varName + "] == msg.sender);\n";
+            if (args[i][1] == '#') {
+                textLine += "        require(inputMaskOwner[idx" + varName + "Blinding] == msg.sender);\n";
+            }
             flag = true;
         }
     }
@@ -472,7 +465,7 @@ SPACE [ \t\r]+
 \n {
     textLine += string(yytext);
 
-    //printf("textLine:%s", textLine.c_str());
+//    printf("textLine:%s", textLine.c_str());
 
     if (isMpc) {
         if (braces == mpcBracesPos) {
