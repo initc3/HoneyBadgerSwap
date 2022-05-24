@@ -4,8 +4,8 @@ set -e
 
 #### parameters
 apps=$1
-finalize_on_chain=$2
-is_benchmark=$3
+finalize_on_chain=${2:-0}
+is_benchmark=${3:-0}
 ####
 
 

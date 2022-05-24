@@ -1,3 +1,5 @@
+import json
+
 import aiohttp_cors
 import ast
 import asyncio
@@ -46,8 +48,6 @@ class Server:
 
         self.loop = asyncio.get_event_loop()
 
-        self.zkrpShares = {}
-
         self.local_input_mask_cnt = 0
 
         # self.test = test
@@ -58,6 +58,9 @@ class Server:
         # except KeyError:
         #     pass
         # print('**** input_mask_queue_tail', self.input_mask_queue_tail)
+
+        self.zkrpShares = {}
+
 
     async def get_zkrp_shares(self, players, inputmask_idxes):
         request = f"zkrp_share_idxes/{inputmask_idxes}"
@@ -108,10 +111,9 @@ class Server:
         #     print(f"s{self.serverID} response: {res}")
         #     return web.json_response(data)
 
-        # TODO:
         async def handler_mpc_verify(request):
             print(f"s{self.serverID} request: s{request} request from {request.remote}")
-            mask_idx = re.split(",", request.match_info.get("mask_idxes"))[0]
+            mask_idx = re.split(',', request.match_info.get("mask_idxes"))[0]
 
             while mask_idx not in self.zkrpShares.keys():
                 await asyncio.sleep(1)

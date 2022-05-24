@@ -18,11 +18,11 @@ contract rockPaperScissors {
     constructor() public {}
 
 
-    function createGame($uint value1) public {
+    function createGame($#uint value1) public {
         address player1 = msg.sender;
         uint gameId = ++gameCnt;
 
-        mpc(uint gameId, address player1, $uint value1) {
+        mpc(uint gameId, address player1, $#uint value1) {
             mpcInput(sint value1)
 
             valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
