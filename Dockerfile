@@ -1,4 +1,4 @@
-ARG mpspdz_commit=2bb036d
+ARG mpspdz_commit=a6cc504
 FROM initc3/malicious-shamir-party.x:${mpspdz_commit} as malshamirparty
 FROM initc3/mal-shamir-offline.x:${mpspdz_commit} as malshamiroffline
 FROM initc3/random-shamir.x:${mpspdz_commit} as randomshamir
