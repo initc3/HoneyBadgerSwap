@@ -73,14 +73,14 @@ class Server:
 
         self.loop = asyncio.get_event_loop()
 
-        self.zkrpShares = defaultdict(list)
+        self.zkrpShares = {}
 
     async def get_zkrp_shares(self, players, inputmask_idxes):
         request = f"zkrp_share_idxes/{inputmask_idxes}"
         results = await send_requests(players, request)
         parsed_results = []
         for i in range(len(results)):
-            parsed_results.append(json.loads(results[i]["zkrp_share_idx"])[0])
+            parsed_results.append(json.loads(results[i]["zkrp_share_idx"]))
 
         return parsed_results
 
@@ -130,26 +130,14 @@ class Server:
 
         # TODO:
         async def handler_mpc_verify(request):
-            print(f"s{self.serverID} request: s{request}")
-            zkrp_share_idx = re.split(",", request.match_info.get("zkrp_share_idxes"))
+            print(f"s{self.serverID} request: s{request} request from {request.remote}")
+            mask_idx = re.split(",", request.match_info.get("mask_idxes"))[0]
 
-            while len(self.zkrpShares[zkrp_share_idx]) == 0:
-                await asyncio.sleep(10)
-                res = str(self.zkrpShares[zkrp_share_idx][0])
+            while mask_idx not in self.zkrpShares.keys():
+                await asyncio.sleep(1)
 
-            # print("&&&&&", mask_idxes[0], json.dumps(self.zkrpShares[mask_idxes[0]]))
             data = {
-                "zkrp_share_idx": json.dumps(self.zkrpShares[mask_idxes[0]]),
-            }
-            return web.json_response(data)
-
-        async def handler_mpc_verify(request):
-            print(f"s{self.serverID} request: s{request}")
-            mask_idxes = re.split(",", request.match_info.get("mask_idxes"))
-
-            # print("&&&&&", mask_idxes[0], json.dumps(self.zkrpShares[mask_idxes[0]]))
-            data = {
-                "zkrp_share_idx": json.dumps(self.zkrpShares[mask_idxes[0]]),
+                "zkrp_share_idx": json.dumps(self.zkrpShares[mask_idx]),
             }
             return web.json_response(data)
 
