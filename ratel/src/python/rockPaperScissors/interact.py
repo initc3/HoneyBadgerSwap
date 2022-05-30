@@ -37,10 +37,6 @@ def createGame(appContract, value1, account):
     )[0]
     maskedBlinding = (blinding + bmask) % prime
 
-    # TODO:
-    bmask = asyncio.run(get_inputmasks(players(appContract), f"{bidx}"))[0]
-    maskedBlinding = (blinding + bmask) % blsPrime
-
     web3.eth.defaultAccount = account.address
     tx = appContract.functions.createGame(
         idx, maskedValue, bidx, maskedBlinding, proof, commitment

@@ -1,34 +1,31 @@
-import ast
 import asyncio
-import json
-import time
+from zkrp_pyo3 import pedersen_aggregate, pedersen_commit, zkrp_verify
 from ratel.src.python.utils import (
     location_sharefile,
     prog,
     mpcPort,
-    blsPrime,
+    prime,
     sz,
     int_to_hex,
     hex_to_int,
     recover_input,
     fp,
     replay,
+    mark_finish,
+    read_db,
+    write_db,
+    bytes_to_int,
+    bytes_to_list,
+    bytes_to_dict,
+    int_to_bytes,
+    list_to_bytes,
+    dict_to_bytes,
+    execute_cmd,
     players,
 )
 
-# TODO: Manually added code for zkrp
-# TODO: this can only be run under the virtual environment. can we move the package to the whole environment?
-# from zkrp_pyo3 import zkrp_prove, zkrp_verify
-from ratel.src.zkrp_pyo3.zkrp_pyo3 import (
-    pedersen_aggregate,
-    pedersen_commit,
-    pedersen_open,
-    zkrp_prove,
-    zkrp_verify,
-)
 
-
-async def monitor(server, loop):
+async def monitor(server):
     blkNum = server.web3.eth.get_block_number()
     while True:
         curBlkNum = server.web3.eth.get_block_number()
@@ -61,9 +58,10 @@ async def monitor(server, loop):
                 )
 
             logs.sort(key=lambda s: (s[0], s[1]))
-            for log in logs:
-                for _ in range((1 if log[2] != "Trade" else replay)):
-                    loop.create_task(eval(f"run{log[2]}")(server, log[3]))
+            for i in range(replay):
+                for log in logs:
+                    if i == 0 or log[2] == "Trade":
+                        server.loop.create_task(eval(f"run{log[2]}")(server, log[3]))
             blkNum = curBlkNum - server.confirmation + 1
         else:
             await asyncio.sleep(1)
@@ -98,58 +96,46 @@ async def runCreateGame(server, log):
     # TODO: create the function to commit to the unmasked secret shares.
     # TODO: we also need to change the current zkrp interface to allow specifying r and choose range to prove.
 
-    server.zkrpShares[f"{idxValue1}"].append(share_commitment)
+    server.zkrpShares[f"{idxValue1}"] = share_commitment
     results = await server.get_zkrp_shares(players(server.contract), f"{idxValue1}")
-    print("#####", results)
+    # print(")))))))", results)
+    agg_commitment = pedersen_aggregate(
+        results, [x + 1 for x in list(range(server.players))]
+    )
 
-    print("((((((Server players:", server.players)
-    agg_commitment = pedersen_aggregate(results, list(range(server.players)))
+    # print("((((((((", agg_commitment, commitment)
+    assert agg_commitment == commitment
 
-    # assert agg_commitment == commitment
-
-    await server.dbLock["access"].acquire()
     readKeys = []
     writeKeys = [f"gameBoard_{gameId}"]
-    for key in readKeys:
-        if key not in server.dbLock.keys():
-            server.dbLock[key] = asyncio.Lock()
+
     for key in writeKeys:
         if key not in server.dbLock.keys():
             server.dbLock[key] = asyncio.Lock()
-    server.dbLock["access"].release()
+            server.dbLockCnt[key] = 0
 
     tasks = []
-    for key in readKeys:
-        tasks.append(server.dbLock[key].acquire())
     for key in writeKeys:
-        tasks.append(server.dbLock[key].acquire())
+        if key not in readKeys:
+            tasks.append(server.dbLock[key].acquire())
     port = mpcPort(seqCreateGame, server.concurrency)
     tasks.append(server.portLock[port].acquire())
     await asyncio.wait(tasks)
 
-    for key in readKeys:
-        server.dbLock[key].release()
+    for key in writeKeys:
+        server.dbLockCnt[key] += 1
 
     file = location_sharefile(server.serverID, port)
     with open(file, "wb") as f:
         f.write(int_to_hex(value1))
 
-    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} rockPaperScissorsCreateGame1"
-    proc = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await proc.communicate()
-    print(f"[{cmd!r} exited with {proc.returncode}]")
-    if stdout:
-        print(f"[stdout]\n{stdout.decode()}")
-    if stderr:
-        print(f"[stderr]\n{stderr.decode()}")
+    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} rockPaperScissorsCreateGame1"
+    await execute_cmd(cmd)
 
     input_arg_num = 1
     with open(file, "rb") as f:
         f.seek(input_arg_num * sz)
         valid = hex_to_int(f.read(sz))
-    server.portLock[port].release()
 
     print("**** valid", valid)
     if valid == 1:
@@ -158,11 +144,11 @@ async def runCreateGame(server, log):
             "value1": value1,
         }
         print("**** game", game)
-        game = str(game)
-        game = bytes(game, encoding="utf-8")
-        server.db.Put(f"gameBoard_{gameId}".lower().encode(), game)
-        server.dbLock[f"gameBoard_{gameId}"].release()
+        game = dict_to_bytes(game)
+        write_db(server, f"gameBoard_{gameId}", game)
+
         curStatus = 1
+
         tx = server.contract.functions.statusSet(curStatus, gameId).buildTransaction(
             {
                 "from": server.account.address,
@@ -177,21 +163,7 @@ async def runCreateGame(server, log):
         server.web3.eth.wait_for_transaction_receipt(signedTx.hash)
         print(server.contract.functions.status(gameId).call())
 
-    await server.dbLock["execHistory"].acquire()
-    try:
-        execHistory = server.db.Get(f"execHistory".encode())
-    except KeyError:
-        execHistory = bytes(0)
-    try:
-        execHistory = execHistory.decode(encoding="utf-8")
-        execHistory = dict(ast.literal_eval(execHistory))
-    except:
-        execHistory = {}
-    execHistory[f"seqCreateGame"] = True
-    execHistory = str(execHistory)
-    execHistory = bytes(execHistory, encoding="utf-8")
-    server.db.Put(f"execHistory".encode(), execHistory)
-    server.dbLock["execHistory"].release()
+    mark_finish(server, seqCreateGame, port)
 
 
 async def runJoinGame(server, log):
@@ -203,70 +175,61 @@ async def runJoinGame(server, log):
 
     value2 = recover_input(server.db, maskedValue2, idxValue2)
 
-    await server.dbLock["access"].acquire()
-    readKeys = []
+    readKeys = [f"gameBoard_{gameId}"]
     writeKeys = [f"gameBoard_{gameId}"]
+
     for key in readKeys:
         if key not in server.dbLock.keys():
             server.dbLock[key] = asyncio.Lock()
+            server.dbLockCnt[key] = 0
     for key in writeKeys:
         if key not in server.dbLock.keys():
             server.dbLock[key] = asyncio.Lock()
-    server.dbLock["access"].release()
+            server.dbLockCnt[key] = 0
 
     tasks = []
     for key in readKeys:
         tasks.append(server.dbLock[key].acquire())
     for key in writeKeys:
-        tasks.append(server.dbLock[key].acquire())
+        if key not in readKeys:
+            tasks.append(server.dbLock[key].acquire())
     port = mpcPort(seqJoinGame, server.concurrency)
     tasks.append(server.portLock[port].acquire())
     await asyncio.wait(tasks)
 
-    try:
-        value1 = server.db.Get(f"gameBoard_{gameId}".lower().encode())
-    except KeyError:
-        value1 = bytes(0)
-    try:
-        value1 = value1.decode(encoding="utf-8")
-        value1 = dict(ast.literal_eval(value1))
-    except:
-        value1 = {}
-    game = value1
     for key in readKeys:
-        server.dbLock[key].release()
+        server.dbLockCnt[key] += 1
+    for key in writeKeys:
+        server.dbLockCnt[key] += 1
+
+    value1 = read_db(server, f"gameBoard_{gameId}")
+    value1 = bytes_to_dict(value1)
+    game = value1
 
     file = location_sharefile(server.serverID, port)
     with open(file, "wb") as f:
         f.write(int_to_hex(value2))
 
-    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} rockPaperScissorsJoinGame1"
-    proc = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await proc.communicate()
-    print(f"[{cmd!r} exited with {proc.returncode}]")
-    if stdout:
-        print(f"[stdout]\n{stdout.decode()}")
-    if stderr:
-        print(f"[stderr]\n{stderr.decode()}")
+    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} rockPaperScissorsJoinGame1"
+    await execute_cmd(cmd)
 
     input_arg_num = 1
     with open(file, "rb") as f:
         f.seek(input_arg_num * sz)
         valid = hex_to_int(f.read(sz))
-    server.portLock[port].release()
 
     print("**** valid", valid)
     if valid == 1:
         game["player2"] = player2
         game["value2"] = value2
+
         print("**** game", game)
-        game = str(game)
-        game = bytes(game, encoding="utf-8")
-        server.db.Put(f"gameBoard_{gameId}".lower().encode(), game)
-        server.dbLock[f"gameBoard_{gameId}"].release()
+
+        game = dict_to_bytes(game)
+        write_db(server, f"gameBoard_{gameId}", game)
+
         curStatus = 2
+
         tx = server.contract.functions.statusSet(curStatus, gameId).buildTransaction(
             {
                 "from": server.account.address,
@@ -281,85 +244,52 @@ async def runJoinGame(server, log):
         server.web3.eth.wait_for_transaction_receipt(signedTx.hash)
         print(server.contract.functions.status(gameId).call())
 
-    await server.dbLock["execHistory"].acquire()
-    try:
-        execHistory = server.db.Get(f"execHistory".encode())
-    except KeyError:
-        execHistory = bytes(0)
-    try:
-        execHistory = execHistory.decode(encoding="utf-8")
-        execHistory = dict(ast.literal_eval(execHistory))
-    except:
-        execHistory = {}
-    execHistory[f"seqJoinGame"] = True
-    execHistory = str(execHistory)
-    execHistory = bytes(execHistory, encoding="utf-8")
-    server.db.Put(f"execHistory".encode(), execHistory)
-    server.dbLock["execHistory"].release()
+    mark_finish(server, seqJoinGame, port)
 
 
 async def runStartRecon(server, log):
     seqStartRecon = log["args"]["seqStartRecon"]
     gameId = log["args"]["gameId"]
 
-    await server.dbLock["access"].acquire()
     readKeys = [f"gameBoard_{gameId}"]
     writeKeys = []
+
     for key in readKeys:
         if key not in server.dbLock.keys():
             server.dbLock[key] = asyncio.Lock()
-    for key in writeKeys:
-        if key not in server.dbLock.keys():
-            server.dbLock[key] = asyncio.Lock()
-    server.dbLock["access"].release()
+            server.dbLockCnt[key] = 0
 
     tasks = []
     for key in readKeys:
-        tasks.append(server.dbLock[key].acquire())
-    for key in writeKeys:
         tasks.append(server.dbLock[key].acquire())
     port = mpcPort(seqStartRecon, server.concurrency)
     tasks.append(server.portLock[port].acquire())
     await asyncio.wait(tasks)
 
-    try:
-        value1 = server.db.Get(f"gameBoard_{gameId}".lower().encode())
-    except KeyError:
-        value1 = bytes(0)
-    try:
-        value1 = value1.decode(encoding="utf-8")
-        value1 = dict(ast.literal_eval(value1))
-    except:
-        value1 = {}
+    for key in readKeys:
+        server.dbLockCnt[key] += 1
+
+    value1 = read_db(server, f"gameBoard_{gameId}")
+    value1 = bytes_to_dict(value1)
     game = value1
+
     value1 = game["value1"]
     value2 = game["value2"]
-    for key in readKeys:
-        server.dbLock[key].release()
 
     file = location_sharefile(server.serverID, port)
     with open(file, "wb") as f:
         f.write(int_to_hex(value1) + int_to_hex(value2))
 
-    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {blsPrime} rockPaperScissorsStartRecon1"
-    proc = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await proc.communicate()
-    print(f"[{cmd!r} exited with {proc.returncode}]")
-    if stdout:
-        print(f"[stdout]\n{stdout.decode()}")
-    if stderr:
-        print(f"[stderr]\n{stderr.decode()}")
+    cmd = f"{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} rockPaperScissorsStartRecon1"
+    await execute_cmd(cmd)
 
     input_arg_num = 2
     with open(file, "rb") as f:
         f.seek(input_arg_num * sz)
         result = hex_to_int(f.read(sz))
-    server.portLock[port].release()
 
     if result > 2:
-        result -= blsPrime
+        result -= prime
     print("****", result)
     if result == 0:
         print("**** tie")
@@ -370,6 +300,7 @@ async def runStartRecon(server, log):
     else:
         print("**** winner-player2")
         winner = "player2"
+
     tx = server.contract.functions.winnersSet(winner, gameId).buildTransaction(
         {
             "from": server.account.address,
@@ -384,18 +315,4 @@ async def runStartRecon(server, log):
     server.web3.eth.wait_for_transaction_receipt(signedTx.hash)
     print(server.contract.functions.winners(gameId).call())
 
-    await server.dbLock["execHistory"].acquire()
-    try:
-        execHistory = server.db.Get(f"execHistory".encode())
-    except KeyError:
-        execHistory = bytes(0)
-    try:
-        execHistory = execHistory.decode(encoding="utf-8")
-        execHistory = dict(ast.literal_eval(execHistory))
-    except:
-        execHistory = {}
-    execHistory[f"seqStartRecon"] = True
-    execHistory = str(execHistory)
-    execHistory = bytes(execHistory, encoding="utf-8")
-    server.db.Put(f"execHistory".encode(), execHistory)
-    server.dbLock["execHistory"].release()
+    mark_finish(server, seqStartRecon, port)
