@@ -58,7 +58,7 @@ async def run_test(func, players, threshold, concurrency, mpcProg):
         for server_id in range(players):
             tasks.append(test(func, server_id, port, players, threshold, mpcProg))
     results = await asyncio.gather(*tasks)
-    print(f'!!!! {func} {results}')
+    print(f'!!! {func} {results}')
     return sum(results) / (players * concurrency)
 
 

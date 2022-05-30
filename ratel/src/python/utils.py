@@ -306,8 +306,8 @@ http_port = 4000
 
 mpc_port = 5000
 
-spareShares = 100
-shareBatchSize = 1000
+spareShares = 1000
+shareBatchSize = 10000
 
 confirmation = 2
 
@@ -315,6 +315,6 @@ replay = 1
 
 trade_key_num = 7
 
-repeat_experiment = 5
+repeat_experiment = 10
 
 mpc_failed_retry = 3

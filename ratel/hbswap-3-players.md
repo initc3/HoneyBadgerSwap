@@ -1,8 +1,8 @@
 
 
-`docker-compose build`
+`docker-compose build --no-cache --pull`
 
-`docker-compose up -d --force-recreate`
+`docker-compose up -d`
 
 `docker exec -it honeybadgerswap_dev_1 bash`
 
@@ -23,18 +23,21 @@
 ```
 ./ratel/benchmark/src/test_concurrent_trade_run.sh [players] [client_num] [concurrency] [rep]
 
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 1 1 1
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 2 2 10
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 4 4 10
-./ratel/benchmark/src/test_concurrent_trade_run.sh 3 16 16 10
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 1 1 20
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 2 2 20
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 4 4 20
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 8 8 20
+./ratel/benchmark/src/test_concurrent_trade_run.sh 3 16 16 20
 ```
 
-`python3 -m ratel.benchmark.src.plot ratel/benchmark/data`
+`python3 -m ratel.benchmark.src.trade_throughput ratel/benchmark/data`
 
 ```
-python3 -m ratel.benchmark.src.calc [players] [dir]
-python3 -m ratel.benchmark.src.calc 3 ratel/benchmark/data
+python3 -m ratel.benchmark.src.trade_latency [players] [dir]
+python3 -m ratel.benchmark.src.trade_latency 3 ratel/benchmark/data
 ```
+
+`python3 -m ratel.benchmark.src.trade_plot`
 
 `./latency-control.sh stop`
 
@@ -42,6 +45,7 @@ python3 -m ratel.benchmark.src.calc 3 ratel/benchmark/data
 
 ```
 ./compile.py -v -C -F 128 ratel/genfiles/mpc/hbswapTrade1.mpc
+python3 -m ratel.benchmark.src.test_mpc 3 1 1
 python3 -m ratel.benchmark.src.test_mpc 3 1 10
 ```
 
@@ -51,6 +55,7 @@ python3 -m ratel.benchmark.src.test_mpc 3 1 10
 
 ```
 ./ratel/benchmark/src/test_inputmask_generation_run.sh
+python3 -m ratel.benchmark.src.test_inputmask_generation_plot ratel/benchmark/data 3 1 10
 ```
 
 ```

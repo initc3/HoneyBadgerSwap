@@ -13,7 +13,7 @@ async def rep(shareBatchSize):
     sum = 0
     for i in range(repeat_experiment):
         start_time = time.perf_counter()
-        await server.gen_input_mask(shareBatchSize)
+        await server.gen_input_mask(0, 0, shareBatchSize)
         end_time = time.perf_counter()
         duration = end_time - start_time
 
@@ -30,7 +30,9 @@ async def rep(shareBatchSize):
 
 async def test(shareBatchSize):
     print('**** shareBatchSize', shareBatchSize)
+    x.append(shareBatchSize)
     avg_duration = await rep(shareBatchSize)
+    y.append(avg_duration)
     with open(f'ratel/benchmark/data/inputmask_generation_latency_{server.serverID}.csv', 'a') as f:
         f.write(f'shareBatchSize\t{shareBatchSize}\t'
                 f'avg_duration\t{avg_duration}\n')
@@ -40,6 +42,7 @@ if __name__ == '__main__':
     serverID = int(sys.argv[1])
     players = int(sys.argv[2])
     threshold = int(sys.argv[3])
+    batch_num = int(sys.argv[4])
 
     web3 = Web3(Web3.WebsocketProvider(url))
     abi, bytecode = parse_contract('hbswap')
@@ -54,9 +57,16 @@ if __name__ == '__main__':
         threshold,
         concurrency,
         None,
-        0
+        # 0
     )
 
+    x, y = [], []
     batch = 10000
-    for shareBatchSize in range(batch, 5 * batch, batch):
+    for shareBatchSize in range(batch, (batch_num + 1) * batch, batch):
         asyncio.run(test(shareBatchSize))
+    print(x)
+    print(y)
+
+    with open(f'ratel/benchmark/data/inputmask_generation_latency_{server.serverID}.csv', 'a') as f:
+        f.write(f'x\t{x}\n'
+                f'y\t{y}\n')
