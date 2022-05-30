@@ -4,11 +4,11 @@ import re
 import sys
 
 from matplotlib.ticker import MultipleLocator
-from ratel.benchmark.src.calc import idx_op, idx_time, op_start_mpc, op_end_mpc, \
+from ratel.benchmark.src.trade_latency import idx_op, idx_time, op_start_mpc, op_end_mpc, \
     op_end_mpc_chain, op_lock_acquired
 
 
-interval = 30
+interval = 60
 width = 0.1
 
 
@@ -30,14 +30,16 @@ def deal(x, init_time):
     return y
 
 
-def scan():
+def avg(x):
+    return sum(x) / len(x)
+
+
+def scan(dir, serverID=0):
     send_request = []
     lock_acquired = []
     start_mpc = []
     end_mpc = []
     end_mpc_chain = []
-
-    serverID = 0
 
     file = f'{dir}/latency_{serverID}.csv'
     with open(file, 'r') as f:
@@ -74,8 +76,9 @@ def scan():
     end_mpc = deal(end_mpc, init_time)
     end_mpc_chain = deal(end_mpc_chain, init_time)
     print(end_mpc)
+    mean = avg(list(end_mpc.values())[1:-1])
 
-    return send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain
+    return send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain, mean
 
 
 def plot(plt, map, offset, label):
@@ -115,5 +118,5 @@ def draw(send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain):
 if __name__ == '__main__':
     dir = sys.argv[1]
 
-    send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain = scan()
+    send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain, _ = scan(dir)
     draw(send_request, lock_acquired, start_mpc, end_mpc, end_mpc_chain)

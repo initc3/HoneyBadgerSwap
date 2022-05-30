@@ -181,10 +181,10 @@ class Server:
         ]
         await asyncio.gather(*tasks)
 
-    async def gen_input_mask(self, input_mask_cnt, input_mask_version):
+    async def gen_input_mask(self, input_mask_cnt, input_mask_version, share_batch_size=shareBatchSize):
         print(f'Generating new inputmasks... s-{self.serverID}')
 
-        cmd = f"./random-shamir.x -i {self.serverID} -N {self.players} -T {self.threshold} --nshares {shareBatchSize} --prep-dir {INPUTMASK_SHARES_DIR} -P {prime}"
+        cmd = f'./random-shamir.x -i {self.serverID} -N {self.players} -T {self.threshold} --nshares {share_batch_size} --prep-dir {INPUTMASK_SHARES_DIR} -P {prime}'
         await execute_cmd(cmd)
 
         file = location_inputmask(self.serverID, self.players)

@@ -9,7 +9,7 @@ op_start_mpc = '2'
 op_end_mpc = '3'
 op_end_mpc_chain = '4'
 
-def scan(serverID):
+def scan(dir, serverID):
     mpc = 0
     cnt_mpc = 0
     mpc_chain = 0
@@ -37,7 +37,7 @@ def scan(serverID):
 
     avg_mpc = mpc / cnt_mpc
     avg_mpc_chain = mpc_chain / cnt_mpc_chain
-    return avg_mpc, avg_mpc_chain
+    return avg_mpc, avg_mpc_chain, avg_mpc_chain - avg_mpc
 
 
 if __name__ == '__main__':
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     dir = sys.argv[2]
 
     for serverID in range(players):
-        print(scan(serverID))
+        print(scan(dir, serverID))

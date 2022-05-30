@@ -339,10 +339,10 @@ contract hbswap {
             orderSucceed = flagBuyA + flagBuyB
             totalCnt += orderSucceed
 
-            print_ln('**** balanceA %s', balanceA.reveal())
-            print_ln('**** balanceB %s', balanceB.reveal())
-            print_ln('**** poolA %s', poolA.reveal())
-            print_ln('**** poolB %s', poolB.reveal())
+            #print_ln('**** balanceA %s', balanceA.reveal())
+            #print_ln('**** balanceB %s', balanceB.reveal())
+            #print_ln('**** poolA %s', poolA.reveal())
+            #print_ln('**** poolB %s', poolB.reveal())
 
             mpcOutput(sfix balanceA, sfix balanceB, sfix poolA, sfix poolB, sfix changeA, sfix changeB, sint orderSucceed, sint totalCnt)
 
