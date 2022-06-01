@@ -9,7 +9,7 @@ from ratel.src.python.deploy import url, app_addr, token_addrs
 from ratel.src.python.utils import fp, prime, getAccount, sign_and_send, parse_contract, players, threshold
 
 
-def trade(appContract, tokenA, tokenB, amtA, amtB, account):
+def trade(appContract, tokenA, tokenB, amtA, amtB, account, web3, client_id):
     amtA = int(amtA * fp)
     amtB = int(amtB * fp)
     idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
@@ -49,5 +49,5 @@ if __name__=='__main__':
     web3.eth.defaultAccount = account.address
 
     for i in range(repetition):
-        trade(appContract, tokenA, tokenB, amtA, amtB, account)
-        trade(appContract, tokenA, tokenB, amtB, amtA, account)
+        trade(appContract, tokenA, tokenB, amtA, amtB, account, web3, client_id)
+        trade(appContract, tokenA, tokenB, amtB, amtA, account, web3, client_id)
