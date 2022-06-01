@@ -1,6 +1,7 @@
 import re
 import sys
 
+idx_seq = 2
 idx_op = 4
 idx_time = 6
 
