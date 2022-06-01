@@ -59,5 +59,16 @@ python3 -m ratel.benchmark.src.test_inputmask_generation_plot ratel/benchmark/da
 ```
 
 ```
+./latency-control.sh stop
+ratel/benchmark/src/swap/test_real_data_trade_start.sh 3 1 1
+./latency-control.sh start 200 50
+ratel/benchmark/src/swap/test_real_data_trade_run.sh 3 1 1
+
+python3 -m ratel.benchmark.src.swap.analyze 3 ratel/benchmark/data
+python3 -m ratel.benchmark.src.swap.collect 3 ratel/benchmark/data
+python3 -m ratel.benchmark.src.swap.simulate 172800 432000 traderjoev2_USDC.e_WAVAX
+```
+
+```
 python3 -m ratel.src.python.hbswap.updateBatchPrice
 ```
