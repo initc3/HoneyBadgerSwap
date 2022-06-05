@@ -20,8 +20,8 @@ async def run_online_ONLY(server_id, port, players, threshold, mpcProg):
 
 
 async def run_online(server_id, port, players, threshold, mpcProg, seq=0):
-    src_dir = f'Player-data-port-{port}'
-    dst_dir = f'Player-data-port-{port}-s{server_id}-copy'
+    src_dir = f'{mpcProg}-Player-data-port-{port}'
+    dst_dir = f'{mpcProg}-Player-data-port-{port}-s{server_id}-copy'
 
     cmd = f'rm -rf {dst_dir}'
     await execute_cmd(cmd)
@@ -35,7 +35,7 @@ async def run_online(server_id, port, players, threshold, mpcProg, seq=0):
 
 
 async def run_offline(server_id, port, players, threshold, mpcProg):
-    dir = f'Player-data-port-{port}'
+    dir = f'{mpcProg}-Player-data-port-{port}'
     cmd = f'{offline_prog} -N {players} -T {threshold} -p {server_id} -pn {port} -P {prime} --prep-dir {dir} -npfs {mpcProg}'
     await execute_cmd(cmd)
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     players = int(sys.argv[1])
     threshold = int(sys.argv[2])
     max_concurrency = int(sys.argv[3])
-    mpcProg = 'hbswapTrade1'
+    mpcProg = sys.argv[4]
 
     set_up_share_files(players, max_concurrency)
     asyncio.run(main(players, threshold, max_concurrency))
