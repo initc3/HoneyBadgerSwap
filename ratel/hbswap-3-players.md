@@ -1,5 +1,6 @@
 
 
+
 `docker-compose build --no-cache --pull`
 
 `docker-compose up -d`
@@ -8,7 +9,9 @@
 
 `bash setup-ssl.sh 3`
 
-`bash ratel/src/compile.sh hbswap 0 1`
+`bash ratel/src/compile.sh hbswap`
+
+`./latency-control.sh stop`
 
 ```
 ./ratel/benchmark/src/test_concurrent_trade_start.sh [players] [client_num] [concurrency]
@@ -19,6 +22,8 @@
 ./ratel/benchmark/src/test_concurrent_trade_start.sh 3 8 8
 ./ratel/benchmark/src/test_concurrent_trade_start.sh 3 16 16
 ```
+
+`./latency-control.sh start 200 50`
 
 ```
 ./ratel/benchmark/src/test_concurrent_trade_run.sh [players] [client_num] [concurrency] [rep]
@@ -39,14 +44,11 @@ python3 -m ratel.benchmark.src.trade_latency 3 ratel/benchmark/data
 
 `python3 -m ratel.benchmark.src.trade_plot`
 
-`./latency-control.sh stop`
-
-`./latency-control.sh start 200 50`
-
 ```
+set up ratel/benchmark/data/sharefiles
 ./compile.py -v -C -F 128 ratel/genfiles/mpc/hbswapTrade1.mpc
-python3 -m ratel.benchmark.src.test_mpc 3 1 1
-python3 -m ratel.benchmark.src.test_mpc 3 1 10
+python3 -m ratel.benchmark.src.test_mpc 3 1 1 hbswapTrade1
+python3 -m ratel.benchmark.src.test_mpc 3 1 10 hbswapTrade1
 ```
 
 ```

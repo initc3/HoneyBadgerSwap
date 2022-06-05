@@ -11,7 +11,6 @@
 using namespace std;
 
 bool finalizeOnChain;
-bool isBenchmark;
 
 bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput; /* see keyword in the current line */
 bool inPureMpc; /* in pureMpc block */
@@ -104,6 +103,7 @@ string getIndent(string text) {
 void initPython() {
     textPythonUpper += "import asyncio\n";
     textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send, verify_proof\n";
+    textPythonUpper += "from ratel.benchmark.src.test_mpc import run_online\n";
     textPythonUpper += "\n";
 
     textPythonUpper += "async def monitor(server):\n";
@@ -138,16 +138,8 @@ void finalizePython() {
 
     textPythonUpper += "            logs.sort(key=lambda s:(s[0], s[1]))\n";
 
-    if (isBenchmark) {
-        textPythonUpper += "            from ratel.src.python.utils import replay\n";
-        textPythonUpper += "            for i in range(replay):\n";
-        textPythonUpper += "                for log in logs:\n";
-        textPythonUpper += "                    if i == 0 or log[2] == 'Trade':\n";
-        textPythonUpper += "                        server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
-    } else {
-        textPythonUpper += "            for log in logs:\n";
-        textPythonUpper += "                server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
-    }
+    textPythonUpper += "            for log in logs:\n";
+    textPythonUpper += "                server.loop.create_task(eval(f'run{log[2]}')(server, log[3]))\n";
     textPythonUpper += "            blkNum = curBlkNum - server.confirmation + 1\n";
     textPythonUpper += "        else:\n";
     textPythonUpper += "            await asyncio.sleep(1)\n";
@@ -534,13 +526,7 @@ void mpcInput() {
 
     /* python */
     string mpcName = mpcFile.substr(4, mpcFile.length() - 8);
-    if (isBenchmark && mpcName == "hbswapTrade1") {
-        textFuncLower += indent + "from ratel.benchmark.src.test_mpc import run_online\n";
-        textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
-    } else {
-        textFuncLower += indent + "cmd = f'{prog} -N {server.players} -T {server.threshold} -p {server.serverID} -pn {port} -P {prime} -npfs " + mpcName + "\'\n";
-        textFuncLower += indent + "await execute_cmd(cmd)\n";
-    }
+    textFuncLower += indent + "await run_online(server.serverID, port, server.players, server.threshold, \'" + mpcName + "\', seq" + funcName + ")\n";
     textFuncLower += "\n";
 }
 
@@ -814,10 +800,6 @@ int main(int argc, char **argv) {
     fileName = string(_fileName);
 
     finalizeOnChain = argv[2][0] - '0';
-    isBenchmark = 0;
-    if (argc > 3) {
-        isBenchmark = argv[3][0] - '0';
-    }
 
     initPython();
 

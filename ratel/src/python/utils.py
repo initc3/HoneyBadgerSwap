@@ -311,10 +311,8 @@ shareBatchSize = 10000
 
 confirmation = 2
 
-replay = 1
-
 trade_key_num = 7
 
-repeat_experiment = 10
+repeat_experiment = 1
 
 mpc_failed_retry = 3
