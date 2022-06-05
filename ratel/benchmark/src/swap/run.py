@@ -90,7 +90,15 @@ if __name__ == '__main__':
     pool_name = sys.argv[1]
     duration = int(sys.argv[2])
 
-    ratel / benchmark / src / swap / run.py
+    timestamp_list = []
+    with open(f'ratel/benchmark/src/swap/pool_data/{pool_name}.csv', 'r') as f:
+        lines = f.readlines()
+        for line in lines[1:]:
+            element = re.split(',|\t|\n', line)
+            timestamp = float(element[0])
+            timestamp_list.append(timestamp)
+            if timestamp > duration:
+                break
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))
