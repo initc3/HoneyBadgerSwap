@@ -50,7 +50,7 @@ if __name__ == '__main__':
     plt.plot(x, a * x + b)
 
     plt.xlabel(f"Input mask number")
-    plt.ylabel("Time(sec)")
+    plt.ylabel("Time cost(sec)")
     # ax = plt.gca()
     # ax.xaxis.set_major_locator(MultipleLocator(1))
     # ax.yaxis.set_major_locator(MultipleLocator(10))

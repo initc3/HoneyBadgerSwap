@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import numpy as np
 
 from ratel.benchmark.src import trade_throughput, trade_latency
 
@@ -52,16 +53,18 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111)
     ax2 = ax1.twinx()
 
-    ax1.plot(pool_num_list, latency_list, mcolors.TABLEAU_COLORS[colors[0]], label=f'latency')
-    ax2.plot(pool_num_list, throughput_list, mcolors.TABLEAU_COLORS[colors[1]], label=f'throughput')
+    ax1.plot(pool_num_list, latency_list, color='teal', marker='v', label=f'latency')
+    ax2.plot(pool_num_list, throughput_list, color='crimson', marker='o', label=f'throughput')
 
     ax1.set_xlabel('Trading pool number')
-    ax1.set_ylabel('Average Trade Latency(s)')
-    ax2.set_ylabel('Average Trade Throughput(/min)')
+    ax1.set_ylabel('Average trades latency(s)')
+    ax2.set_ylabel('Average trades throughput(/min)')
+    ax1.set_xlim(0, 17)
     ax1.set_ylim(0, 8)
     ax2.set_ylim(0, 180)
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
+    ax1.set_xticks(np.arange(0, 17, step=2))
     plt.show()
     # save_file = f'{fig_dir}/scale_chain_num_{max_chain_num}_val_num_{sys.argv[1]}.pdf'
     # plt.savefig(save_file)
