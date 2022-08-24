@@ -22,13 +22,15 @@ plt.rc('legend', fontsize=12)
 plt.rc('figure', titlesize=20)
 
 
+interval = 5
+
+
 def sample():
     return np.random.choice(list(pdf.keys()), p=list(pdf.values())) / 10
 
 
 def simulate():
     delay_dict = {}
-    interval = 5
     mpc_time = 0
     with open(f'ratel/benchmark/src/swap/pool_data/{pool_name}.csv', 'r') as f:
         lines = f.readlines()
@@ -75,7 +77,7 @@ def simulate():
             tot += delay_dict[k]
     # print(f'tot {tot}')
 
-    return m, pos, tot
+    return m, pos, tot, delay_dict
 
 
 if __name__ == '__main__':
@@ -87,54 +89,31 @@ if __name__ == '__main__':
         line = f.readlines()[0]
         pdf = eval(line)
 
-    # rep = 100
-    # m, pos, tot = 0, 0, 0
-    # for i in range(rep):
-    #     _m, _pos, _tot = simulate()
-    #     m += _m
-    #     pos += _pos
-    #     tot += _tot
-    # print(f'm {m / rep}')
-    # print(f'pos {pos / rep}')
-    # print(f'tot {tot / rep}')
+    rep = 100
+    lim = 100
+    m, pos, tot = 0, 0, 0
+    x = np.arange(0, lim, interval)
+    values = np.zeros((rep, lim // interval))
+    for i in range(rep):
+        _m, _pos, _tot, _values = simulate()
+        m += _m
+        pos += _pos
+        tot += _tot
+        for j, k in enumerate(x):
+            values[i][j] = _values[k]
 
-    delay_dict = {}
-    interval = 5
-    mpc_time = 0
-    with open(f'ratel/benchmark/src/swap/pool_data/{pool_name}.csv', 'r') as f:
-        lines = f.readlines()
-        for line in lines[1:]:
-            element = re.split(',|\t|\n', line)
-            timestamp = float(element[0])
+    y = np.mean(values, axis=0)
+    err = np.std(values, axis=0)
 
-            if timestamp < start_time:
-                continue
-            if timestamp > end_time:
-                break
-
-            if mpc_time > timestamp:
-                delay = mpc_time - timestamp
-                mpc_time += sample()
-            else:
-                delay = 0
-                mpc_time = timestamp + sample()
-            delay //= interval
-            if delay not in delay_dict.keys():
-                delay_dict[delay] = 0
-            delay_dict[delay] += 1
-
-    s = sum(delay_dict.values())
-    print('sum', s)
-    m = max(delay_dict.keys())
-    print('max', m)
-    delay_dict = {k * interval + interval / 2 : v / s for k, v in delay_dict.items()}
+    print(y)
+    print(err)
 
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
-    ax1.set_xticks(np.arange(0, 65, 20))
-    ax1.set_xlim(0, 65)
-    ax1.set_ylim(0, 0.6)
-    ax1.bar(delay_dict.keys(), delay_dict.values(), width=interval, color='darkseagreen')
+    ax1.set_xticks(x[::2])
+    ax1.set_xlim(0, lim)
+    ax1.set_ylim(0, 0.5)
+    ax1.bar(x + interval / 2, y, width=interval, color='cornflowerblue', yerr=err, ecolor='fuchsia')
     ax1.set_xlabel('Wait time(s)')
     ax1.set_ylabel('Probability')
     plt.show()

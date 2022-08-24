@@ -77,6 +77,7 @@ if __name__ == '__main__':
     ax1.set_xlim(0, 3600)
     ax1.set_xlabel('Tx submission time(s)')
     ax1.set_ylabel('Wait time(s)')
+    ax1.set_ylim(0, 150)
 
     blocks = {}
     for t in tx_time.values():
