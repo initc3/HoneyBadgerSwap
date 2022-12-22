@@ -1,26 +1,59 @@
 import asyncio
 import sys
 import time
+import json
 
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-from ratel.src.python.Client import get_inputmasks, reserveInput
+from ratel.src.python.Client import get_inputmasks, reserveInput, get_serverval
 from ratel.src.python.deploy import url, app_addr, token_addrs
-from ratel.src.python.utils import fp, prime, getAccount, sign_and_send, parse_contract, players, threshold
+from ratel.src.python.utils import fp, prime, getAccount, sign_and_send, parse_contract, players, threshold, get_zkrp
 
 
 def trade(appContract, tokenA, tokenB, amtA, amtB, account, web3, client_id):
     amtA = int(amtA * fp)
     amtB = int(amtB * fp)
-    idxAmtA, idxAmtB = reserveInput(web3, appContract, 2, account)
-    maskA, maskB = asyncio.run(get_inputmasks(players(appContract), f'{idxAmtA},{idxAmtB}', threshold(appContract)))
-    maskedAmtA, maskedAmtB = (amtA + maskA) % prime, (amtB + maskB) % prime
-    tx = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB).buildTransaction({
+
+    ###############zkrp prove here#############
+    serverval_idx1 = f'balance_{tokenA}_{account.address}'
+    serverval_idx2 = f'balance_{tokenB}_{account.address}'
+    
+    balanceA, balanceB = asyncio.run(get_serverval(players(appContract), f'{serverval_idx1},{serverval_idx2}', threshold(appContract)))
+
+    # balanceA, balanceB = float(balanceA / fp), float(balanceB / fp)
+
+    feeRate = 0.003
+    totalA = (1 + feeRate) * amtA
+    totalB = (1 + feeRate) * amtB
+
+            # assert(zkrp((-totalA) <= balanceA))
+            # assert(zkrp((-totalB) <= balanceB))
+
+    # print('amtA:', amtA, 'amtB:', amtB)
+    print('totalA:', totalA, 'totalB:', totalB)
+    print('balanceA:', balanceA, 'balanceB:', balanceB)
+
+    proof1, commitment1, blinding1 = get_zkrp(amtA*amtB, '<=', 0)
+    proof2, commitment2, blinding2 = get_zkrp(-amtA, '<=', int(balanceA/(1+feeRate)))
+    proof3, commitment3, blinding3 = get_zkrp(-amtB, '<=', int(balanceB/(1+feeRate)))
+    ###############zkrp prove end#############
+    
+    idxAmtA, idxAmtB, idxzkp1, idxzkp2, idxzkp3 = reserveInput(web3, appContract, 5, account)
+    maskA, maskB, maskzkp1, maskzkp2, maskzkp3 = asyncio.run(get_inputmasks(players(appContract), f'{idxAmtA},{idxAmtB},{idxzkp1},{idxzkp2},{idxzkp3}', threshold(appContract)))
+    maskedAmtA, maskedAmtB, maskedzkp1, maskedzkp2, maskedzkp3 = (amtA + maskA) % prime, (amtB + maskB) % prime, (blinding1 + maskzkp1) % prime, (blinding2 + maskzkp2) % prime, (blinding3 + maskzkp3) % prime
+
+    zkp1 = [idxzkp1,maskedzkp1,proof1,commitment1]
+    zkp2 = [idxzkp2,maskedzkp2,proof2,commitment2]
+    zkp3 = [idxzkp3,maskedzkp3,proof3,commitment3]
+    zkps = json.dumps([zkp1,zkp2,zkp3])
+    # zkps = json.dumps([zkp1])
+
+    tx = appContract.functions.trade(tokenA, tokenB, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB, zkps).buildTransaction({
         'nonce': web3.eth.get_transaction_count(web3.eth.defaultAccount)
     })
     receipt = sign_and_send(tx, web3, account)
     log = appContract.events.Trade().processReceipt(receipt)[0]
-    print(log['args'])
+    # print(log['args'])
     seqTrade = log['args']['seqTrade']
     with open('ratel/benchmark/data/gas.csv', 'a') as f:
         f.write(f"trade\t{seqTrade}\t"
@@ -50,4 +83,5 @@ if __name__=='__main__':
 
     for i in range(repetition):
         trade(appContract, tokenA, tokenB, amtA, amtB, account, web3, client_id)
+        # time.sleep(60)
         trade(appContract, tokenA, tokenB, amtB, amtA, account, web3, client_id)

@@ -12,9 +12,11 @@ using namespace std;
 
 bool finalizeOnChain;
 
-bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput; /* see keyword in the current line */
+bool isPureMpc, isEvent, isReadDB, isWriteDB, isMpcInput, isMpcOutput, isZkrp; /* see keyword in the current line */
 bool inPureMpc; /* in pureMpc block */
 bool inFunc; /* in function block */
+
+bool hasFloatPoint;
 
 int braces;
 
@@ -26,6 +28,9 @@ FILE *mpcFp, *pythonFp;
 int cntMPC;
 bool isMPC; /* MP-SPDZ code */
 int numInput;
+
+int cntZkrp;
+int sumZkrp = 0;
 
 string textLine;
 
@@ -42,6 +47,7 @@ string textRecover;
 string returnLine;
 
 bool isArg;
+int cntArg;
 string arg;
 vector<string> args;
 
@@ -99,10 +105,64 @@ string getIndent(string text) {
     }
 }
 
+void checkFloatConstant(){
+    int pos_point = 0;
+    for(int i = textLine.length()-1;i >= 0;--i){
+        if(textLine[i] == '.'){
+            pos_point = i;
+            break;
+        }
+    }
+    if (pos_point == 0){
+        return;
+    }
+
+    if(textLine[pos_point - 1] < '0' || textLine[pos_point - 1] > '9'){
+        return;
+    }
+    if(textLine[pos_point + 1] < '0' || textLine[pos_point + 1] > '9'){
+        return;
+    }
+
+    //get Float Constant
+    int pos_l, pos_r;
+    for(pos_l = pos_point - 1;pos_l >= 0;--pos_l){
+        if(textLine[pos_l] < '0' || textLine[pos_l] > '9'){
+            break;
+        }
+    }
+    pos_l = pos_l + 1;
+
+    for(pos_r = pos_point + 1;pos_r < textLine.length();++pos_r){
+        if(textLine[pos_r] < '0' || textLine[pos_r] > '9'){
+            break;
+        }
+    }
+    pos_r = pos_r - 1;
+
+    
+    int lenFloat = pos_r - pos_point;
+    int lenInt = pos_point - pos_l;
+    int lenNum = pos_r - pos_l + 1;
+
+    string strFloatConstantInt = textLine.substr(pos_l,lenInt) + textLine.substr(pos_point+1,lenFloat);
+    int pos_act;
+    for(pos_act = 0;pos_act < strFloatConstantInt.length();++pos_act){
+        if(strFloatConstantInt[pos_act] != '0'){
+            break;
+        }
+    }
+    strFloatConstantInt = strFloatConstantInt.substr(pos_act);
+
+    string strReplace = strFloatConstantInt + " * pow(inv_10," + to_string(lenFloat) + ",prime) % prime";
+    
+    textLine.replace(pos_l,lenNum,strReplace);
+}
 
 void initPython() {
     textPythonUpper += "import asyncio\n";
-    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send, verify_proof\n";
+    textPythonUpper += "import json\n";
+    textPythonUpper += "from ratel.src.python.utils import location_sharefile, prog, mpcPort, prime, inv_10, sz, int_to_hex, hex_to_int, recover_input, fp, mark_finish, read_db, write_db, bytes_to_int, bytes_to_list, bytes_to_dict, int_to_bytes, list_to_bytes, dict_to_bytes, execute_cmd, MultiAcquire, sign_and_send, verify_proof\n";
     textPythonUpper += "from ratel.benchmark.src.test_mpc import run_online\n";
     textPythonUpper += "\n";
 
@@ -224,6 +284,10 @@ void processEventParam() {
             if (args[i][1] == '#') {
                 textLine += ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName;
             }
+        } else if(getType(args[i]) == "zkp_stmt"){
+            string postVarName = removeType(args[i]);
+            postVarName[0] = toupper(postVarName[0]);
+            textLine += "zkp_stmt" + postVarName + "str, idx" + postVarName + ", masked" + postVarName + ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding,  proof" + postVarName + ", commitment" + postVarName;
         } else {
             textLine += removeType(args[i]);
         }
@@ -268,6 +332,29 @@ void monitorEvent() {
                 textFuncUpper += tab(1) + commitmentVarName + " = log['args']['" + commitmentVarName + "']\n";
             }
 
+        } else if (type == "zkp_stmt"){
+            varName[0] = toupper(varName[0]);
+
+            string pfstrName = "zkp_stmt" + varName + "str";
+            textFuncUpper += tab(1) + pfstrName + " = log['args']['" + pfstrName + "']\n";
+
+            string idxVarName = "idx" + varName;
+            textFuncUpper += tab(1) + idxVarName + " = log['args']['" + idxVarName + "']\n";
+
+            string maskedVarName = "masked" + varName;
+            textFuncUpper += tab(1) + maskedVarName + " = log['args']['" + maskedVarName + "']\n";
+
+            string idxVarNameBlinding = "idx" + varName + "Blinding";
+            textFuncUpper += tab(1) + idxVarNameBlinding + " = log['args']['" + idxVarNameBlinding + "']\n";
+
+            string maskedVarNameBlinding = "masked" + varName + "Blinding";
+            textFuncUpper += tab(1) + maskedVarNameBlinding + " = log['args']['" + maskedVarNameBlinding + "']\n";
+
+            string proofVarName = "proof" + varName;
+            textFuncUpper += tab(1) + proofVarName + " = log['args']['" + proofVarName + "']\n";
+
+            string commitmentVarName = "commitment" + varName;
+            textFuncUpper += tab(1) + commitmentVarName + " = log['args']['" + commitmentVarName + "']\n";
         } else {
             textFuncUpper += tab(1) + varName + " = log['args']['" + varName + "']\n";
         }
@@ -281,6 +368,9 @@ void monitorEvent() {
 void unmaskInput() {
     bool flag = 0;
     bool hasZKP = 0;
+
+//    textFuncUpper += "    liszkp = []\n";
+
     for (int i = 0; i < args.size(); i++) {
         if (args[i][0] == '$') {
             flag = 1;
@@ -291,9 +381,19 @@ void unmaskInput() {
             if (args[i][1] == '#') {
                 textFuncUpper += "    " + varName + "Blinding = recover_input(server.db, masked" + postVarName + "Blinding, idx" + postVarName + "Blinding)\n";
 
-                textFuncLower += "    assert(await verify_proof(server, idx" + postVarName + ", masked" + postVarName + ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName + "))\n";
                 hasZKP = 1;
             }
+        } else if(getType(args[i]) == "zkp_stmt"){
+            flag = 1;
+            string varName = removeType(args[i]);
+            string postVarName = varName;
+            postVarName[0] = toupper(postVarName[0]);
+            textFuncUpper += "    " + varName + " = recover_input(server.db, masked" + postVarName + ", idx" + postVarName + ")\n";
+            textFuncUpper += "    " + varName + "Blinding = recover_input(server.db, masked" + postVarName + "Blinding, idx" + postVarName + "Blinding)\n";
+
+            textFuncUpper += "    liszkp.append((zkp_stmt" + postVarName + "str, idx" + postVarName + ", masked" + postVarName + ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName + ",32))\n";
+
+            hasZKP = 1;
         }
     }
     if (flag) textFuncUpper += "\n";
@@ -561,6 +661,105 @@ void mpcOutput() {
     }
 }
 
+void zkrp(){
+    if(cntZkrp == 1){
+        textFuncLower += "    lis_zkpstmt = json.loads(json_lis_zkpstmt)\n";
+    }
+
+    string pfstr = args[0];
+
+    textFuncLower += "    print(\'" + pfstr +  "\')\n";
+
+    
+
+    int pospf = 0;
+    for(int i = 0;i < pfstr.length();++i){
+        if(pfstr[i] == '<' || pfstr[i] == '>'){
+            pospf = i;
+            break;
+        }
+    }
+
+    string pfVarName = "pfVar" + to_string(cntZkrp-1);
+
+    string pfExp = pfstr.substr(0,pospf);
+    string zkpstmtName = "zkpstmt" + to_string(cntZkrp-1);
+
+    bool hasMul = false;
+    int posMul = 0;
+    string expL, expR;
+    for(int i = 0;i < pfExp.length();++i){
+        if(pfExp[i] == '*'){
+            hasMul = true;
+            posMul = i;
+        }
+    }
+
+    textFuncLower += "    tmpMul = False\n";
+    textFuncLower += "    tmpMulR = 0\n";
+    textFuncLower += "    tmptype_Mul = 0\n";
+
+    if(pfstr[pospf] == '>' && pfstr[pospf+1] == '=') {
+        string rangeName = pfstr.substr(pospf+2);
+        textFuncLower += "    tmpRange = int(" + rangeName + ")\n";
+
+        // secret_value >= r <==> secret_value - r >= 0
+        textFuncLower += "    " + pfVarName + " = " + pfExp + " - tmpRange\n";
+
+        if(hasMul){
+            textFuncLower += "    " + pfVarName + " = " + pfExp.substr(0,posMul) + ")\n";
+            textFuncLower += "    tmpMulR = (" + pfExp.substr(posMul+1) + "\n";
+            textFuncLower += "    tmptype_Mul = 1\n";
+        }
+    } else if(pfstr[pospf] == '>' && pfstr[pospf+1] != '=') {
+        string rangeName = pfstr.substr(pospf+1);
+        textFuncLower += "    tmpRange = int(" + rangeName + ")\n";
+
+        // secret_value > r <==> secret_value - r - 1 >= 0
+        textFuncLower += "    " + pfVarName + " = " + pfExp + " - tmpRange - 1\n";
+
+        if(hasMul){
+            textFuncLower += "    " + pfVarName + " = " + pfExp.substr(0,posMul) + ")\n";
+            textFuncLower += "    tmpMulR = (" + pfExp.substr(posMul+1) + "\n";
+            textFuncLower += "    tmptype_Mul = 2\n";
+            textFuncLower += "    tmpRange = tmpRange + 1\n";
+        }
+    } else if(pfstr[pospf] == '<' && pfstr[pospf+1] == '=') { 
+        string rangeName = pfstr.substr(pospf+2);
+        textFuncLower += "    tmpRange = int(" + rangeName + ")\n";
+
+        // secret_value <= r <==> r - secret_value >= 0 
+        textFuncLower += "    " + pfVarName + " = tmpRange - " + pfExp + "\n";
+
+        if(hasMul){
+            textFuncLower += "    " + pfVarName + " = " + pfExp.substr(0,posMul) + ")\n";
+            textFuncLower += "    tmpMulR = (" + pfExp.substr(posMul+1) + "\n";
+            textFuncLower += "    tmptype_Mul = 3\n";
+            textFuncLower += "    tmpRange = -tmpRange\n";
+        }
+    } else if(pfstr[pospf] == '<' && pfstr[pospf+1] != '=') { 
+        string rangeName = pfstr.substr(pospf+1);
+        textFuncLower += "    tmpRange = int(" + rangeName + ")\n";
+
+        // secret_value < r <==> r - secret_value - 1 >= 0
+        textFuncLower += "    " + pfVarName + " = tmpRange - " + pfExp + " - 1\n";
+
+        if(hasMul){
+            textFuncLower += "    " + pfVarName + " = " + pfExp.substr(0,posMul) + ")\n";
+            textFuncLower += "    tmpMulR = (" + pfExp.substr(posMul+1) + "\n";
+            textFuncLower += "    tmptype_Mul = 4\n";
+            textFuncLower += "    tmpRange = -tmpRange + 1\n";
+        }
+    } else {
+        assert(0);
+    }
+
+    textFuncLower += "    " + zkpstmtName + " = lis_zkpstmt[" + to_string(cntZkrp-1) + "]\n";
+//    textFuncLower += "    print(\'cntZkrp:" + to_string(cntZkrp-1) + "\')\n";
+//    textFuncLower += "    print(\'zkpstmt\'," + zkpstmtName + ")\n";
+    textFuncLower += "    print(\'tmpRange:\',tmpRange)\n";
+}
+
 
 void addText(char *yytext) {
     string text = string(yytext);
@@ -573,6 +772,31 @@ void addText(char *yytext) {
         textLine += text;
     }
 }
+
+void addZkrpArgs(){
+    if(cntZkrp > 0){
+        string recover_str = "";
+        string liszkp_str = "";
+        for(int i = 0;i < cntZkrp;++i){
+            string postVarName = "zkpstmt" + to_string(i);
+
+            //todos
+            /////////////////////add recover input for zkp/////////////////////
+//            recover_str += "    " + postVarName + " = recover_input(server.db, masked" + postVarName + ", idx" + postVarName + ")\n";
+//            recover_str += "    " + postVarName + "Blinding = recover_input(server.db, masked" + postVarName + "Blinding, idx" + postVarName + "Blinding)\n";
+        }
+    }
+}
+
+
+void zkrpStmt(){
+    string pfVarName = "pfVar" + to_string(cntZkrp);
+
+    string zkpstmtName = "zkpstmt" + to_string(cntZkrp);
+
+    textLine += "await verify_proof(server, " + pfVarName + ", " + zkpstmtName + " , tmptype_Mul, tmpMulR, tmpRange)";
+}
+
 
 
 %}
@@ -599,7 +823,9 @@ SPACE [ \t\r]+
     inPureMpc = true;
     isPureMpc = true;
     isArg = true;
+    cntArg = 1;
     cntMPC = 0;
+    cntZkrp = 0;
     cntReadDB = 0;
     textFuncUpper = "";
     textFuncLower = "";
@@ -612,7 +838,9 @@ SPACE [ \t\r]+
     inFunc = true;
     isEvent = true;
     isArg = true;
+    cntArg = 1;
     cntMPC = 0;
+    cntZkrp = 0;
     cntReadDB = 0;
     textFuncUpper = "";
     textFuncLower = "";
@@ -624,6 +852,7 @@ SPACE [ \t\r]+
 ^.*readDB\( {
     isReadDB = true;
     isArg = true;
+    cntArg = 1;
 
     string text = string(yytext);
     indent = getIndent(text);
@@ -634,6 +863,7 @@ SPACE [ \t\r]+
 ^.*writeDB\( {
     isWriteDB = true;
     isArg = true;
+    cntArg = 1;
 
     string text = string(yytext);
     indent = getIndent(text);
@@ -643,6 +873,7 @@ SPACE [ \t\r]+
 ^.*mpcInput\( {
     isMpcInput = true;
     isArg = true;
+    cntArg = 1;
 
     indent = getIndent(string(yytext));
 }
@@ -651,6 +882,17 @@ SPACE [ \t\r]+
 ^.*mpcOutput\( {
     isMpcOutput = true;
     isArg = true;
+    cntArg = 1;
+}
+
+^.*zkrp\( {
+    isZkrp = true;
+    isArg = true;
+    cntArg = 1;
+
+    indent = getIndent(string(yytext));
+    string text = string(yytext);
+    textLine += text.substr(0, text.length() - strlen("zkrp("));
 }
 
 ^.*return {
@@ -659,6 +901,9 @@ SPACE [ \t\r]+
 
 
 \( {
+    if(isArg){
+        cntArg++;
+    }
     if (isEvent || isPureMpc) {
         funcName = arg;
         arg = "";
@@ -671,8 +916,15 @@ SPACE [ \t\r]+
 \) {
     if (isArg) {
         if (arg.length()) {
-            args.push_back(arg);
-            arg = "";
+            if(!isZkrp){
+                args.push_back(arg);
+                arg = "";
+            } else if(cntArg == 1){
+                args.push_back(arg);
+                arg = "";
+            } else {
+                addText(yytext);
+            }
         }
 
         if (isReadDB) {
@@ -681,9 +933,18 @@ SPACE [ \t\r]+
         } else if (isWriteDB) {
             assert(args.size() == 3);
             writeDB();
+        } else if (isZkrp){
+            if(cntArg == 1){
+                zkrpStmt();
+            }
         }
-
-        isArg = false;
+        
+        cntArg--;
+        if(!isZkrp){
+            isArg = false;
+        } else if(cntArg == 0){
+            isArg = false;
+        }
     } else {
         addText(yytext);
     }
@@ -717,6 +978,8 @@ SPACE [ \t\r]+
 
         setRecover();
 
+        addZkrpArgs();
+
         textPythonLower += textFuncUpper + textFuncLower;
 
         if (!inPureMpc) {
@@ -732,6 +995,8 @@ SPACE [ \t\r]+
 
         textPythonLower += returnLine;
 
+        sumZkrp += cntZkrp;
+
         inPureMpc = false;
         inFunc = false;
         returnLine = "";
@@ -743,6 +1008,12 @@ SPACE [ \t\r]+
     textLine += "\n";
 
 //    printf("-textLine:%s", textLine.c_str());
+
+    if(hasFloatPoint && (!isMPC)){
+        checkFloatConstant();
+        hasFloatPoint = false;
+    }
+
 
     if (isPureMpc) {
         processPureMpc();
@@ -767,7 +1038,13 @@ SPACE [ \t\r]+
         isMPC = false;
 
         isMpcOutput = false;
-    } else if (isWriteDB) {
+    } else if(isZkrp){
+        cntZkrp++;
+        zkrp();
+        textFuncLower += textLine;
+
+        isZkrp = false;
+    }else if (isWriteDB) {
         textFuncLower += textLine;
 
         isWriteDB = false;
@@ -786,6 +1063,10 @@ SPACE [ \t\r]+
     textLine = "";
 }
 
+\. {
+//    hasFloatPoint = true;
+    addText(yytext);
+}
 
 . {
     addText(yytext);
@@ -813,6 +1094,12 @@ int main(int argc, char **argv) {
     recoverFp = fopen(recoverFile.c_str(), "a");
     fprintf(recoverFp, "%s", textRecover.c_str());
     fclose(recoverFp);
+
+//    FILE *tmpFp;
+//    string tmpFile = "tmp.txt";
+//    tmpFp = fopen(tmpFile.c_str(), "a");
+//    fprintf(tmpFp, "%s", to_string(sumZkrp).c_str());
+//    fclose(tmpFp);
 
 	return 0;
 }

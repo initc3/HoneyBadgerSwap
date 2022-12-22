@@ -7,6 +7,8 @@ use merlin::Transcript;
 extern crate bulletproofs;
 use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
 use pyo3::prelude::*;
+use curve25519_dalek_ng::ristretto::RistrettoPoint;
+use curve25519_dalek_ng::traits::MultiscalarMul;
 
 /// Given `data` with `len >= 32`, return the first 32 bytes.
 pub fn read32(data: &[u8]) -> [u8; 32] {
@@ -51,6 +53,101 @@ fn pedersen_commit(secret_value_bytes: [u8; 32], blinding_bytes: [u8; 32]) -> Py
 
     Ok(commitment.compress().to_bytes())
 }
+
+/// Provides an iterator over the powers of a `Scalar`.
+///
+/// This struct is created by the `exp_iter` function.
+// pub struct ScalarExp {
+//     x: Scalar,
+//     next_exp_x: Scalar,
+// }
+
+// impl Iterator for ScalarExp {
+//     type Item = Scalar;
+
+//     fn next(&mut self) -> Option<Scalar> {
+//         let exp_x = self.next_exp_x;
+//         self.next_exp_x *= self.x;
+//         Some(exp_x)
+//     }
+
+//     fn size_hint(&self) -> (usize, Option<usize>) {
+//         (usize::max_value(), None)
+//     }
+// }
+
+// /// Return an iterator of the powers of `x`.
+// pub fn exp_iter(x: Scalar) -> ScalarExp {
+//     let next_exp_x = Scalar::one();
+//     ScalarExp { x, next_exp_x }
+// }
+/// Raises `x` to the power `n` using binary exponentiation,
+/// with (1 to 2)*lg(n) scalar multiplications.
+/// TODO: a consttime version of this would be awfully similar to a Montgomery ladder.
+// pub fn scalar_exp_vartime(x: &Scalar, mut n: Scalar) -> Scalar {
+//     let mut result = Scalar::one();
+//     let mut aux = *x; // x, x^2, x^4, x^8, ...
+//     let zer = Scalar::zero();
+//     let on = Scalar::one();
+//     let inv_2 = (Scalar::from(2u64)).invert().reduce();
+//     while n > zer {
+//         let bit = n & on;
+//         if bit == on {
+//             result = result * aux;
+//         }
+//         n = n * inv_2;
+//         aux = aux * aux; // FIXME: one unnecessary mult at the last step here!
+//     }
+//     result
+// }
+
+        // z^0 * \vec(2)^n || z^1 * \vec(2)^n || ... || z^(m-1) * \vec(2)^n
+        // let powers_of_2: Vec<Scalar> = util::exp_iter(Scalar::from(2u64)).take(n).collect();
+// #[pyfunction]
+// fn other_base_commit(cur_base_bytes: [u8; 32], secret_value_bytes: [u8; 32], blinding_bytes: [u8; 32]) -> PyResult<[u8; 32]> {
+//     //cur_base ^ {secret_value_bytes} * h^{blinding_bytes}
+//     let cur_base = Scalar::from_bytes_mod_order(cur_base_bytes);
+//     let secret_value = Scalar::from_bytes_mod_order(secret_value_bytes);
+//     let blinding = Scalar::from_bytes_mod_order(blinding_bytes);
+
+//     let pow_of_cur_base: Scalar = scalar_exp_vartime(&cur_base, secret_value);
+//     let zer = Scalar::zero();
+
+//     let pc_gens = PedersenGens::default();
+//     let blinding_com = pc_gens.commit(zer, blinding);
+
+//     let commitment = pow_of_cur_base * blinding_com;
+
+//     Ok(commitment.compress().to_bytes())
+// }
+
+#[pyfunction]
+fn other_base_commit(g_x_bytes: [u8; 32], y_bytes: [u8; 32], blinding_bytes: [u8; 32]) -> PyResult<[u8; 32]> {
+    // (g^x)^{secret_value} * h^{blinding} * g^{r}
+    let g_x = CompressedRistretto(g_x_bytes).decompress().unwrap();
+    let y = Scalar::from_bytes_mod_order(y_bytes);
+    let blinding = Scalar::from_bytes_mod_order(blinding_bytes);
+
+    let pc_gens = PedersenGens::default();
+
+    let g_xy_h_rz_com = RistrettoPoint::multiscalar_mul(&[y, blinding], &[g_x, pc_gens.B_blinding]);
+
+
+    Ok(g_xy_h_rz_com.compress().to_bytes())
+}
+
+#[pyfunction]
+fn product_com(x_bytes: [u8; 32], y_bytes: [u8; 32]) -> PyResult<[u8; 32]> {
+    // let x = CompressedRistretto(x_bytes).decompress().unwrap();
+    // let y = CompressedRistretto(y_bytes).decompress().unwrap();
+    let x = Scalar::from_bytes_mod_order(x_bytes);
+    let y = Scalar::from_bytes_mod_order(y_bytes);
+
+    let product_com = (x * y).reduce();
+    
+    Ok(product_com.to_bytes())
+}
+
 
 #[pyfunction]
 fn pedersen_open(secret_value: u64, blinding: u64, commitment_bytes: [u8; 32]) -> PyResult<bool> {
@@ -139,6 +236,83 @@ fn zkrp_verify(proof_bytes: Vec<u8>, committed_value_bytes: [u8; 32]) -> PyResul
     Ok(proof.verify_single(&bp_gens, &pc_gens, &mut verifier_transcript, &committed_value, 32).is_ok())
 }
 
+#[pyfunction]
+fn gen_random_value(value_num: u64) -> PyResult<Vec<[u8; 32]>> {
+    let mut res_val : Vec<[u8; 32]> = Vec::new();
+
+    let mut i = 0;
+
+    while i < value_num {
+        let cur_res = Scalar::random(&mut rand::thread_rng());
+        res_val.push(cur_res.to_bytes());
+        i = i + 1;
+    }
+
+    Ok(res_val)
+}
+
+
+#[pyfunction]
+fn zkrp_prove_mul(x_v: u64, y_v: u64, rx_prime_bytes: [u8; 32], ry_prime_bytes: [u8; 32]) -> PyResult<[u8; 32]> {
+    let pc_gens = PedersenGens::default();
+
+    let x = Scalar::from(x_v);
+    let y = Scalar::from(y_v);
+    let rx_prime = Scalar::from_bytes_mod_order(rx_prime_bytes);
+    let ry_prime = Scalar::from_bytes_mod_order(ry_prime_bytes);
+
+    let kx = Scalar::random(&mut rand::thread_rng());
+    let kx_prime = Scalar::random(&mut rand::thread_rng());
+    let ky = Scalar::random(&mut rand::thread_rng());
+    let ky_prime = Scalar::random(&mut rand::thread_rng());
+    let rz = Scalar::random(&mut rand::thread_rng());
+    let kz_prime = Scalar::random(&mut rand::thread_rng());
+
+    let com_kx = pc_gens.commit(kx, kx_prime).compress();
+    let com_ky = pc_gens.commit(ky, ky_prime).compress();
+
+    // com_kz = pc_gens.commit(x*ky, -rx_prime*ky + kz_prime);
+    let t1_value:Scalar = (x * ky).reduce();
+    let t1_blinding_value:Scalar = (kz_prime - (rx_prime * ky).reduce()).reduce();
+    let com_kz = pc_gens.commit(t1_value, t1_blinding_value).compress();
+
+    let mut prover_transcript = Transcript::new(b"zkrpmul");
+    let mut c_bytes = [0u8; 64];
+    prover_transcript.commit_bytes(b"com_kx",com_kx.as_bytes());
+    prover_transcript.commit_bytes(b"com_ky",com_ky.as_bytes());
+    prover_transcript.commit_bytes(b"com_kz",com_kz.as_bytes());
+    prover_transcript.challenge_bytes(b"c", &mut c_bytes);
+    let c = Scalar::from_bytes_mod_order_wide(&c_bytes);
+    
+    let sx:Scalar = ((c*x).reduce() + kx).reduce(); // sx = c * x + kx
+    let sy:Scalar = ((c*y).reduce() + ky).reduce(); // sy = c * y + ky
+    let sx_prime:Scalar = (kx_prime - (c*rx_prime).reduce()).reduce(); // sx' = c * (-rx') + kx'
+    let sy_prime:Scalar = (ky_prime - (c*ry_prime).reduce()).reduce(); // sy' = c * (-ry') + ky'
+    let sz_prime:Scalar = ((c*rz).reduce() + kz_prime).reduce(); // sz' = c * rz + kz'
+
+    
+
+    Ok(c.to_bytes())
+}
+
+#[pyfunction ]
+fn zkrp_verify_mul(mx_bytes: [u8; 32], my_bytes: [u8; 32], c_rx_bytes: [u8; 32], c_ry_bytes: [u8; 32]) -> PyResult<()> {
+    let mx = Scalar::from_bytes_mod_order(mx_bytes);
+    let my = Scalar::from_bytes_mod_order(my_bytes);
+    let c_rx = Scalar::from_bytes_mod_order(c_rx_bytes);
+    let c_ry = Scalar::from_bytes_mod_order(c_ry_bytes);
+    let zer = Scalar::zero();
+
+    let pc_gens = PedersenGens::default();
+
+    let g_mx = Scalar::from_bytes_mod_order(pc_gens.commit(mx,zer).compress().to_bytes());
+    let c_x = (c_rx * (g_mx.invert())).reduce();
+    let g_my = Scalar::from_bytes_mod_order(pc_gens.commit(my,zer).compress().to_bytes());
+    let c_y = (c_ry * (g_my.invert())).reduce();
+
+    Ok(())
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn zkrp_pyo3(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -148,5 +322,10 @@ fn zkrp_pyo3(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(pedersen_compare, m)?)?;
     m.add_function(wrap_pyfunction!(zkrp_prove, m)?)?;
     m.add_function(wrap_pyfunction!(zkrp_verify, m)?)?;
+    m.add_function(wrap_pyfunction!(gen_random_value, m)?)?;
+    m.add_function(wrap_pyfunction!(zkrp_prove_mul, m)?)?;
+    m.add_function(wrap_pyfunction!(zkrp_verify_mul, m)?)?;
+    m.add_function(wrap_pyfunction!(other_base_commit, m)?)?;
+    m.add_function(wrap_pyfunction!(product_com, m)?)?;
     Ok(())
 }

@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import time
 
 from web3 import Web3
 
@@ -37,3 +38,6 @@ if __name__ == '__main__':
     )
 
     server.loop.run_until_complete(server.init(rockPaperScissors.monitor(server)))
+    # server.loop.run_until_complete(server.preprocess_zkrp_blinding())
+    print('111')
+    time.sleep(10)
