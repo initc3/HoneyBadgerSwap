@@ -88,3 +88,53 @@ Test recover states
 ./ratel/benchmark/src/test_recover_states_run.sh 4 5
 ```
 
+To give the proof zkrp(amtA * amtB < 0)
+
+In server side, idxAmtA, maskedAmtA, idxAmtB, maskedAmtB; 
+
+recover_input: amtA_shares, amtB_shares;
+
+
+
+
+
+
+
+
+
+
+
+# def recover_input(db, masked_value, idx): # return: int
+#     try:
+#         input_mask_share = db.Get(key_inputmask_index(idx))
+#     except KeyError:
+#         input_mask_share = bytes(0)
+#     input_mask_share = int.from_bytes(input_mask_share, 'big')
+#     return (masked_value - input_mask_share) % prime
+
+
+
+----------------------------------------------------------------
+
+prove zkrp(amtA < 0)
+
+client: generate idxAmtA, maskedAmtA,    get_zkrp()->proofValue, commitmentValue, idxBlindingValue, maskedBlindingValue
+
+server:
+
+amtA_share = maskedAmtA - input_mask_share_with_key_idxAmtA : recover_input (idxAmtA,maskedAmtA)
+
+blidingValue_share = maskedBlindingValue - input_mask_share_with_key_idxBlindingValue: recover_input ()
+
+compute g^{amtA_share} * h^{blindingValue_share}
+
+
+
+every server broadcast share of commitment & 
+
+reconstruct commitment Value & 
+
+check whether the aggregate_commitment_from_servers == commitment_given_by_client
+
+
+

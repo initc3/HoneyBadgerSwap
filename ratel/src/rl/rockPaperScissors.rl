@@ -18,28 +18,22 @@ contract rockPaperScissors {
     constructor() public {}
 
 
-    function createGame($#uint value1) public {
+    function createGame($uint value1) public {
         address player1 = msg.sender;
         uint gameId = ++gameCnt;
 
-        mpc(uint gameId, address player1, $#uint value1) {
-            mpcInput(sint value1)
+        mpc(uint gameId, address player1, $uint value1) {
+            assert(zkrp(value1>=1))
+            assert(zkrp((value1*value1) >= 0))
+            game = {
+                'player1': player1,
+                'value1': value1,
+            }
+            print('**** game', game)
+            writeDB(f'gameBoard_{gameId}', game, dict)
 
-            valid = ((value1.greater_equal(1, bit_length=bit_length)) * (value1.less_equal(3, bit_length=bit_length))).reveal()
-
-            mpcOutput(cint valid)
-
-            print('**** valid', valid)
-            if valid == 1:
-                game = {
-                    'player1': player1,
-                    'value1': value1,
-                }
-                print('**** game', game)
-                writeDB(f'gameBoard_{gameId}', game, dict)
-
-                curStatus = 1
-                set(status, uint curStatus, uint gameId)
+            curStatus = 1
+            set(status, uint curStatus, uint gameId)
         }
     }
 
@@ -49,25 +43,21 @@ contract rockPaperScissors {
         address player2 = msg.sender;
 
         mpc(uint gameId, address player2, $uint value2) {
+
+            assert(zkrp(value2 >= 1))
+            assert(zkrp(value2 <= 3))
+
             game = readDB(f'gameBoard_{gameId}', dict)
 
-            mpcInput(sint value2)
+            game['player2'] = player2
+            game['value2'] = value2
 
-            valid = ((value2.greater_equal(1, bit_length=bit_length)) * (value2.less_equal(3, bit_length=bit_length))).reveal()
+            print('**** game', game)
 
-            mpcOutput(cint valid)
+            writeDB(f'gameBoard_{gameId}', game, dict)
 
-            print('**** valid', valid)
-            if valid == 1:
-                game['player2'] = player2
-                game['value2'] = value2
-
-                print('**** game', game)
-
-                writeDB(f'gameBoard_{gameId}', game, dict)
-
-                curStatus = 2
-                set(status, uint curStatus, uint gameId)
+            curStatus = 2
+            set(status, uint curStatus, uint gameId)
         }
     }
 

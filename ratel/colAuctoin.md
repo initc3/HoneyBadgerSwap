@@ -33,15 +33,15 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 #### pull docker image & enter the container
 ```
-sudo docker pull initc3/honeybadgerswap:8fc1863
-sudo docker tag initc3/honeybadgerswap:8fc1863 hbswap:latest
+sudo docker pull initc3/honeybadgerswap:latest
+sudo docker tag initc3/honeybadgerswap:latest hbswap:latest
 sudo docker-compose up -d
 sudo docker exec -it honeybadgerswap_dev_1 bash
 ```
 
 #### setup ssl connection
 ```
-bash setup-ssl.sh 4
+bash setup-ssl.sh 4 /opt/ssl
 ```
 
 #### compile the ratel
@@ -83,3 +83,9 @@ python3 -m ratel.src.python.colAuction.interact
 ```
 
 
+### install rust on ubuntu
+```
+curl https://sh.rustup.rs -sSf | sh
+source "$HOME/.cargo/env"
+pip install .
+```

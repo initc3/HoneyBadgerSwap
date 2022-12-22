@@ -302,7 +302,7 @@ contract hbswap {
             times.append(time.perf_counter())
 
 
-            feeRate = 0.003
+            feeRate = 1
 
             totalA = (1 + feeRate) * amtA
             totalB = (1 + feeRate) * amtB
@@ -311,8 +311,8 @@ contract hbswap {
 
             ### TODO: realize by ZKP
             assert(zkrp((amtA * amtB) <= 0))
-            assert(zkrp((-amtA) <= balanceA/(1+feeRate)))
-            assert(zkrp((-amtB) <= balanceB/(1+feeRate)))
+            assert(zkrp((-totalA) <= balanceA))
+            assert(zkrp((-totalB) <= balanceB))
 
             times.append(time.perf_counter())
 
@@ -364,7 +364,7 @@ contract hbswap {
 
             times.append(time.perf_counter())
 
-            with open(f'ratel/benchmark/data/latency_{server.serverID}.csv', 'a') as f:
+            with open(f'ratel/benchmark/data/latency_zkrp_{server.serverID}.csv', 'a') as f:
                 for op, t in enumerate(times):
                     f.write(f'trade\t'
                             f'seq\t{seqTrade}\t'

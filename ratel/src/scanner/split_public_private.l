@@ -39,6 +39,8 @@ string indent;
 bool isSetData, isAddData;
 set<string> setDataPool, addDataPool;
 
+int cntZkrp;
+bool isZkrp;
 
 string removeType(string st) {
     for (int i = st.length() - 1; i >= 0; i--) {
@@ -93,6 +95,11 @@ string argWithType(string arg, bool isEvent=false) {
             tmp = ", uint idx" + postVarName + "Blinding, uint masked" + postVarName + "Blinding, uint8[] " + mem + " proof" + postVarName + ", uint8[] " + mem + " commitment" + postVarName;
         }
         ret = "uint idx" + postVarName + ", uint masked" + postVarName + tmp;
+    } else if(getType(arg) == "zkp_stmt") {
+        string postVarName = removeType(arg);
+        postVarName[0] = toupper(postVarName[0]);
+        string mem = isEvent ? "" : "memory" ;
+        ret = "string " + mem + " zkp_stmt" + postVarName + "str, uint idx" + postVarName + ", uint masked" + postVarName + ", uint idx" + postVarName + "Blinding, uint masked" + postVarName + "Blinding, uint8[] " + mem + " proof" + postVarName + ", uint8[] " + mem + " commitment" + postVarName;
     } else {
         ret = arg;
     }
@@ -109,6 +116,10 @@ string argWithoutType(string arg) {
         if (arg[1] == '#') {
             ret += ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName;
         }
+    } else if(getType(arg) == "zkp_stmt") {
+        string postVarName = removeType(arg);
+        postVarName[0] = toupper(postVarName[0]);
+        ret = "zkp_stmt" + postVarName + "str, idx" + postVarName + ", masked" + postVarName + ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding, proof" + postVarName + ", commitment" + postVarName;
     } else {
         ret = removeType(arg);
     }
@@ -194,9 +205,14 @@ void addInputMaskCheck() {
                 textLine += "        require(inputMaskOwner[idx" + varName + "Blinding] == msg.sender);\n";
             }
             flag = true;
+        } else if(getType(args[i]) == "zkp_stmt"){
+            textLine += "        require(inputMaskOwner[idx" + varName + "] == msg.sender);\n";
+            textLine += "        require(inputMaskOwner[idx" + varName + "Blinding] == msg.sender);\n";
+            flag = true;
         }
     }
-    if (flag) textLine += "\n";
+//    if (flag) textLine += "\n";
+    textLine += "\n";
 }
 
 
@@ -348,6 +364,179 @@ void callFunc(string op, int init) {
 }
 
 
+void addZkrpArgs(){
+    if(cntZkrp > 0){
+        int pos = textPublic.length()-1;
+        
+        string text_addParam_with_type = ", string memory json_lis_zkpstmt";
+        string text_addParam_without_type = ", json_lis_zkpstmt";
+        string text_addParam_event = ", string json_lis_zkpstmt";
+        string text_addParam_recover = "json_lis_zkpstmt, ";
+//        for(int i = 0;i < cntZkrp;++i){
+//            string postVarName = "zkpstmt" + to_string(i);
+//            text_addParam_without_type += ", " + postVarName;
+//            text_addParam_without_type += ", publicRange" + postVarName ;
+//            text_addParam_without_type += ", idx" + postVarName + "Blinding, masked" + postVarName + "Blinding";
+//            text_addParam_without_type += ", proof" + postVarName + ", commitment" + postVarName;
+
+//            text_addParam_with_type += ", string memory " + postVarName;
+//            text_addParam_with_type += ", uint publicRange" + postVarName ;
+//            text_addParam_with_type += ", uint idx" + postVarName + "Blinding, uint masked" + postVarName + "Blinding";
+//            text_addParam_with_type += ", uint8[] memory proof" + postVarName + ", uint8[] memory commitment" + postVarName;
+
+//            text_addParam_event += ", string " + postVarName;
+//            text_addParam_event += ", uint publicRange" + postVarName ;
+//            text_addParam_event += ", uint idx" + postVarName + "Blinding, uint masked" + postVarName + "Blinding";
+//            text_addParam_event += ", uint8[]  proof" + postVarName + ", uint8[]  commitment" + postVarName;
+
+//            if(i != 0) text_addParam_recover += ",";
+//            text_addParam_recover += postVarName;
+//            text_addParam_recover += "publicRange" + postVarName ;
+//            text_addParam_recover += ",idx" + postVarName + "Blinding, masked" + postVarName + "Blinding";
+//            text_addParam_recover += ", proof" + postVarName + ", commitment" + postVarName + ",";
+//        }
+        
+        
+        //////////////////add emit param////////////////
+        string emit_str = "emit " + funcName;
+        for(;pos >= 0;--pos){
+            if(textPublic.compare(pos,emit_str.length(),emit_str) == 0){
+                break;
+            }
+        }
+        if(pos >= 0){
+            for(;pos < textPublic.length();++pos){
+                if(textPublic[pos]== ')'){
+                    break;
+                }
+            }
+            textPublic.insert(pos,text_addParam_without_type);
+        }
+
+        ///////////////add opContent param////////////
+        string opContent_str = "opContent[seq" + funcName+"]";
+        for(;pos >= 0;--pos){
+            if(textPublic.compare(pos,opContent_str.length(),opContent_str) == 0){
+                break;
+            }
+        }
+        if(pos >= 0){
+            for(;pos < textPublic.length();++pos){
+                if(textPublic[pos]== ')'){
+                    break;
+                }
+            }
+            textPublic.insert(pos,text_addParam_without_type);
+        }
+
+
+        //////////////////add function param/////////////
+        string lowFuncName = funcName;
+        lowFuncName[0] = tolower(lowFuncName[0]);
+        string tmpFuncNameLower = "function " + lowFuncName;
+        string tmpFuncNameUpper = "function " + funcName;
+
+        for(;pos >= 0;--pos){
+            if(textPublic.compare(pos,tmpFuncNameUpper.length(),tmpFuncNameUpper) == 0 || textPublic.compare(pos,tmpFuncNameLower.length(),tmpFuncNameLower) == 0 ){
+                break;
+            }
+        }
+        if(pos >= 0){
+            for(;pos < textPublic.length();++pos){
+                if(textPublic[pos]== ')'){
+                    break;
+                }
+            }
+            textPublic.insert(pos,text_addParam_with_type);
+        }
+
+        ////////////////add func param mask check////////////////
+        for(;pos < textPublic.length();++pos){
+            if(textPublic[pos]== '\n'){
+                break;
+            }
+        }
+//        string req_str = "";
+//        for(int i = 0;i < cntZkrp;++i){
+//            string postVarName = "zkpstmt" + to_string(i);
+//            req_str += "        require(inputMaskOwner[idx" + postVarName + "] == msg.sender);\n";
+    
+//            req_str += "        tmpzkpstmt = json.loads(" + postVarName + ")\n";
+//            req_str += "        [tmpidxValueBlinding, tmpmaskedValueBlinding, tmpproof, tmpcommitment] = tmpzkpstmt \n";
+//            req_str += "        require(inputMaskOwner[tmpidxValueBlinding] == msg.sender);\n";
+//        }
+//        textPublic.insert(pos+1,req_str);
+
+        ////////////add event param////////////
+        string event_str = "event " + funcName;
+        for(pos = 0;pos < textPublicEvents.length();++pos){
+            if(textPublicEvents.compare(pos,event_str.length(),event_str) == 0){
+                break;
+            }
+        }
+        if(pos < textPublicEvents.length()){
+            for(;pos < textPublicEvents.length();++pos){
+                if(textPublicEvents[pos]== ')'){
+                    break;
+                }
+            }
+            textPublicEvents.insert(pos,text_addParam_event);
+        }
+
+        //////////add zkp_stmt to textPrivate/////
+        string mpc_str = "mpc " + funcName;
+        for(pos = 0;pos < textPrivate.length();++pos){
+            if(textPrivate.compare(pos,mpc_str.length(),mpc_str) == 0){
+                break;
+            }
+        }
+        if(pos < textPrivate.length()){
+            for(;pos < textPrivate.length();++pos){
+                if(textPrivate[pos]== ')'){
+                    break;
+                }
+            }
+            textPrivate.insert(pos,text_addParam_with_type);
+        }
+
+        ///////////add zkp param to textRecover/////////////
+        string rec_str = "    if opEvent == \'" + funcName + "\':\n";
+        for(pos = 0;pos < textRecover.length();++pos){
+            if(textRecover.compare(pos,rec_str.length(),rec_str) == 0){
+                break;
+            }
+        }
+        pos += rec_str.length();
+        if(pos < textRecover.length()){
+            for(;pos < textRecover.length();++pos){
+                if(textRecover[pos]== '='){
+                    break;
+                }
+            }
+            textRecover.insert(pos,text_addParam_recover);
+        }
+
+        rec_str = "eval(f'\{op\}" + funcName + "')(opSeq";;
+        for(;pos < textRecover.length();++pos){
+            if(textRecover.compare(pos,rec_str.length(),rec_str) == 0){
+                break;
+            }
+        }
+        pos += rec_str.length();
+        if(pos < textRecover.length()){
+            for(;pos < textRecover.length();++pos){
+                if(textRecover[pos]== ')'){
+                    break;
+                }
+            }
+            textRecover.insert(pos,text_addParam_without_type);
+        }
+
+
+    }
+}
+
+
 %}
 
 SPACE [ \t\r]+
@@ -372,6 +561,8 @@ SPACE [ \t\r]+
     isArg = true;
     mpcBracesPos = braces;
 
+    cntZkrp = 0;
+
     string text = string(yytext);
     mpcIndentLen = getIndent(text).length();
     textLine += text.substr(0, text.length() - 1) + " " + funcName + "(";
@@ -381,6 +572,8 @@ SPACE [ \t\r]+
 ^.*pureMpc.*\( {
     isMpc = true;
     mpcBracesPos = braces;
+
+    cntZkrp = 0;
 
     funcName = getFuncName(string(yytext));
 
@@ -405,6 +598,13 @@ SPACE [ \t\r]+
     indent = getIndent(string(yytext)).substr(mpcIndentLen);
 }
 
+^.*zkrp\( {
+    isZkrp = true;
+
+    string text = string(yytext);
+    textLine += text.substr(0, text.length() - 1) + "(";
+    indent = getIndent(string(yytext)).substr(mpcIndentLen);
+}
 
 ,{SPACE}* {
     if (isArg) {
@@ -471,6 +671,9 @@ SPACE [ \t\r]+
         if (braces == mpcBracesPos) {
             isMpc = false;
             textLine += "\n";
+
+//////////////////////////ADD zkrp arg here//////////////////////////////
+            addZkrpArgs();
         }
 
         if (isMpcParam) {
@@ -491,6 +694,12 @@ SPACE [ \t\r]+
             callFunc("Add", 1);
 
             isAddData = false;
+            args.clear();
+        } else if(isZkrp){
+            cntZkrp++;
+            textPrivate += (textLine.length() > mpcIndentLen ? textLine.substr(mpcIndentLen): textLine);
+
+            isZkrp = false;
             args.clear();
         } else {
             textPrivate += (textLine.length() > mpcIndentLen ? textLine.substr(mpcIndentLen): textLine);
